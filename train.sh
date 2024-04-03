@@ -4,7 +4,7 @@ python image_retrieval/cli.py fit \
     --data.train_batch_size 128 \
     --data.val_batch_size 128 \
     --data.max_length 200 \
-    --model.image_encoder_alias resnet50 \
+    --model.image_encoder_alias vit_base_patch16_224.augreg2_in21k_ft_in1k \
     --model.text_encoder_alias distilbert-base-uncased \
     --model.image_embedding_dims 2048 \
     --model.text_embedding_dims 768 \
