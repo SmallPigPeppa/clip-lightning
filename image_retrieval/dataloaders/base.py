@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from typing import Optional
 
-import albumentations as A
+# import albumentations as A
+import torchvision.transforms as T
 import cv2
 import numpy as np
 import torch
@@ -28,10 +29,16 @@ class ImageRetrievalDataset(Dataset):
         self.tokenized_captions = tokenizer(
             list(self.captions), padding=True, truncation=True, max_length=max_length
         )
-        self.transforms = A.Compose(
+        # self.transforms = A.Compose(
+        #     [
+        #         A.Resize(target_size, target_size, always_apply=True),
+        #         A.Normalize(max_pixel_value=255.0, always_apply=True),
+        #     ]
+        # )
+        self.transforms = T.Compose(
             [
-                A.Resize(target_size, target_size, always_apply=True),
-                A.Normalize(max_pixel_value=255.0, always_apply=True),
+                T.Resize(target_size, target_size, always_apply=True),
+                T.Normalize(max_pixel_value=255.0, always_apply=True),
             ]
         )
 
