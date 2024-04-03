@@ -1,5 +1,6 @@
 # from pytorch_lightning.utilities import cli
-import pytorch_lightning.cli.LightningCLI as CIL
+# import pytorch_lightning.cli.LightningCLI as CIL
+from pytorch_lightning import cli
 
 from dataloaders.data_module import ImageRetrievalDataModule
 from models.clip_model import CLIPDualEncoderModel
