@@ -1,6 +1,6 @@
 python image_retrieval/cli.py fit \
     --data.dataset_name flickr8k \
-    --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-8k:latest \
+    --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
     --data.train_batch_size 128 \
     --data.val_batch_size 128 \
     --data.max_length 200 \
