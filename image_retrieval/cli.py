@@ -2,7 +2,7 @@
 # import pytorch_lightning.cli.LightningCLI as CIL
 from pytorch_lightning import cli
 
-from dataloaders.data_module_coco import ImageRetrievalDataModule
+from dataloaders.data_module import ImageRetrievalDataModule
 from models.clip_model import CLIPDualEncoderModel
 from callbacks import LogPredictionCallback
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
