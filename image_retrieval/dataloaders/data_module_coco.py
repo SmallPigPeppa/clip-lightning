@@ -9,27 +9,25 @@ from .base import ImageRetrievalDataset
 from .flickr8k import Flickr8kDataset
 from .flickr30k import Flickr30kDataset
 from .coco import COCODataset
-from .utils import collate_fn
-
 
 DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset, "coco": COCODataset}
 
 
 class ImageRetrievalDataModule(LightningDataModule):
     def __init__(
-        self,
-        artifact_id: str,
-        dataset_name: str,
-        val_split: float = 0.2,
-        tokenizer_alias: Optional[str] = None,
-        target_size: Optional[int] = 224,
-        max_length: int = 100,
-        lazy_loading: bool = False,
-        train_batch_size: int = 16,
-        val_batch_size: int = 16,
-        num_workers: int = 12,
-        mask: bool = False,
-        **kwargs
+            self,
+            artifact_id: str,
+            dataset_name: str,
+            val_split: float = 0.2,
+            tokenizer_alias: Optional[str] = None,
+            target_size: Optional[int] = 224,
+            max_length: int = 100,
+            lazy_loading: bool = False,
+            train_batch_size: int = 16,
+            val_batch_size: int = 16,
+            num_workers: int = 12,
+            mask: bool = False,
+            **kwargs
     ):
         super().__init__(**kwargs)
         self.artifact_id = artifact_id
@@ -54,8 +52,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         return train_dataset, val_dataset
 
     def setup(
-        self,
-        stage: Optional[str] = None,
+            self,
+            stage: Optional[str] = None,
     ) -> None:
         dataset = DATASET_LOOKUP[self.dataset_name](
             artifact_id=self.artifact_id,
