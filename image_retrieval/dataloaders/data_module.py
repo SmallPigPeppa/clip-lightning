@@ -8,6 +8,10 @@ from .base import ImageRetrievalDataset
 from .flickr8k import Flickr8kDataset
 from .flickr30k import Flickr30kDataset
 from .utils import collate_fn
+from transformers import DistilBertTokenizer, DistilBertModel
+
+# tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+# model = DistilBertModel.from_pretrained("distilbert-base-uncased")
 
 
 DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset}
@@ -15,24 +19,25 @@ DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset}
 
 class ImageRetrievalDataModule(LightningDataModule):
     def __init__(
-        self,
-        artifact_id: str,
-        dataset_name: str,
-        val_split: float = 0.2,
-        tokenizer_alias: Optional[str] = None,
-        target_size: Optional[int] = 224,
-        max_length: int = 100,
-        lazy_loading: bool = False,
-        train_batch_size: int = 16,
-        val_batch_size: int = 16,
-        num_workers: int = 4,
-        **kwargs
+            self,
+            artifact_id: str,
+            dataset_name: str,
+            val_split: float = 0.2,
+            tokenizer_alias: Optional[str] = None,
+            target_size: Optional[int] = 224,
+            max_length: int = 100,
+            lazy_loading: bool = False,
+            train_batch_size: int = 16,
+            val_batch_size: int = 16,
+            num_workers: int = 4,
+            **kwargs
     ):
         super().__init__(**kwargs)
         self.artifact_id = artifact_id
         self.dataset_name = dataset_name
         self.val_split = val_split
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
+        # self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
+        self.tokenizer = DistilBertTokenizer.from_pretrained(tokenizer_alias)
         self.target_size = target_size
         self.max_length = max_length
         self.lazy_loading = lazy_loading
@@ -50,8 +55,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         return train_dataset, val_dataset
 
     def setup(
-        self,
-        stage: Optional[str] = None,
+            self,
+            stage: Optional[str] = None,
     ) -> None:
         dataset = DATASET_LOOKUP[self.dataset_name](
             artifact_id=self.artifact_id,

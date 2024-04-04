@@ -1,13 +1,18 @@
 import torch
 import transformers
 from torch import nn
+from transformers import DistilBertTokenizer, DistilBertModel
+
+# tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+# model = DistilBertModel.from_pretrained("distilbert-base-uncased")
 
 
 class TextEncoder(nn.Module):
     def __init__(self, model_name: str, trainable: bool = True) -> None:
         super().__init__()
 
-        self.model = transformers.AutoModel.from_pretrained(model_name)
+        # self.model = transformers.AutoModel.from_pretrained(model_name)
+        self.model = DistilBertModel.from_pretrained(model_name)
 
         for param in self.model.parameters():
             param.requires_grad = trainable
