@@ -26,8 +26,8 @@ class COCODataset(ImageRetrievalDataset):
         # else:
         #     artifact = wandb.use_artifact(self.artifact_id, type="dataset")
         # artifact_dir = artifact.download()
-        img_folder = "/home/manan_goel/coco/train2014"
-        train_annotations_file = f"/home/manan_goel/coco/annotations/captions_train2014.json"
+        img_folder = "/Users/lwz/torch_ds/coco_caption/train2014"
+        train_annotations_file = f"/Users/lwz/torch_ds/coco_caption/annotations_trainval2014/annotations/captions_train2014.json"
         coco = COCO(train_annotations_file)
 
         ids = list(coco.anns.keys())
