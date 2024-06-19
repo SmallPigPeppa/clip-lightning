@@ -16,11 +16,11 @@ from models import CLIPDualEncoderModel
 
 class LogPredictionCallback(Callback):
     def __init__(
-        self,
-        tokenizer: str,
-        max_length: int = 200,
-        max_matches: int = 5,
-        max_sentences: int = 20,
+            self,
+            tokenizer: str,
+            max_length: int = 200,
+            max_matches: int = 5,
+            max_sentences: int = 20,
     ) -> None:
         super().__init__()
         assert tokenizer is not None
@@ -65,31 +65,15 @@ class LogPredictionCallback(Callback):
             table.add_data(*row)
         return table
 
-    # def on_validation_batch_end(
-    #     self,
-    #     trainer: pl.Trainer,
-    #     pl_module: CLIPDualEncoderModel,
-    #     outputs: Any,
-    #     batch: Any,
-    #     batch_idx: int,
-    #     dataloader_idx: int,
-    # ):
-    #     if self.validation_dataloader is None:
-    #         self.validation_dataloader = trainer.datamodule.val_dataloader()
-    #     if len(self.search_text) < self.max_sentences:
-    #         self.search_text.extend(batch["caption"])
-    #     elif len(self.search_text) > self.max_sentences:
-    #         self.search_text = self.search_text[: self.max_sentences]
     def on_validation_batch_end(
-        self,
-        trainer: "pl.Trainer",
-        pl_module: "pl.LightningModule",
-        outputs: Any,
-        batch: Any,
-        batch_idx: int,
-        dataloader_idx: int = 0,
-    ) -> None:
-        """Called when the validation batch ends."""
+            self,
+            trainer: pl.Trainer,
+            pl_module: CLIPDualEncoderModel,
+            outputs: Any,
+            batch: Any,
+            batch_idx: int,
+            dataloader_idx: int = 0,
+    ):
         if self.validation_dataloader is None:
             self.validation_dataloader = trainer.datamodule.val_dataloader()
         if len(self.search_text) < self.max_sentences:
@@ -99,7 +83,7 @@ class LogPredictionCallback(Callback):
 
 
     def on_validation_epoch_end(
-        self, trainer: pl.Trainer, pl_module: CLIPDualEncoderModel
+            self, trainer: pl.Trainer, pl_module: CLIPDualEncoderModel
     ) -> None:
         if not self.is_setup:
             self.setup_search_text(self.search_text)
