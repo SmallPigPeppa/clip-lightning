@@ -2,7 +2,8 @@ from typing import Optional
 
 import albumentations as A
 from torch.utils.data import random_split, DataLoader
-from pytorch_lightning import LightningDataModule
+# from pytorch_lightning import LightningDataModule
+from lightning import LightningDataModule
 from transformers import AutoTokenizer
 
 from .base import ImageRetrievalDataset

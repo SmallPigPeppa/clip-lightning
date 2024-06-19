@@ -3,7 +3,8 @@ import itertools
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from pytorch_lightning import LightningModule
+# from pytorch_lightning import LightningModule
+from lightning import LightningModule
 
 from .encoders import ImageEncoder, ProjectionHead, TextEncoder
 

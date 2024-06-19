@@ -1,11 +1,13 @@
 from typing import Any, List, Union
 
 import numpy as np
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
+import lightning as pl
 import torch
 import torch.nn.functional as F
 import wandb
-from pytorch_lightning.callbacks import Callback
+# from pytorch_lightning.callbacks import Callback
+from lightning.pytorch.callbacks import Callback
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
