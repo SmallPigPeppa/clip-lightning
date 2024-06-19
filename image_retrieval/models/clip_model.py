@@ -11,25 +11,25 @@ from .encoders import ImageEncoder, ProjectionHead, TextEncoder
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
-        self,
-        image_encoder_alias: str,
-        text_encoder_alias: str,
-        image_encoder_pretrained: bool = True,
-        image_encoder_trainable: bool = True,
-        text_encoder_trainable: bool = True,
-        image_embedding_dims: int = 2048,
-        text_embedding_dims: int = 768,
-        projection_dims: int = 256,
-        dropout: float = 0.0,
-        temperature: float = 1.0,
-        weight_decay: float = 0.0,
-        head_lr: float = 1e-3,
-        image_encoder_lr: float = 1e-4,
-        text_encoder_lr: float = 1e-5,
-        lr_scheduler_patience: float = 1.0,
-        lr_scheduler_factor: float = 0.8,
-        *args,
-        **kwargs,
+            self,
+            image_encoder_alias: str,
+            text_encoder_alias: str,
+            image_encoder_pretrained: bool = True,
+            image_encoder_trainable: bool = True,
+            text_encoder_trainable: bool = True,
+            image_embedding_dims: int = 2048,
+            text_embedding_dims: int = 768,
+            projection_dims: int = 256,
+            dropout: float = 0.0,
+            temperature: float = 1.0,
+            weight_decay: float = 0.0,
+            head_lr: float = 1e-3,
+            image_encoder_lr: float = 1e-4,
+            text_encoder_lr: float = 1e-5,
+            lr_scheduler_patience: float = 1.0,
+            lr_scheduler_factor: float = 0.8,
+            *args,
+            **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.image_encoder = ImageEncoder(
@@ -109,14 +109,27 @@ class CLIPDualEncoderModel(LightningModule):
             "monitor": "val/loss",
         }
 
-    def training_step(self, batch, *args, **kwargs):
+    # def training_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+    #     train_loss = self.all_gather(loss)
+    #     self.log("train/loss", train_loss.mean())
+    #     return loss
+    #
+    # def validation_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+    #     val_loss = self.all_gather(loss)
+    #     self.log("val/loss", val_loss.mean())
+    #     return loss
+    def training_step(self, batch, batch_idx, dataloader_idx, dataloader_iter):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         train_loss = self.all_gather(loss)
         self.log("train/loss", train_loss.mean())
         return loss
 
-    def validation_step(self, batch, *args, **kwargs):
+    def validation_step(self, batch, batch_idx, dataloader_idx, dataloader_iter):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         val_loss = self.all_gather(loss)
