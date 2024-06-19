@@ -65,21 +65,38 @@ class LogPredictionCallback(Callback):
             table.add_data(*row)
         return table
 
+    # def on_validation_batch_end(
+    #     self,
+    #     trainer: pl.Trainer,
+    #     pl_module: CLIPDualEncoderModel,
+    #     outputs: Any,
+    #     batch: Any,
+    #     batch_idx: int,
+    #     dataloader_idx: int,
+    # ):
+    #     if self.validation_dataloader is None:
+    #         self.validation_dataloader = trainer.datamodule.val_dataloader()
+    #     if len(self.search_text) < self.max_sentences:
+    #         self.search_text.extend(batch["caption"])
+    #     elif len(self.search_text) > self.max_sentences:
+    #         self.search_text = self.search_text[: self.max_sentences]
     def on_validation_batch_end(
         self,
-        trainer: pl.Trainer,
-        pl_module: CLIPDualEncoderModel,
+        trainer: "pl.Trainer",
+        pl_module: "pl.LightningModule",
         outputs: Any,
         batch: Any,
         batch_idx: int,
-        dataloader_idx: int,
-    ):
+        dataloader_idx: int = 0,
+    ) -> None:
+        """Called when the validation batch ends."""
         if self.validation_dataloader is None:
             self.validation_dataloader = trainer.datamodule.val_dataloader()
         if len(self.search_text) < self.max_sentences:
             self.search_text.extend(batch["caption"])
         elif len(self.search_text) > self.max_sentences:
             self.search_text = self.search_text[: self.max_sentences]
+
 
     def on_validation_epoch_end(
         self, trainer: pl.Trainer, pl_module: CLIPDualEncoderModel
