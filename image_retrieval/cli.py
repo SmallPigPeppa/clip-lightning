@@ -14,6 +14,14 @@ from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
 
+try:
+    import torch_npu
+    import transfer_to_npu
+    print("Using NPU for computation.")
+except ImportError:
+    print("Failed to import one or more NPU packages.")
+
+
 
 class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
