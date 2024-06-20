@@ -10,7 +10,7 @@ python image_retrieval/cli.py fit \
     --model.text_embedding_dims 768 \
     --model.projection_dims 256 \
     --trainer.precision 16 \
-    --trainer.accelerator gpu \
+    --trainer.accelerator npu \
     --trainer.max_epochs 20 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger
