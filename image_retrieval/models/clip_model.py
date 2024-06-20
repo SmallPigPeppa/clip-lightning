@@ -73,6 +73,9 @@ class CLIPDualEncoderModel(LightningModule):
         return (images_loss + texts_loss) / 2.0
 
     def forward(self, inputs):
+        # fix bug
+        inputs.to(self.device)
+
         image_features = self.image_encoder(inputs["image"])
         text_features = self.text_encoder(
             input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
