@@ -2,14 +2,14 @@ import torch
 import transformers
 from torch import nn
 from transformers import DistilBertTokenizer, DistilBertModel
-# import lightning as pl
+import lightning as pl
 
 # tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 # model = DistilBertModel.from_pretrained("distilbert-base-uncased")
 
 
-class TextEncoder(nn.Module):
-# class TextEncoder(pl.LightningModule):
+# class TextEncoder(nn.Module):
+class TextEncoder(pl.LightningModule):
     def __init__(self, model_name: str, trainable: bool = True) -> None:
         super().__init__()
 
