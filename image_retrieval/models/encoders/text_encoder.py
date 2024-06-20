@@ -2,7 +2,7 @@ import torch
 import transformers
 from torch import nn
 from transformers import DistilBertTokenizer, DistilBertModel
-import lightning as pl
+# import lightning as pl
 
 # tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 # model = DistilBertModel.from_pretrained("distilbert-base-uncased")
@@ -29,10 +29,3 @@ class TextEncoder(nn.Module):
 
 
 
-
-if __name__ == '__main__':
-    text_encoder = TextEncoder(
-        model_name='distilbert-base-uncased', trainable=True
-    )
-    # #torch.Size([128, 88]) torch.Size([128, 88])
-    # input_ids = inputs["input_ids"], attention_mask = inputs["attention_mask"]
