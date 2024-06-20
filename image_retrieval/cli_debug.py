@@ -65,5 +65,7 @@ if __name__ == "__main__":
         projection_dims=256, )
     mdata.setup()
     train_loader = mdata.train_dataloader()
-    batch = next(iter(train_loader))
-    image_embeddings, text_embeddings = model.forward(batch)
+    inputs = next(iter(train_loader))
+    text_features = model.text_encoder(
+        input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
+    )
