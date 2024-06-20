@@ -8,7 +8,7 @@ from transformers.configuration_utils import PretrainedConfig
 
 class DistilBertModel_PL(LightningModule, DistilBertModel):
     def __init__(self, config: PretrainedConfig):
-        LightningModule.__init__()  # 初始化 LightningModule 部分
+        LightningModule.__init__(self, config)  # 初始化 LightningModule 部分
         DistilBertModel.__init__(self, config)  # 初始化 DistilBertModel 部分
 
     # 重写 forward
