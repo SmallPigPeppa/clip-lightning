@@ -11,6 +11,10 @@ from callbacks import LogPredictionCallback
 from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 
+import os
+os.environ['CURL_CA_BUNDLE'] = ''
+
+
 class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("model.text_encoder_alias", "data.tokenizer_alias")
