@@ -4,10 +4,10 @@ import torch
 from typing import Dict, List, Optional, Set, Tuple, Union
 from torch import nn
 import math
-
+from transformers.configuration_utils import PretrainedConfig
 
 class DistilBertModel_PL(LightningModule, DistilBertModel):
-    def __init__(self, config):
+    def __init__(self, config: PretrainedConfig):
         LightningModule.__init__(self)  # 初始化 LightningModule 部分
         DistilBertModel.__init__(self, config)  # 初始化 DistilBertModel 部分
 
