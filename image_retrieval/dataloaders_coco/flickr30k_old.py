@@ -8,24 +8,23 @@ from .base import ImageRetrievalDataset
 
 class Flickr30kDataset(ImageRetrievalDataset):
     def __init__(
-            self,
-            artifact_id: str,
-            tokenizer=None,
-            target_size: Optional[int] = None,
-            max_length: int = 100,
-            lazy_loading: bool = False,
-            mask: bool = False
+        self,
+        artifact_id: str,
+        tokenizer=None,
+        target_size: Optional[int] = None,
+        max_length: int = 100,
+        lazy_loading: bool = False,
+        mask: bool = False
     ) -> None:
         super().__init__(artifact_id, tokenizer, target_size, max_length, lazy_loading, mask)
 
     def fetch_dataset(self):
-        # if wandb.run is None:
-        #     api = wandb.Api()
-        #     artifact = api.artifact(self.artifact_id, type="dataset")
-        # else:
-        #     artifact = wandb.use_artifact(self.artifact_id, type="dataset")
-        # artifact_dir = artifact.download()
-        artifact_dir = 'artifacts/flickr30k:v0'
+        if wandb.run is None:
+            api = wandb.Api()
+            artifact = api.artifact(self.artifact_id, type="dataset")
+        else:
+            artifact = wandb.use_artifact(self.artifact_id, type="dataset")
+        artifact_dir = artifact.download()
         annotations = pd.read_csv(os.path.join(artifact_dir, "results.csv"), sep='|')
         annotations = annotations.dropna()
         image_files = [
