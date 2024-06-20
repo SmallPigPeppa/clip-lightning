@@ -2,7 +2,7 @@ import torch
 import transformers
 from torch import nn
 # from transformers import DistilBertTokenizer, DistilBertModel
-from .modeling_distillbert_pl import DistilBertModel_PL as DistilBertModel
+from .modeling_distillbert_plv2 import DistilBertModel_PL as DistilBertModel
 import lightning as pl
 
 # tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')

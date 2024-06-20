@@ -7,9 +7,9 @@ import math
 from transformers.configuration_utils import PretrainedConfig
 
 
-class DistilBertModel_PL(DistilBertModel, LightningModule):
+class DistilBertModel_PL(DistilBertModel):
     def __init__(self, config: PretrainedConfig):
-        DistilBertModel.__init__(self, config)  # 初始化 DistilBertModel 部分
+        super().__init__(config)
 
     # 重写 forward
     def forward(
