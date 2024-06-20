@@ -6,10 +6,12 @@ from torch import nn
 import math
 from transformers.configuration_utils import PretrainedConfig
 
-class DistilBertModel_PL(LightningModule, DistilBertModel):
+
+class DistilBertModel_PL(DistilBertModel, LightningModule):
     def __init__(self, config: PretrainedConfig):
-        LightningModule.__init__(self)  # 初始化 LightningModule 部分
+
         DistilBertModel.__init__(self, config)  # 初始化 DistilBertModel 部分
+        LightningModule.__init__(self)  # 初始化 LightningModule 部分
 
     # 重写 forward
     def forward(
@@ -78,5 +80,8 @@ class DistilBertModel_PL(LightningModule, DistilBertModel):
 
 
 if __name__ == '__main__':
-    # config = DistilBertModel.from_pretrained('distilbert-base-uncased').config
+    config = DistilBertModel.from_pretrained('distilbert-base-uncased').config
+    model = DistilBertModel_PL(config)
+    print(model)
     model = DistilBertModel_PL.from_pretrained('distilbert-base-uncased')
+    print(model)
