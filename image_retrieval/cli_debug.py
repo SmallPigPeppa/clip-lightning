@@ -74,3 +74,4 @@ if __name__ == "__main__":
         input_ids=x1, attention_mask=x2
     )
     print(text_features.shape)
+    print(text_features)
