@@ -78,5 +78,5 @@ class DistilBertModel_PL(LightningModule, DistilBertModel):
 
 
 if __name__ == '__main__':
-    config = DistilBertModel.from_pretrained('distilbert-base-uncased').config
-    model = DistilBertModel_PL(config)
+    # config = DistilBertModel.from_pretrained('distilbert-base-uncased').config
+    model = DistilBertModel_PL.from_pretrained('distilbert-base-uncased')
