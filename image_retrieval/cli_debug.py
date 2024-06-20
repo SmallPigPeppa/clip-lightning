@@ -66,6 +66,11 @@ if __name__ == "__main__":
     mdata.setup()
     train_loader = mdata.train_dataloader()
     inputs = next(iter(train_loader))
+
+    x1 = inputs["input_ids"].cuda()
+    x2 = inputs["attention_mask"].cuda()
+    model.cuda()
     text_features = model.text_encoder(
-        input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
+        input_ids=x1, attention_mask=x2
     )
+    print(text_features.shape)
