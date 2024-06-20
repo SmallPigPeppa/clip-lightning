@@ -12,4 +12,5 @@ python image_retrieval/cli.py fit \
     --trainer.precision 16 \
     --trainer.accelerator npu \
     --trainer.max_epochs 20 \
-    --trainer.log_every_n_steps 1
+    --trainer.log_every_n_steps 1 \
+    --trainer.strategy ddp
