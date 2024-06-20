@@ -49,7 +49,7 @@ if __name__ == "__main__":
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger
     '''
-    data = ImageRetrievalDataModule(
+    mdata = ImageRetrievalDataModule(
         dataset_name='flickr30k',
         artifact_id='wandb/clip.lightning-image_retrieval/flickr-30k:latest',
         train_batch_size=128,
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         image_embedding_dims=2048,
         text_embedding_dims=768,
         projection_dims=256, )
-
-    train_loader = data.train_dataloader()
+    mdata.setup()
+    train_loader = mdata.train_dataloader()
     batch = next(iter(train_loader))
     loss = model.train_step(batch)
