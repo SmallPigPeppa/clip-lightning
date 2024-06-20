@@ -1,7 +1,6 @@
-from transformers import DistilBertTokenizer, DistilBertModel
-from lightning import LightningModule
+from transformers import DistilBertModel
 import torch
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Optional, Tuple
 from torch import nn
 import math
 from transformers.configuration_utils import PretrainedConfig
