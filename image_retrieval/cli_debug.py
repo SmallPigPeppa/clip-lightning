@@ -54,7 +54,7 @@ if __name__ == "__main__":
         artifact_id='wandb/clip.lightning-image_retrieval/flickr-30k:latest',
         train_batch_size=128,
         val_batch_size=128,
-        max_epochs=20,
+        max_length=200,
         tokenizer_alias='distilbert-base-uncased', )
 
     model = CLIPDualEncoderModel(
