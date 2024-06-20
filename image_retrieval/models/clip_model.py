@@ -73,15 +73,6 @@ class CLIPDualEncoderModel(LightningModule):
         return (images_loss + texts_loss) / 2.0
 
     def forward(self, inputs):
-        # fix bug
-        # inputs.to(self.device)
-        print('### Image encoder forward ###')
-        print('self.device:', self.device)
-        # print('### Image encoder forward ###')
-        print('inputs[input_ids].shape,inputs[attention_mask].shape:', inputs['input_ids'].shape,
-              inputs['attention_mask'].shape)
-        # import pdb;pdb.set_trace()
-
         image_features = self.image_encoder(inputs["image"])
         text_features = self.text_encoder(
             input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
@@ -118,27 +109,14 @@ class CLIPDualEncoderModel(LightningModule):
             "monitor": "val/loss",
         }
 
-    # def training_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     loss = self._compute_losses(image_embeddings, text_embeddings).mean()
-    #     train_loss = self.all_gather(loss)
-    #     self.log("train/loss", train_loss.mean())
-    #     return loss
-    #
-    # def validation_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     loss = self._compute_losses(image_embeddings, text_embeddings).mean()
-    #     val_loss = self.all_gather(loss)
-    #     self.log("val/loss", val_loss.mean())
-    #     return loss
-    def training_step(self, batch, batch_idx, dataloader_idx=0):
+    def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         train_loss = self.all_gather(loss)
         self.log("train/loss", train_loss.mean())
         return loss
 
-    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+    def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         val_loss = self.all_gather(loss)
