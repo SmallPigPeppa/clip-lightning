@@ -84,7 +84,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         image_features = self.image_encoder(inputs["image"])
         text_features = self.text_encoder(
-            input_ids=inputs["input_ids"].to(self.device), attention_mask=inputs["attention_mask"].to(self.device)
+            input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
         )
 
         image_embeddings = self.image_projection(image_features)
