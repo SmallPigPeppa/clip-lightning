@@ -77,6 +77,7 @@ class CLIPDualEncoderModel(LightningModule):
         # inputs.to(self.device)
         print('### Image encoder forward ###')
         print('self.device:', self.device)
+        import pdb;pdb.set_trace()
 
         image_features = self.image_encoder(inputs["image"])
         text_features = self.text_encoder(
