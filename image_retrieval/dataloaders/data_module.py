@@ -75,6 +75,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.train_dataset,
             batch_size=self.train_batch_size,
             num_workers=self.num_workers,
+            pin_memory=True
         )
 
     def val_dataloader(self):
@@ -82,4 +83,5 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.val_dataset,
             batch_size=self.val_batch_size,
             num_workers=self.num_workers,
+            pin_memory=True
         )
