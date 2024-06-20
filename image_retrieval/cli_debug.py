@@ -66,4 +66,4 @@ if __name__ == "__main__":
     mdata.setup()
     train_loader = mdata.train_dataloader()
     batch = next(iter(train_loader))
-    loss = model.train_step(batch)
+    loss = model.training_step(batch)
