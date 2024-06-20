@@ -18,7 +18,7 @@
  part from HuggingFace PyTorch version of Google AI Bert model (https://github.com/google-research/bert)
 """
 
-
+import lightning as pl
 import math
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -144,7 +144,7 @@ class Embeddings(nn.Module):
         return embeddings
 
 
-class MultiHeadSelfAttention(nn.Module):
+class MultiHeadSelfAttention(pl.LightningModule):
     def __init__(self, config: PretrainedConfig):
         super().__init__()
         self.config = config
