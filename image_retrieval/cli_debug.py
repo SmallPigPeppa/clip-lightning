@@ -66,4 +66,4 @@ if __name__ == "__main__":
     mdata.setup()
     train_loader = mdata.train_dataloader()
     batch = next(iter(train_loader))
-    loss = model.training_step(batch)
+    image_embeddings, text_embeddings = model.forward(batch)
