@@ -118,7 +118,7 @@ class CLIPDualEncoderModel(LightningModule):
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
             warmup_epochs=5,
-            max_epochs=self.max_epochs,
+            max_epochs=20,
             warmup_start_lr=0.01 * base_lr,  # 基于最小学习率计算起始学习率
             eta_min=0.01 * base_lr  # 设置最小学习率
         )
