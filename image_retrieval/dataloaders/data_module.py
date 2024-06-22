@@ -30,7 +30,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             lazy_loading: bool = False,
             train_batch_size: int = 16,
             val_batch_size: int = 16,
-            num_workers: int = 4,
+            num_workers: int = 8,
             **kwargs
     ):
         super().__init__(**kwargs)
