@@ -13,4 +13,6 @@ python image_retrieval/cli.py fit \
     --trainer.accelerator npu \
     --trainer.max_epochs 20 \
     --trainer.log_every_n_steps 1 \
-    --trainer.logger WandbLogger
+    --trainer.logger WandbLogger \
+    --trainer.logger.project CLIP \
+    --trainer.logger.log_model all
