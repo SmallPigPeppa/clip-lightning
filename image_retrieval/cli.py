@@ -11,8 +11,8 @@ from callbacks import LogPredictionCallback
 from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 
-import os
-os.environ['CURL_CA_BUNDLE'] = ''
+# import os
+# os.environ['CURL_CA_BUNDLE'] = ''
 
 
 
