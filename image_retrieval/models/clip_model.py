@@ -1,9 +1,7 @@
 import itertools
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-# from pytorch_lightning import LightningModule
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
@@ -27,8 +25,7 @@ class CLIPDualEncoderModel(LightningModule):
             head_lr: float = 1e-3,
             image_encoder_lr: float = 1e-4,
             text_encoder_lr: float = 1e-5,
-            lr_scheduler_patience: float = 1.0,
-            lr_scheduler_factor: float = 0.8,
+            lr_warmup_epochs: int = 5,
             *args,
             **kwargs,
     ) -> None:
@@ -57,8 +54,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.head_lr = head_lr
         self.image_encoder_lr = image_encoder_lr
         self.text_encoder_lr = text_encoder_lr
-        self.lr_scheduler_patience = lr_scheduler_patience
-        self.lr_scheduler_factor = lr_scheduler_factor
+        self.lr_warmup_epochs = lr_warmup_epochs
 
         self.save_hyperparameters()
 
@@ -84,33 +80,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         return image_embeddings, text_embeddings
 
-    # def configure_optimizers(self):
-    #     parameters = [
-    #         {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
-    #         {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
-    #         {
-    #             "params": itertools.chain(
-    #                 self.image_projection.parameters(),
-    #                 self.text_projection.parameters(),
-    #             ),
-    #             "lr": self.head_lr,
-    #             "weight_decay": self.weight_decay,
-    #         },
-    #     ]
-    #     optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
-    #     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-    #         optimizer,
-    #         mode="min",
-    #         patience=self.lr_scheduler_patience,
-    #         factor=self.lr_scheduler_factor,
-    #     )
-    #
-    #     return {
-    #         "optimizer": optimizer,
-    #         "lr_scheduler": lr_scheduler,
-    #         "monitor": "val/loss",
-    #     }
-
     def configure_optimizers(self):
         parameters = [
             {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
@@ -128,8 +97,8 @@ class CLIPDualEncoderModel(LightningModule):
         base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
-            warmup_epochs=5,
-            max_epochs=20,
+            warmup_epochs=self.lr_warmup_epochs,
+            max_epochs=self.trainer.max_epochs,
             warmup_start_lr=0.01 * base_lr,
             eta_min=0.01 * base_lr
         )
@@ -138,7 +107,6 @@ class CLIPDualEncoderModel(LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": lr_scheduler,
         }
-
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
