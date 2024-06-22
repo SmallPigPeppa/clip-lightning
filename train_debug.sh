@@ -1,6 +1,8 @@
 python image_retrieval/cli.py fit \
     --data.dataset_name flickr8k \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-8k:latest \
+    --data.train_batch_size 128 \
+    --data.val_batch_size 128 \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
     --trainer.accelerator gpu \
