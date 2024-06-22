@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 # from pytorch_lightning import LightningModule
 from lightning import LightningModule
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 from .encoders import ImageEncoder, ProjectionHead, TextEncoder
 
@@ -97,12 +98,31 @@ class CLIPDualEncoderModel(LightningModule):
             },
         ]
         optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
-        lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        # lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        #     optimizer,
+        #     mode="min",
+        #     patience=self.lr_scheduler_patience,
+        #     factor=self.lr_scheduler_factor,
+        # )
+        # scheduler = LinearWarmupCosineAnnealingLR(
+        #     optimizer,
+        #     warmup_epochs=5,
+        #     max_epochs=max_epochs,
+        #     warmup_start_lr=0.01 * lr,
+        #     eta_min=0.01 * lr,
+        # )
+
+        # 选择最小的学习率作为warmup和annealing的参考基线
+        base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
+
+        lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
-            mode="min",
-            patience=self.lr_scheduler_patience,
-            factor=self.lr_scheduler_factor,
+            warmup_epochs=5,
+            max_epochs=self.max_epochs,
+            warmup_start_lr=0.01 * base_lr,  # 基于最小学习率计算起始学习率
+            eta_min=0.01 * base_lr  # 设置最小学习率
         )
+
         return {
             "optimizer": optimizer,
             "lr_scheduler": lr_scheduler,
