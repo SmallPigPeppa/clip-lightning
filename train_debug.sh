@@ -10,4 +10,5 @@ python image_retrieval/cli.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP \
-    --trainer.logger.log_model all
+    --trainer.logger.log_model all \
+    --lr_monitor.logging_interval step
