@@ -13,11 +13,6 @@ from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-import urllib3
-import warnings
-
-# 忽略由于未验证的HTTPS请求导致的不安全请求警告
-warnings.filterwarnings('ignore', category=urllib3.exceptions.InsecureRequestWarning)
 
 
 
