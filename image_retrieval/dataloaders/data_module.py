@@ -37,8 +37,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.artifact_id = artifact_id
         self.dataset_name = dataset_name
         self.val_split = val_split
-        # self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
-        self.tokenizer = DistilBertTokenizer.from_pretrained(tokenizer_alias)
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
+        # self.tokenizer = DistilBertTokenizer.from_pretrained(tokenizer_alias)
         self.target_size = target_size
         self.max_length = max_length
         self.lazy_loading = lazy_loading

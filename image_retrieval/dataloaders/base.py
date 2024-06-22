@@ -10,12 +10,12 @@ from torch.utils.data import Dataset
 
 class ImageRetrievalDataset(Dataset):
     def __init__(
-        self,
-        artifact_id: str,
-        tokenizer=None,
-        target_size: Optional[int] = None,
-        max_length: int = 200,
-        lazy_loading: bool = False,
+            self,
+            artifact_id: str,
+            tokenizer=None,
+            target_size: Optional[int] = None,
+            max_length: int = 200,
+            lazy_loading: bool = False,
     ) -> None:
         super().__init__()
         self.artifact_id = artifact_id
@@ -23,9 +23,16 @@ class ImageRetrievalDataset(Dataset):
         self.image_files, self.captions = self.fetch_dataset()
         self.lazy_loading = lazy_loading
         self.images = self.image_files
+
         assert tokenizer is not None
+
+        self.tokenizer = tokenizer
+
         self.tokenized_captions = tokenizer(
-            list(self.captions), padding=True, truncation=True, max_length=max_length
+            list(self.captions),
+            padding=True,
+            truncation=True,
+            max_length=max_length,
         )
         self.transforms = A.Compose(
             [
@@ -33,15 +40,6 @@ class ImageRetrievalDataset(Dataset):
                 A.Normalize(max_pixel_value=255.0, always_apply=True),
             ]
         )
-
-    def read_image(self, image_file):
-        image = Image.open(image_file)
-        image = (
-            image.resize((self.target_size, self.target_size))
-            if self.target_size is not None
-            else image
-        )
-        return image
 
     @abstractmethod
     def fetch_dataset(self):
@@ -52,7 +50,7 @@ class ImageRetrievalDataset(Dataset):
 
     def __getitem__(self, index):
         item = {
-            key: torch.tensor(values[index])
+            key: values[index]
             for key, values in self.tokenized_captions.items()
         }
         image = cv2.imread(self.image_files[index])
