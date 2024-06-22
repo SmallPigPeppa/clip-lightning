@@ -14,8 +14,8 @@ class TextEncoder(pl.LightningModule):
     def __init__(self, model_name: str, trainable: bool = True) -> None:
         super().__init__()
 
-        self.model = transformers.AutoModel.from_pretrained(model_name)
-        # self.model = DistilBertModel.from_pretrained(model_name)
+        # self.model = transformers.AutoModel.from_pretrained(model_name)
+        self.model = DistilBertModel.from_pretrained(model_name)
 
         for param in self.model.parameters():
             param.requires_grad = trainable
