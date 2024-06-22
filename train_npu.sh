@@ -14,7 +14,7 @@ python image_retrieval/cli.py fit \
     --model.text_encoder_trainable true \
     --model.projection_dims 512 \
     --model.head_lr 16e-3 \
-    --trainer.accelerator gpu \
+    --trainer.accelerator npu \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
