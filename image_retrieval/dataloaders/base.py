@@ -33,6 +33,7 @@ class ImageRetrievalDataset(Dataset):
             padding=True,
             truncation=True,
             max_length=max_length,
+            return_tensors='pt'
         )
         self.transforms = A.Compose(
             [
