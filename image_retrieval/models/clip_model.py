@@ -84,50 +84,71 @@ class CLIPDualEncoderModel(LightningModule):
 
         return image_embeddings, text_embeddings
 
+    # def configure_optimizers(self):
+    #     parameters = [
+    #         {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
+    #         {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
+    #         {
+    #             "params": itertools.chain(
+    #                 self.image_projection.parameters(),
+    #                 self.text_projection.parameters(),
+    #             ),
+    #             "lr": self.head_lr,
+    #             "weight_decay": self.weight_decay,
+    #         },
+    #     ]
+    #     optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
+    #     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+    #         optimizer,
+    #         mode="min",
+    #         patience=self.lr_scheduler_patience,
+    #         factor=self.lr_scheduler_factor,
+    #     )
+    #
+    #     return {
+    #         "optimizer": optimizer,
+    #         "lr_scheduler": lr_scheduler,
+    #         "monitor": "val/loss",
+    #     }
     def configure_optimizers(self):
-        parameters = [
-            {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
-            {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
-            {
-                "params": itertools.chain(
-                    self.image_projection.parameters(),
-                    self.text_projection.parameters(),
-                ),
-                "lr": self.head_lr,
-                "weight_decay": self.weight_decay,
-            },
-        ]
-        optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
-        # lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        #     optimizer,
-        #     mode="min",
-        #     patience=self.lr_scheduler_patience,
-        #     factor=self.lr_scheduler_factor,
-        # )
-        # scheduler = LinearWarmupCosineAnnealingLR(
-        #     optimizer,
-        #     warmup_epochs=5,
-        #     max_epochs=max_epochs,
-        #     warmup_start_lr=0.01 * lr,
-        #     eta_min=0.01 * lr,
-        # )
-
-        # 选择最小的学习率作为warmup和annealing的参考基线
-        base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
-
-        lr_scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=5,
-            max_epochs=20,
-            warmup_start_lr=0.01 * base_lr,  # 基于最小学习率计算起始学习率
-            eta_min=0.01 * base_lr  # 设置最小学习率
+        optimizer_image = optim.Adam(self.image_encoder.parameters(), lr=self.image_encoder_lr,
+                                     weight_decay=self.weight_decay)
+        optimizer_text = optim.Adam(self.text_encoder.parameters(), lr=self.text_encoder_lr,
+                                    weight_decay=self.weight_decay)
+        optimizer_head = optim.Adam(
+            itertools.chain(self.image_projection.parameters(), self.text_projection.parameters()),
+            lr=self.head_lr, weight_decay=self.weight_decay
         )
 
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": lr_scheduler,
-            "monitor": "val/loss",
-        }
+        lr_scheduler_image = LinearWarmupCosineAnnealingLR(
+            optimizer_image,
+            warmup_epochs=5,
+            max_epochs=20,
+            warmup_start_lr=0.01 * self.image_encoder_lr,
+            eta_min=0.01 * self.image_encoder_lr
+        )
+
+        lr_scheduler_text = LinearWarmupCosineAnnealingLR(
+            optimizer_text,
+            warmup_epochs=5,
+            max_epochs=20,
+            warmup_start_lr=0.01 * self.text_encoder_lr,
+            eta_min=0.01 * self.text_encoder_lr
+        )
+
+        lr_scheduler_head = LinearWarmupCosineAnnealingLR(
+            optimizer_head,
+            warmup_epochs=5,
+            max_epochs=20,
+            warmup_start_lr=0.01 * self.head_lr,
+            eta_min=0.01 * self.head_lr
+        )
+
+        return (
+            {"optimizer": optimizer_image, "lr_scheduler": lr_scheduler_image},
+            {"optimizer": optimizer_text, "lr_scheduler": lr_scheduler_text},
+            {"optimizer": optimizer_head, "lr_scheduler": lr_scheduler_head},
+        )
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
