@@ -20,4 +20,6 @@ python image_retrieval/cli.py fit \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP \
     --trainer.logger.log_model all \
-    --lr_monitor.logging_interval step
+    --lr_monitor.logging_interval epoch \
+    --model_checkpoint.dirpath ckpt \
+    --model_checkpoint.save_weights_only True
