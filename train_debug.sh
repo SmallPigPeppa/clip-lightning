@@ -21,3 +21,5 @@ python image_retrieval/cli.py fit \
     --trainer.logger.project CLIP \
     --trainer.logger.log_model all \
     --lr_monitor.logging_interval step
+
+#python /ppio_net0/code/openapi.py stop 7683f02aa3457a91
