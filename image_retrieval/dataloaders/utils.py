@@ -1,7 +1,5 @@
 import torch
 import time
-import collections.abc
-from itertools import repeat
 
 
 def collate_fn(batch):
