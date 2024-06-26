@@ -1,7 +1,8 @@
 from typing import Optional
 from torch.utils.data import random_split, DataLoader
-from transformers import DistilBertTokenizer, DistilBertModel
 from lightning import LightningDataModule
+from transformers import DistilBertTokenizer, DistilBertModel
+from .base_aug import ImageRetrievalDataset
 from .flickr30k_aug import Flickr30kDataseAug
 from .img_transforms import image_transform_v2
 
@@ -33,32 +34,46 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.val_batch_size = val_batch_size
         self.num_workers = num_workers
 
-    def setup(self, stage: Optional[str] = None) -> None:
+    @staticmethod
+    def split_data(dataset: ImageRetrievalDataset, val_split: float):
+        train_length = int((1 - val_split) * len(dataset))
+        val_length = len(dataset) - train_length
+        train_dataset, val_dataset = random_split(
+            dataset, lengths=[train_length, val_length]
+        )
+        return train_dataset, val_dataset
+
+    def setup(
+            self,
+            stage: Optional[str] = None,
+    ) -> None:
         dataset = DATASET_LOOKUP[self.dataset_name](
             artifact_id=self.artifact_id,
             tokenizer=self.tokenizer,
             max_length=self.max_length
         )
+        self.train_dataset, self.val_dataset = self.split_data(
+            dataset, val_split=self.val_split
+        )
+
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        train_length = int((1 - self.val_split) * len(dataset))
-        val_length = len(dataset) - train_length
-        train_dataset, val_dataset = random_split(dataset, lengths=[train_length, val_length])
-        train_dataset.dataset.transforms = train_transforms
-        val_dataset.dataset.transforms = val_transforms
-
-        self.train_dataset = train_dataset
-        self.val_dataset = val_dataset
+        self.train_dataset.transforms = train_transforms
+        self.val_dataset.transforms = val_transforms
 
     def train_dataloader(self):
         return DataLoader(
-            self.train_dataset, batch_size=self.train_batch_size,
-            num_workers=self.num_workers, pin_memory=True
+            self.train_dataset,
+            batch_size=self.train_batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True
         )
 
     def val_dataloader(self):
         return DataLoader(
-            self.val_dataset, batch_size=self.val_batch_size,
-            num_workers=self.num_workers, pin_memory=True
+            self.val_dataset,
+            batch_size=self.val_batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True
         )
