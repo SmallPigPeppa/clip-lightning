@@ -1,5 +1,5 @@
 python image_retrieval/cli_aug.py fit \
-    --data.dataset_name flickr30k \
+    --data.dataset_name flickr30k_aug \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
     --data.train_batch_size 128 \
     --data.val_batch_size 128 \
