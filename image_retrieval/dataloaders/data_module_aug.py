@@ -1,4 +1,5 @@
 from typing import Optional
+import torchvision
 from torch.utils.data import random_split, DataLoader
 from lightning import LightningDataModule
 from transformers import DistilBertTokenizer, DistilBertModel
@@ -50,7 +51,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         dataset = DATASET_LOOKUP[self.dataset_name](
             artifact_id=self.artifact_id,
             tokenizer=self.tokenizer,
-            max_length=self.max_length
+            max_length=self.max_length,
+            transforms=torchvision.transforms.ToTensor()
         )
         self.train_dataset, self.val_dataset = self.split_data(
             dataset, val_split=self.val_split
