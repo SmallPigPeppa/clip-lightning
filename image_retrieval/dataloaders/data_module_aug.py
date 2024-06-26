@@ -1,8 +1,8 @@
 from typing import Optional
 from torch.utils.data import random_split, DataLoader
+from transformers import DistilBertTokenizer, DistilBertModel
 from lightning import LightningDataModule
 from .flickr30k_aug import Flickr30kDataseAug
-from transformers import DistilBertTokenizer, DistilBertModel
 from .img_transforms import image_transform_v2
 
 DATASET_LOOKUP = {"flickr30k_aug": Flickr30kDataseAug}
