@@ -93,7 +93,8 @@ class CLIPDualEncoderModel(LightningModule):
                 "weight_decay": self.weight_decay,
             },
         ]
-        optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
+        # optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
+        optimizer = optim.SGD(parameters, weight_decay=5e-4, momentum=0.9)
         base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
