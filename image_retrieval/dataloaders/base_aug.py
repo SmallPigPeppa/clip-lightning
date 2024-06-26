@@ -2,7 +2,6 @@ from abc import abstractmethod
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
-from img_transforms import image_transform_v2
 
 
 class ImageRetrievalDataset(Dataset):

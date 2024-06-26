@@ -6,7 +6,7 @@ from .flickr8k import Flickr8kDataset
 from .flickr30k import Flickr30kDataset
 from .flickr30k_aug import Flickr30kDataseAug
 from transformers import DistilBertTokenizer, DistilBertModel
-from img_transforms import image_transform_v2
+from .img_transforms import image_transform_v2
 
 DATASET_LOOKUP = {"flickr30k_aug": Flickr30kDataset}
 
