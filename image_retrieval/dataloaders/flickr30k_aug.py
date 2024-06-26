@@ -6,17 +6,15 @@ from typing import Optional
 from .base_aug import ImageRetrievalDataset
 
 
-
 class Flickr30kDataseAug(ImageRetrievalDataset):
     def __init__(
             self,
             artifact_id: str,
-            config: str,
-            is_train: bool,
             tokenizer=None,
             max_length: int = 100,
+            transforms=None
     ) -> None:
-        super().__init__(artifact_id, config, is_train, tokenizer, max_length)
+        super().__init__(artifact_id, tokenizer, max_length, transforms)
 
     def fetch_dataset(self):
         # if wandb.run is None:

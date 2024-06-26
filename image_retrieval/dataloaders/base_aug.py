@@ -7,23 +7,15 @@ from img_transforms import image_transform_v2
 
 class ImageRetrievalDataset(Dataset):
     def __init__(
-            self,
-            artifact_id: str,
-            config: str,
-            is_train: bool,
-            tokenizer=None,
-            max_length: int = 200,
-
+            self, artifact_id: str, tokenizer, max_length: int = 200, transforms=None
     ) -> None:
         super().__init__()
         self.artifact_id = artifact_id
         self.image_files, self.captions = self.fetch_dataset()
-        self.images = self.image_files
-        assert tokenizer is not None
+        self.transforms = transforms
         self.tokenized_captions = tokenizer(
             list(self.captions), padding=True, truncation=True, max_length=max_length
         )
-        self.transforms = image_transform_v2(config_path=config, is_train=is_train, )
 
     @abstractmethod
     def fetch_dataset(self):
@@ -38,6 +30,8 @@ class ImageRetrievalDataset(Dataset):
             for key, values in self.tokenized_captions.items()
         }
         image = Image.open(self.image_files[index])
-        item["image"] = self.transforms(image)
+        if self.transforms:
+            image = self.transforms(image)
+        item["image"] = image
         item["caption"] = self.captions[index]
         return item
