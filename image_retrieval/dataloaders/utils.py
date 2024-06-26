@@ -1,5 +1,7 @@
 import torch
 import time
+import collections.abc
+from itertools import repeat
 
 
 def collate_fn(batch):
@@ -20,3 +22,5 @@ def collate_fn(batch):
     attention_masks = torch.stack(attention_masks, dim=0)
     print(time.time() - start)
     return imgs, captions, input_ids, attention_masks
+
+

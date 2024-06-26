@@ -1,0 +1,18 @@
+preprocess_config:
+  size: 224
+  mode: 'RGB'
+  mean: [0.48145466, 0.4578275, 0.40821073]
+  std: [0.26862954, 0.26130258, 0.27577711]
+  interpolation: 'bicubic'
+  resize_mode: 'shortest'
+  fill_color: 0
+
+augmentation_config:
+  scale: [0.4, 1.0]
+  ratio: [0.75, 1.33]
+  color_jitter: [0.32, 0.32, 0.32, 0.08]
+  re_prob: 0.8
+  re_count: 1
+  use_timm: false
+  color_jitter_prob: 0.8
+  gray_scale_prob: 0.2
