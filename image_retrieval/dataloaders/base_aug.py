@@ -2,6 +2,7 @@ from abc import abstractmethod
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+import cv2
 
 
 class ImageRetrievalDataset(Dataset):
@@ -29,6 +30,10 @@ class ImageRetrievalDataset(Dataset):
             for key, values in self.tokenized_captions.items()
         }
         image = Image.open(self.image_files[index])
+        # # image = cv2.imread(self.image_files[index])
+        # from torchvision import transforms
+        # t = transforms.Resize([224,224])
+        # x = t(image)
         if self.transforms:
             image = self.transforms(image)
         item["image"] = image

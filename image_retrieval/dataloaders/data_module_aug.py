@@ -52,7 +52,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             artifact_id=self.artifact_id,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
-            transforms=transforms.Compose([transforms.Resize(224), transforms.ToTensor()])
+            transforms=transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor()])
         )
         self.train_dataset, self.val_dataset = self.split_data(
             dataset, val_split=self.val_split
@@ -61,8 +61,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        self.train_dataset.transforms = train_transforms
-        self.val_dataset.transforms = val_transforms
+        # self.train_dataset.transforms = train_transforms
+        # self.val_dataset.transforms = val_transforms
 
     def train_dataloader(self):
         return DataLoader(
