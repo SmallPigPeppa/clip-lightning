@@ -61,8 +61,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        # self.train_dataset.transforms = train_transforms
-        # self.val_dataset.transforms = val_transforms
+        self.train_dataset.transforms = train_transforms
+        self.val_dataset.transforms = val_transforms
 
     def train_dataloader(self):
         return DataLoader(

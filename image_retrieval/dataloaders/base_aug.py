@@ -12,6 +12,7 @@ class ImageRetrievalDataset(Dataset):
         super().__init__()
         self.artifact_id = artifact_id
         self.image_files, self.captions = self.fetch_dataset()
+        self.images = self.image_files
         self.transforms = transforms
         self.tokenized_captions = tokenizer(
             list(self.captions), padding=True, truncation=True, max_length=max_length
@@ -30,10 +31,6 @@ class ImageRetrievalDataset(Dataset):
             for key, values in self.tokenized_captions.items()
         }
         image = Image.open(self.image_files[index])
-        # # image = cv2.imread(self.image_files[index])
-        # from torchvision import transforms
-        # t = transforms.Resize([224,224])
-        # x = t(image)
         if self.transforms:
             image = self.transforms(image)
         item["image"] = image
