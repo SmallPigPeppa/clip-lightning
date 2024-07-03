@@ -6,6 +6,7 @@ python image_retrieval/cli_aug.py fit \
     --data.config config.yaml \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
+    --model.image_encoder_pretrained False \
     --model.image_embedding_dims 2048 \
     --model.image_encoder_lr 8e-4 \
     --model.image_encoder_pretrained true \
