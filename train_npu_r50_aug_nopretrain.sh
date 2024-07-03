@@ -20,6 +20,7 @@ python image_retrieval/cli_aug.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP \
+    --trainer.logger.name r50_aug_nopretrain \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \

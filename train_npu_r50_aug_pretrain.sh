@@ -6,10 +6,10 @@ python image_retrieval/cli_aug.py fit \
     --data.config config.yaml \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
-    --model.image_encoder_pretrained False \
+    --model.image_encoder_pretrained True \
     --model.image_embedding_dims 2048 \
     --model.image_encoder_lr 8e-4 \
-    --model.image_encoder_trainable False \
+    --model.image_encoder_trainable True \
     --model.text_embedding_dims 768 \
     --model.text_encoder_lr 8e-5 \
     --model.text_encoder_trainable True \
@@ -20,6 +20,7 @@ python image_retrieval/cli_aug.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP \
+    --trainer.logger.name r50_aug_pretrain \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
