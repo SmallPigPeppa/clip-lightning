@@ -14,7 +14,7 @@ python image_retrieval/cli_aug.py fit \
     --model.text_encoder_lr 0.5 \
     --model.text_encoder_trainable true \
     --model.projection_dims 768 \
-    --model.head_lr 8e-3 \
+    --model.head_lr 0.5 \
     --trainer.accelerator npu \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
