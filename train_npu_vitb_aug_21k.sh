@@ -7,11 +7,11 @@ python image_retrieval/cli_aug.py fit \
     --model.image_encoder_alias vit_base_patch16_224.augreg2_in21k_ft_in1k \
     --model.text_encoder_alias distilbert-base-uncased \
     --model.image_embedding_dims 768 \
-    --model.image_encoder_lr 8e-4 \
+    --model.image_encoder_lr 1e-2 \
     --model.image_encoder_pretrained true \
     --model.image_encoder_trainable true \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 8e-5 \
+    --model.text_encoder_lr 1e-2 \
     --model.text_encoder_trainable true \
     --model.projection_dims 768 \
     --model.head_lr 8e-3 \
