@@ -21,7 +21,7 @@ python image_retrieval/cli_aug.py fit \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP \
     --trainer.logger.log_model False \
-    --trainer.logger.name r18_best \
+    --trainer.logger.name r18_best_aug \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True
