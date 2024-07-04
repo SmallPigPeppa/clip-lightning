@@ -1,12 +1,10 @@
 from typing import Any, List, Union
 
 import numpy as np
-# import pytorch_lightning as pl
 import lightning as pl
 import torch
 import torch.nn.functional as F
 import wandb
-# from pytorch_lightning.callbacks import Callback
 from lightning.pytorch.callbacks import Callback
 from tqdm import tqdm
 from transformers import AutoTokenizer
@@ -106,3 +104,4 @@ class LogPredictionCallback(Callback):
             matches.append([self.images[i] for i in idx[:5]])
         if isinstance(trainer.logger.experiment, wandb.wandb_run.Run):
             trainer.logger.experiment.log({"Predictions": self.create_table(matches)})
+
