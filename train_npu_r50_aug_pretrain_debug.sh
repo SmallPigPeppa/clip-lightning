@@ -19,7 +19,7 @@ python image_retrieval/cli_aug.py fit \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project clip-pl-debug \
+    --trainer.logger.project clip-pl-debug-debug \
     --trainer.logger.name r50_aug_pretrain_debug \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
