@@ -1,3 +1,5 @@
+# grad clip
+# --trainer.gradient_clip_val 0.5 \
 python image_retrieval/cli_aug.py fit \
     --data.dataset_name flickr30k_aug \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \

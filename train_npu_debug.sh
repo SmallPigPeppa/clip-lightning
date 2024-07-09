@@ -1,1 +1,0 @@
-python image_retrieval/cli_debug.py
