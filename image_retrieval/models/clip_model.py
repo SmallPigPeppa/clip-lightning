@@ -55,7 +55,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.image_encoder_lr = image_encoder_lr
         self.text_encoder_lr = text_encoder_lr
         self.lr_warmup_epochs = lr_warmup_epochs
-        self.save_hyperparameters(logger=True)
+        self.save_hyperparameters()
 
     def _compute_losses(self, image_embeddings, text_embeddings):
         logits = (text_embeddings @ image_embeddings.T) / self.temperature
