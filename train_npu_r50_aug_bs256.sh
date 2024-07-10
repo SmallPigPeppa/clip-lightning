@@ -22,8 +22,8 @@ python image_retrieval/cli_aug.py fit \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-lighting \
-    --trainer.logger.name r50-aug-bs128 \
+    --trainer.logger.project CLIP-PL \
+    --trainer.logger.name r50-aug-bs256 \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
