@@ -149,8 +149,8 @@ class CLIPDualEncoderModel(LightningModule):
         for name, logit in logits.items():
             ranking = torch.argsort(logit, descending=True).to(self.device)
             preds = torch.where(ranking == ground_truth)[1]
-            metrics[f"{name}_mean_rank"] = preds.mean() + 1
-            metrics[f"{name}_median_rank"] = preds.median() + 1
+            metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
+            metrics[f"{name}_median_rank"] = preds.float().median() + 1
             for k in [1, 5, 10]:
                 metrics[f"{name}_R@{k}"] = (preds < k).mean()
 
