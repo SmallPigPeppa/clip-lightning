@@ -152,6 +152,6 @@ class CLIPDualEncoderModel(LightningModule):
             metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
             metrics[f"{name}_median_rank"] = preds.float().median() + 1
             for k in [1, 5, 10]:
-                metrics[f"{name}_R@{k}"] = (preds < k).mean()
+                metrics[f"{name}_R@{k}"] = (preds < k).float().mean()
 
         return metrics
