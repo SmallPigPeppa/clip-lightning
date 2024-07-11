@@ -156,7 +156,7 @@ class CLIPDualEncoderModel(LightningModule):
     #             metrics[f"{name}_R@{k}"] = (preds < k).float().mean()
     #
     #     return metrics
-    def get_clip_metrics(image_features, text_features, logit_scale=1.0):
+    def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
