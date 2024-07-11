@@ -144,10 +144,10 @@ class CLIPDualEncoderModel(LightningModule):
         logits_per_image = (logit_scale * image_features @ text_features.t())
         logits_per_text = logits_per_image.t()
         logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
+        ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
 
         for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
+            ranking = torch.argsort(logit, descending=True).to(self.device)
             preds = torch.where(ranking == ground_truth)[1]
             metrics[f"{name}_mean_rank"] = preds.mean() + 1
             metrics[f"{name}_median_rank"] = preds.median() + 1
