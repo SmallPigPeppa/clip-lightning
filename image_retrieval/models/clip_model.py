@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -139,19 +140,37 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats.clear()
         self.val_text_feats.clear()
 
-    def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
+    # def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
+    #     metrics = {}
+    #     logits_per_image = (logit_scale * image_features @ text_features.t())
+    #     logits_per_text = logits_per_image.t()
+    #     logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    #     ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
+    #
+    #     for name, logit in logits.items():
+    #         ranking = torch.argsort(logit, descending=True).to(self.device)
+    #         preds = torch.where(ranking == ground_truth)[1]
+    #         metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
+    #         metrics[f"{name}_median_rank"] = preds.float().median() + 1
+    #         for k in [1, 5, 10]:
+    #             metrics[f"{name}_R@{k}"] = (preds < k).float().mean()
+    #
+    #     return metrics
+    def get_clip_metrics(image_features, text_features, logit_scale=1.0):
         metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t())
-        logits_per_text = logits_per_image.t()
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
+        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+        logits_per_text = logits_per_image.t().detach().cpu()
+
+        logits = {"image_to_text": logits_per_image, "text_to_image": logits_per_text}
+        ground_truth = torch.arange(len(text_features)).view(-1, 1)
 
         for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True).to(self.device)
+            ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
-            metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
-            metrics[f"{name}_median_rank"] = preds.float().median() + 1
+            preds = preds.detach().cpu().numpy()
+            metrics[f"{name}_mean_rank"] = preds.mean() + 1
+            metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
             for k in [1, 5, 10]:
-                metrics[f"{name}_R@{k}"] = (preds < k).float().mean()
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k)
 
         return metrics
