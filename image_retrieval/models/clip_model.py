@@ -172,6 +172,6 @@ class CLIPDualEncoderModel(LightningModule):
     #         metrics[f"{name}_mean_rank"] = preds.mean() + 1
     #         metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
     #         for k in [1, 5, 10]:
-    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100
+    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100 # Convert recall to percentage
     #
     #     return metrics
