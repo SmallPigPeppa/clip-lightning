@@ -53,8 +53,8 @@ class CLI(cli.LightningCLI):
         )
 
     def before_fit(self):
-        if self.config['data']['current_task'] > 0:
-            checkpoint_path = self.config["old_ckpt"]
+        if self.config.data.current_task > 0:
+            checkpoint_path = self.config.old_ckpt
             if checkpoint_path:
                 self.model = self.model.load_from_checkpoint(checkpoint_path, strict=True)
 
