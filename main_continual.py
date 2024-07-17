@@ -27,10 +27,10 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks):
     params_dict['--data.num_tasks'] = str(num_tasks)
     params_dict['--data.current_task'] = str(task_idx)
 
-    # Update ckpt path
-    if task_idx > 0:
-        params_dict['--trainer.resume_from_checkpoint'] = f"task-{task_idx - 1}.ckpt"
-    params_dict['--new_ckpt'] = f"task-{task_idx}.ckpt"
+    # # Update ckpt path
+    # if task_idx > 0:
+    #     params_dict['--trainer.resume_from_checkpoint'] = f"task-{task_idx - 1}.ckpt"
+    # params_dict['--new_ckpt'] = f"task-{task_idx}.ckpt"
 
     # Update current task id
     params_dict['--data.current_task'] = str(task_idx)
