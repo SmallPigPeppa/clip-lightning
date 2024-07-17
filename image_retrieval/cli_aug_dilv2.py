@@ -49,7 +49,7 @@ class CLI(cli.LightningCLI):
         )
 
         parser.link_arguments(
-            "model_checkpoint.filename", "new_ckpt"
+            "new_ckpt", "model_checkpoint.filename"
         )
 
     def before_fit(self):
