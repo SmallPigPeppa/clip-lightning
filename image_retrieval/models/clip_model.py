@@ -30,6 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
             lr_warmup_epochs: int = 5,
             train_batch_size: int = 256,
             val_batch_size: int = 256,
+            old_ckpt: str = None,
             *args,
             **kwargs,
     ) -> None:
@@ -182,6 +183,8 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def on_train_start(self):
+        if self.old_ckpt:
+            self.load_from_checkpoint(self.old_ckpt)
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
         self.image_projection_old = copy.deepcopy(self.image_projection)

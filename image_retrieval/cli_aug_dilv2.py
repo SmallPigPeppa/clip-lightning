@@ -51,10 +51,13 @@ class CLI(cli.LightningCLI):
         parser.link_arguments(
             "new_ckpt", "model_checkpoint.filename"
         )
+        parser.link_arguments(
+            "old_ckpt", "model.old_ckpt"
+        )
 
-    def before_fit(self):
-        if self.config.fit.old_ckpt:
-            self.model = self.model.load_from_checkpoint(self.config.fit.old_ckpt, strict=True)
+    # def before_fit(self):
+    #     if self.config.fit.old_ckpt:
+    #         self.model = self.model.load_from_checkpoint(self.config.fit.old_ckpt, strict=True)
 
 
 if __name__ == "__main__":
