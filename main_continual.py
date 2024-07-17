@@ -51,10 +51,10 @@ def incremental_learning(num_tasks, script_path):
     """
     Manage the incremental learning process across multiple tasks.
     """
-    base_command_dict = read_base_command(script_path)
+    base_command, params_dict = read_base_command(script_path)
     for task_idx in range(num_tasks):
         print(f"Starting training for task {task_idx}")
-        task_specific_command = modify_command_for_task(base_command_dict.copy(), task_idx, num_tasks)
+        task_specific_command = modify_command_for_task(base_command, params_dict.copy(), task_idx, num_tasks)
         subprocess.run(task_specific_command, shell=True, check=True)
         print(f"Completed training for task {task_idx}")
 
