@@ -7,6 +7,7 @@ import torch.optim as optim
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from .encoders import ImageEncoder, ProjectionHead, TextEncoder
+import copy
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -174,6 +175,12 @@ class CLIPDualEncoderModel(LightningModule):
             metrics[f"{name}_mean_rank"] = preds.mean() + 1
             metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
             for k in [1, 5, 10]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100 # Convert recall to percentage
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
+    def copy_encoder_and_decoder(self):
+        self.image_encoder_old = copy.deepcopy(self.image_encoder)
+        self.text_encoder_old = copy.deepcopy(self.text_encoder)
+        self.image_projection_old = copy.deepcopy(self.image_projection)
+        self.text_projection_old = copy.deepcopy(self.text_projection)

@@ -20,7 +20,7 @@ python image_retrieval/cli_aug_dil.py fit \
     --model.projection_dims 512 \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL-DIL \

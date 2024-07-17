@@ -39,10 +39,13 @@ class CLI(cli.LightningCLI):
 
     def run_incremental_learning(self):
         num_tasks = self.config["num_tasks"]
+        base_logger_name = self.config["trainer"]["logger"]["name"]
         for task in range(0, num_tasks):
             self.config["model"]["current_task"] = task
             self.config["data"]["current_task"] = task
             self.config["data"]["num_tasks"] = num_tasks
+            # Update logger name by appending task number
+            self.config["trainer"]["logger"]["name"] = f'{base_logger_name}-task{task}'
             if task > 0:
                 self.model.save_old_model()
             super().before_instantiate_classes()
