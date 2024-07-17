@@ -31,6 +31,7 @@ class CLIPDualEncoderModel(LightningModule):
             train_batch_size: int = 256,
             val_batch_size: int = 256,
             old_ckpt: str = None,
+            current_task: int = 0,
             *args,
             **kwargs,
     ) -> None:
