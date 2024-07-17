@@ -1,0 +1,62 @@
+import subprocess
+
+
+def read_base_command(file_path):
+    """
+    Read the base command from a shell script file and convert it to a dictionary.
+    """
+    with open(file_path, 'r') as file:
+        base_command = file.read().strip()
+    # Convert command to dictionary
+    parts = base_command.split()
+    command_dict = {}
+    key = None
+    for part in parts:
+        if part.startswith('--'):
+            key = part
+            command_dict[key] = []
+        elif key:
+            command_dict[key].append(part)
+    # Join values in dictionary
+    for key, values in command_dict.items():
+        command_dict[key] = ' '.join(values)
+    return command_dict
+
+
+def modify_command_for_task(command_dict, task_idx, num_tasks):
+    """
+    Modify the command dictionary for a specific task index and convert it back to a command string.
+    """
+    # Update parameters for incremental learning
+    command_dict['--num_tasks'] = str(num_tasks)
+    command_dict['--task_idx'] = str(task_idx)
+
+    # Modify the logger name to include the task index
+    if '--trainer.logger.name' in command_dict:
+        command_dict['--trainer.logger.name'] += f"-task-{task_idx}"
+
+    # Convert dictionary back to command string
+    command_parts = []
+    for key, value in command_dict.items():
+        command_parts.append(f"{key} {value}")
+    modified_command = " \\\n    ".join(command_parts)
+    return modified_command
+
+
+
+def incremental_learning(num_tasks, script_path):
+    """
+    Manage the incremental learning process across multiple tasks.
+    """
+    base_command_dict = read_base_command(script_path)
+    for task_idx in range(num_tasks):
+        print(f"Starting training for task {task_idx}")
+        task_specific_command = modify_command_for_task(base_command_dict.copy(), task_idx, num_tasks)
+        subprocess.run(task_specific_command, shell=True, check=True)
+        print(f"Completed training for task {task_idx}")
+
+
+if __name__ == "__main__":
+    num_tasks = 5  # Total number of tasks
+    script_path = "run.sh"
+    incremental_learning(num_tasks, script_path)
