@@ -44,6 +44,7 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks):
     for key, value in params_dict.items():
         command_parts.append(f"{key} {value}")
     modified_command = " \\\n    ".join(command_parts)
+    print(modified_command)
     return modified_command
 
 
