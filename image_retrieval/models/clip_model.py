@@ -30,6 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
             lr_warmup_epochs: int = 5,
             train_batch_size: int = 256,
             val_batch_size: int = 256,
+            old_checkpoint_path: str = None,
             *args,
             **kwargs,
     ) -> None:
@@ -63,6 +64,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
+        self.old_checkpoint_path = old_checkpoint_path
         self.save_hyperparameters()
 
     def _compute_losses(self, image_embeddings, text_embeddings):
@@ -184,8 +186,10 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def on_train_start(self):
+        if self.old_checkpoint_path:
+            checkpoint = torch.load(self.old_checkpoint_path)
+            self.load_state_dict(checkpoint['state_dict'])
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
         self.image_projection_old = copy.deepcopy(self.image_projection)
         self.text_projection_old = copy.deepcopy(self.text_projection)
-

@@ -30,38 +30,6 @@ class CLI(LightningCLI):
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
         parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
-        # num_tasks
-        # parser.add_argument(
-        #     "--num_tasks",
-        #     type=int,
-        #     default=1,
-        #     help="Number of incremental learning tasks"
-        # )
-        # parser.add_argument(
-        #     "--old_ckpt",
-        #     type=str,
-        #     default=None
-        # )
-        # parser.add_argument(
-        #     "--new_ckpt",
-        #     type=str,
-        #     default='clip.ckpt'
-        # )
-
-        # parser.link_arguments(
-        #     "new_ckpt", "model_checkpoint.filename"
-        # )
-        # parser.link_arguments(
-        #     "old_ckpt", "model.old_ckpt",
-        # )
-        # parser.link_arguments(
-        #     "data.current_task", "model.current_task",
-        # )
-
-    # def before_fit(self):
-    #     if self.config.fit.old_ckpt:
-    #         self.model = self.model.load_from_checkpoint(self.config.fit.old_ckpt, strict=True)
-
 
 if __name__ == "__main__":
     CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None,
