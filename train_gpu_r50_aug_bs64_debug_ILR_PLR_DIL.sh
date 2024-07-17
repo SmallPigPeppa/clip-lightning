@@ -4,7 +4,7 @@ python image_retrieval/cli_aug_dil.py fit \
     --num_tasks 5 \
     --data.dataset_name flickr30k_aug \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
-    --data.train_batch_size 128 \
+    --data.train_batch_size 64 \
     --data.val_batch_size 16 \
     --data.config config.yaml \
     --model.image_encoder_alias resnet50 \
@@ -24,7 +24,7 @@ python image_retrieval/cli_aug_dil.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL-DIL \
-    --trainer.logger.name r50-aug-bs128-debug-ILR-PLR \
+    --trainer.logger.name r50-aug-bs64-debug-ILR-PLR \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
