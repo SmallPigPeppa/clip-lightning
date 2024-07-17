@@ -30,7 +30,7 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks):
     # # Update ckpt path
     if task_idx > 0:
         params_dict['--model.old_checkpoint_path'] = f"task-{task_idx - 1}.ckpt"
-    params_dict['--model_checkpoint.filename'] = f"task-{task_idx}.ckpt"
+    params_dict['--model_checkpoint.filename'] = f"task-{task_idx}"
 
     # Update current task id
     params_dict['--data.current_task'] = str(task_idx)
