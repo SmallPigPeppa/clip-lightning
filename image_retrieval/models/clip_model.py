@@ -30,8 +30,6 @@ class CLIPDualEncoderModel(LightningModule):
             lr_warmup_epochs: int = 5,
             train_batch_size: int = 256,
             val_batch_size: int = 256,
-            old_ckpt: str = None,
-            current_task: int = 0,
             *args,
             **kwargs,
     ) -> None:
@@ -65,8 +63,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
-        self.current_task = current_task
-        self.old_ckpt = old_ckpt
         self.save_hyperparameters()
 
     def _compute_losses(self, image_embeddings, text_embeddings):
@@ -188,8 +184,6 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def on_train_start(self):
-        if self.current_task > 0 and self.old_ckpt:
-            self.load_from_checkpoint(self.old_ckpt)
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
         self.image_projection_old = copy.deepcopy(self.image_projection)

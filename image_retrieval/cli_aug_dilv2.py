@@ -40,7 +40,7 @@ class CLI(cli.LightningCLI):
         parser.add_argument(
             "--old_ckpt",
             type=str,
-            default='clip.ckpt'
+            default=None
         )
         parser.add_argument(
             "--new_ckpt",
@@ -51,12 +51,12 @@ class CLI(cli.LightningCLI):
         parser.link_arguments(
             "new_ckpt", "model_checkpoint.filename"
         )
-        parser.link_arguments(
-            "old_ckpt", "model.old_ckpt",
-        )
-        parser.link_arguments(
-            "data.current_task", "model.current_task",
-        )
+        # parser.link_arguments(
+        #     "old_ckpt", "model.old_ckpt",
+        # )
+        # parser.link_arguments(
+        #     "data.current_task", "model.current_task",
+        # )
 
     # def before_fit(self):
     #     if self.config.fit.old_ckpt:
