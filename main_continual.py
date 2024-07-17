@@ -32,7 +32,8 @@ def modify_command_for_task(command_dict, task_idx, num_tasks):
     command_dict['--data.current_task'] = str(task_idx)
 
     # Update ckpt path
-    command_dict['--old_ckpt'] = f"task-{task_idx - 1}.ckpt"
+    if task_idx > 0:
+        command_dict['--old_ckpt'] = f"task-{task_idx - 1}.ckpt"
     command_dict['--new_ckpt'] = f"task-{task_idx}.ckpt"
 
     # Update current task id
