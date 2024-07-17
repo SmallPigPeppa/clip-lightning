@@ -19,6 +19,9 @@ class CLI(cli.LightningCLI):
             "model.train_batch_size", "data.train_batch_size"
         )
         parser.link_arguments(
+            "model.val_batch_size", "data.val_batch_size"
+        )
+        parser.link_arguments(
             "model.text_encoder_alias", "log_prediction_callback.tokenizer"
         )
         parser.add_lightning_class_args(

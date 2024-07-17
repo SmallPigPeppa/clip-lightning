@@ -28,6 +28,7 @@ class CLIPDualEncoderModel(LightningModule):
             text_encoder_lr: float = 1e-5,
             lr_warmup_epochs: int = 5,
             train_batch_size: int = 256,
+            val_batch_size: int = 256,
             *args,
             **kwargs,
     ) -> None:
