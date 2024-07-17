@@ -52,7 +52,7 @@ class CLI(cli.LightningCLI):
             "new_ckpt", "model_checkpoint.filename"
         )
 
-    def before_fit(self)
+    def before_fit(self):
         print(self.config)
         if self.config.data.current_task > 0:
             checkpoint_path = self.config.old_ckpt
