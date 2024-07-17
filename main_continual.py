@@ -1,12 +1,33 @@
 import subprocess
 
 
+# def read_base_command(file_path):
+#     """
+#     Read the base command from a shell script file and convert it to a dictionary.
+#     """
+#     with open(file_path, 'r') as file:
+#         base_command = file.read().strip()
+#     # Convert command to dictionary
+#     parts = base_command.split()
+#     command_dict = {}
+#     key = None
+#     for part in parts:
+#         if part.startswith('--'):
+#             key = part
+#             command_dict[key] = []
+#         elif key:
+#             command_dict[key].append(part)
+#     # Join values in dictionary
+#     for key, values in command_dict.items():
+#         command_dict[key] = ' '.join(values)
+#     return command_dict
+
 def read_base_command(file_path):
     """
     Read the base command from a shell script file and convert it to a dictionary.
     """
     with open(file_path, 'r') as file:
-        base_command = file.read().strip()
+        base_command = file.read().strip().replace('\\\n', ' ')
     # Convert command to dictionary
     parts = base_command.split()
     command_dict = {}
