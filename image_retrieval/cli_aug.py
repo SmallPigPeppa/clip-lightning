@@ -15,11 +15,14 @@ os.environ['CURL_CA_BUNDLE'] = ''
 class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("model.text_encoder_alias", "data.tokenizer_alias")
-        parser.add_lightning_class_args(
-            LogPredictionCallback, "log_prediction_callback"
+        parser.link_arguments(
+            "model.train_batch_size", "data.train_batch_size"
         )
         parser.link_arguments(
             "model.text_encoder_alias", "log_prediction_callback.tokenizer"
+        )
+        parser.add_lightning_class_args(
+            LogPredictionCallback, "log_prediction_callback"
         )
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
         parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")

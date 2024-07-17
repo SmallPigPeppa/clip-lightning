@@ -23,7 +23,7 @@ python image_retrieval/cli_aug.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL \
-    --trainer.logger.name r50-aug-bs256-debug-ILR-PLR \
+    --trainer.logger.name r50-aug-bs512-debug-ILR-PLR \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \

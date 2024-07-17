@@ -27,6 +27,7 @@ class CLIPDualEncoderModel(LightningModule):
             image_encoder_lr: float = 1e-4,
             text_encoder_lr: float = 1e-5,
             lr_warmup_epochs: int = 5,
+            train_batch_size: int = 256,
             *args,
             **kwargs,
     ) -> None:
@@ -157,21 +158,21 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    # def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
-    #     metrics = {}
-    #     logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-    #     logits_per_text = logits_per_image.t().detach().cpu()
-    #
-    #     logits = {"image_to_text": logits_per_image, "text_to_image": logits_per_text}
-    #     ground_truth = torch.arange(len(text_features)).view(-1, 1)
-    #
-    #     for name, logit in logits.items():
-    #         ranking = torch.argsort(logit, descending=True)
-    #         preds = torch.where(ranking == ground_truth)[1]
-    #         preds = preds.detach().cpu().numpy()
-    #         metrics[f"{name}_mean_rank"] = preds.mean() + 1
-    #         metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
-    #         for k in [1, 5, 10]:
-    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100 # Convert recall to percentage
-    #
-    #     return metrics
+    def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+        metrics = {}
+        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+        logits_per_text = logits_per_image.t().detach().cpu()
+
+        logits = {"image_to_text": logits_per_image, "text_to_image": logits_per_text}
+        ground_truth = torch.arange(len(text_features)).view(-1, 1)
+
+        for name, logit in logits.items():
+            ranking = torch.argsort(logit, descending=True)
+            preds = torch.where(ranking == ground_truth)[1]
+            preds = preds.detach().cpu().numpy()
+            metrics[f"{name}_mean_rank"] = preds.mean() + 1
+            metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
+            for k in [1, 5, 10]:
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100 # Convert recall to percentage
+
+        return metrics
