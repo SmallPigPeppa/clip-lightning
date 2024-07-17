@@ -53,6 +53,8 @@ class CLI(cli.LightningCLI):
         )
 
     def before_fit(self):
+        import pdb;pdb.set_trace()
+        print(self.config)
         if self.config.old_ckpt:
             self.model = self.model.load_from_checkpoint(self.config.old_ckpt, strict=True)
 
