@@ -4,6 +4,7 @@ from models.clip_model import CLIPDualEncoderModel
 from callbacks import LogPredictionCallback
 from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
+
 import os
 
 os.environ['CURL_CA_BUNDLE'] = ''
@@ -36,23 +37,26 @@ class CLI(cli.LightningCLI):
             default=1,
             help="Number of incremental learning tasks"
         )
+        parser.add_argument(
+            "--old_ckpt",
+            type=str,
+            default=None
+        )
+        parser.add_argument(
+            "--new_ckpt",
+            type=str,
+            default='clip.ckpt'
+        )
 
-    def run_incremental_learning(self):
-        num_tasks = self.config["num_tasks"]
-        base_logger_name = self.config["trainer"]["logger"]["name"]
-        for task in range(0, num_tasks):
-            self.config["model"]["current_task"] = task
-            self.config["data"]["current_task"] = task
-            self.config["data"]["num_tasks"] = num_tasks
-            # Update logger name by appending task number
-            self.config["trainer"]["logger"]["name"] = f'{base_logger_name}-task{task}'
-            if task > 0:
-                self.model.save_old_model()
-            super().run()
+        parser.link_arguments(
+            "model_checkpoint.filename", "new_ckpt"
+        )
 
-
+    def before_fit(self):
+        checkpoint_path = self.config["old_ckpt"]
+        if checkpoint_path:
+            self.model = self.model.load_from_checkpoint(checkpoint_path, strict=True)
 
 
 if __name__ == "__main__":
-    cli = CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None)
-    cli.run_incremental_learning()
+    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None)

@@ -28,8 +28,15 @@ def modify_command_for_task(command_dict, task_idx, num_tasks):
     Modify the command dictionary for a specific task index and convert it back to a command string.
     """
     # Update parameters for incremental learning
-    command_dict['--num_tasks'] = str(num_tasks)
-    command_dict['--task_idx'] = str(task_idx)
+    command_dict['--data.num_tasks'] = str(num_tasks)
+    command_dict['--data.current_task'] = str(task_idx)
+
+    # Update ckpt path
+    command_dict['--old_ckpt'] = f"task-{task_idx - 1}.ckpt"
+    command_dict['--new_ckpt'] = f"task-{task_idx}.ckpt"
+
+    # Update current task id
+    command_dict['--data.current_task'] = str(task_idx)
 
     # Modify the logger name to include the task index
     if '--trainer.logger.name' in command_dict:
@@ -41,7 +48,6 @@ def modify_command_for_task(command_dict, task_idx, num_tasks):
         command_parts.append(f"{key} {value}")
     modified_command = " \\\n    ".join(command_parts)
     return modified_command
-
 
 
 def incremental_learning(num_tasks, script_path):
@@ -58,5 +64,5 @@ def incremental_learning(num_tasks, script_path):
 
 if __name__ == "__main__":
     num_tasks = 5  # Total number of tasks
-    script_path = "run.sh"
+    script_path = "train_gpu_r50_aug_bs128_debug_ILR_PLR_DILV2.sh"
     incremental_learning(num_tasks, script_path)

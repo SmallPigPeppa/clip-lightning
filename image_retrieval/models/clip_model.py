@@ -181,8 +181,27 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    def copy_encoder_and_decoder(self):
+    def on_train_start(self):
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
         self.image_projection_old = copy.deepcopy(self.image_projection)
         self.text_projection_old = copy.deepcopy(self.text_projection)
+
+    # def copy_encoder_and_decoder(self):
+    #     pass
+    #
+    #
+    # def load_old_model(self, checkpoint_path: str):
+    #     checkpoint = torch.load(checkpoint_path, map_location=self.device)
+    #     self.image_encoder_old.load_state_dict(checkpoint['image_encoder'])
+    #     self.text_encoder_old.load_state_dict(checkpoint['text_encoder'])
+    #     self.image_projection_old.load_state_dict(checkpoint['image_projection'])
+    #     self.text_projection_old.load_state_dict(checkpoint['text_projection'])
+    #
+    # def save_old_model(self, checkpoint_path: str):
+    #     torch.save({
+    #         'image_encoder': self.image_encoder.state_dict(),
+    #         'text_encoder': self.text_encoder.state_dict(),
+    #         'image_projection': self.image_projection.state_dict(),
+    #         'text_projection': self.text_projection.state_dict(),
+    #     }, checkpoint_path)
