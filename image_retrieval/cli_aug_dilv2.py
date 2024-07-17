@@ -32,5 +32,4 @@ class CLI(cli.LightningCLI):
 
 
 if __name__ == "__main__":
-    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None,
-        parser_kwargs={'ckpt_path': 'temp.ckpt'})
+    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None)
