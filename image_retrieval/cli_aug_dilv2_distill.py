@@ -19,6 +19,9 @@ class CLI(cli.LightningCLI):
         parser.link_arguments(
             "data.val_batch_size", "model.val_batch_size"
         )
+        parser.link_arguments(
+            "data.current_task", "model.current_task"
+        )
 
         # log prediction
         # parser.add_lightning_class_args(

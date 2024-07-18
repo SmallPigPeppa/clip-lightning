@@ -31,6 +31,7 @@ class CLIPDualEncoderModel(LightningModule):
             train_batch_size: int = 256,
             val_batch_size: int = 256,
             old_checkpoint_path: str = None,
+            current_task: int = 0,
             *args,
             **kwargs,
     ) -> None:
@@ -65,6 +66,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.old_checkpoint_path = old_checkpoint_path
+        self.current_task = current_task
         self.save_hyperparameters()
 
     def _compute_losses(self, image_embeddings, text_embeddings):
@@ -131,44 +133,44 @@ class CLIPDualEncoderModel(LightningModule):
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        image_embeddings_old, text_embeddings_old = self.forward_old(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         clip_loss_g = self.all_gather(clip_loss)
-
-        distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
-        distill_loss1_g = self.all_gather(distill_loss1)
-
-        distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
-        distill_loss2_g = self.all_gather(distill_loss1)
-
         self.log("train/clip_loss", clip_loss_g.mean())
-        self.log("train/distill_loss1", distill_loss1_g.mean())
-        self.log("train/distill_loss2", distill_loss2_g.mean())
-        self.log("train/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
-        return clip_loss + distill_loss1 + distill_loss2
+
+        if self.current_rank > 0:
+            image_embeddings_old, text_embeddings_old = self.forward_old(batch)
+            distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
+            distill_loss1_g = self.all_gather(distill_loss1)
+            distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
+            distill_loss2_g = self.all_gather(distill_loss1)
+            self.log("train/distill_loss1", distill_loss1_g.mean())
+            self.log("train/distill_loss2", distill_loss2_g.mean())
+            self.log("train/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
+            return clip_loss + distill_loss1 + distill_loss2
+        else:
+            return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        image_embeddings_old, text_embeddings_old = self.forward_old(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         clip_loss_g = self.all_gather(clip_loss)
-
-        distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
-        distill_loss1_g = self.all_gather(distill_loss1)
-
-        distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
-        distill_loss2_g = self.all_gather(distill_loss1)
-
         self.log("val/clip_loss", clip_loss_g.mean())
-        self.log("val/distill_loss1", distill_loss1_g.mean())
-        self.log("val/distill_loss2", distill_loss2_g.mean())
-        self.log("val/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
-
         # for clip metrics
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
 
-        return clip_loss + distill_loss1 + distill_loss2
+        if self.current_rank > 0:
+            image_embeddings_old, text_embeddings_old = self.forward_old(batch)
+            distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
+            distill_loss1_g = self.all_gather(distill_loss1)
+            distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
+            distill_loss2_g = self.all_gather(distill_loss1)
+            self.log("val/distill_loss1", distill_loss1_g.mean())
+            self.log("val/distill_loss2", distill_loss2_g.mean())
+            self.log("val/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
+            return clip_loss + distill_loss1 + distill_loss2
+        else:
+            return clip_loss
 
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
