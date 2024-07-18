@@ -195,10 +195,21 @@ class CLIPDualEncoderModel(LightningModule):
         self.text_projection_old = copy.deepcopy(self.text_projection)
 
     def load_w(self):
+        # Load the old weights
         old_checkpoint_path = '/ppio_net0/code/clip-lightning/ckpt/task-0.ckpt'
         checkpoint = torch.load(old_checkpoint_path)
-        self.load_state_dict(checkpoint['state_dict'], strict=True)
+
+        # Filter out the weights related to the 'old' parts
+        filtered_state_dict = {k: v for k, v in checkpoint['state_dict'].items() if not k.startswith(
+            ('image_encoder_old', 'text_encoder_old', 'image_projection_old', 'text_projection_old'))}
+
+        # Load the filtered weights into the current model
+        self.load_state_dict(filtered_state_dict, strict=True)
+
+        # Copy the current encoders and projections as old versions
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
         self.image_projection_old = copy.deepcopy(self.image_projection)
         self.text_projection_old = copy.deepcopy(self.text_projection)
+
+        print("Model weights loaded successfully and old parts copied.")
