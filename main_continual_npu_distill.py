@@ -1,5 +1,22 @@
 import os.path
 import subprocess
+import random
+import string
+from datetime import datetime
+
+
+def generate_random_string_with_date(length=6):
+    # Generate a random string of specified length
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+
+    # Get the current date in YYYYMMDD format
+    current_date = datetime.now().strftime("%Y%m%d")
+
+    # Combine the random string and the date with an underscore
+    result = f"{random_string}_{current_date}"
+
+    return result
 
 
 def read_base_command(file_path):
@@ -27,6 +44,9 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks):
     # Update parameters for incremental learning
     params_dict['--data.num_tasks'] = str(num_tasks)
     params_dict['--data.current_task'] = str(task_idx)
+    ckpt_dir = params_dict['--model_checkpoint.dirpath']
+    sub_dir = generate_random_string_with_date(length=6)
+    params_dict['--model_checkpoint.dirpath'] = os.path.join(ckpt_dir, sub_dir)
 
     # # Update ckpt path
     if task_idx > 0:
