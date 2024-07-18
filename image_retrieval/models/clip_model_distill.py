@@ -103,6 +103,7 @@ class CLIPDualEncoderModel(LightningModule):
         return image_embeddings, text_embeddings
 
     def configure_optimizers(self):
+
         parameters = [
             {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
             {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
@@ -115,6 +116,18 @@ class CLIPDualEncoderModel(LightningModule):
                 "weight_decay": self.weight_decay,
             },
         ]
+
+        if self.current_task > 0:
+            distill_params = [{
+                "params": itertools.chain(
+                    self.image_projection_old.parameters(),
+                    self.text_projection_old.parameters(),
+                ),
+                "lr": self.head_lr,
+                "weight_decay": self.weight_decay,
+            }]
+            parameters.extend(distill_params)
+
         optimizer = optim.Adam(parameters, weight_decay=self.weight_decay)
         # optimizer = optim.SGD(parameters, weight_decay=5e-4, momentum=0.9)
         base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
