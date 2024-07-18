@@ -221,7 +221,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    def on_fit_start(self):
+    def on_train_start(self):
         if self.old_checkpoint_path:
             checkpoint = torch.load(self.old_checkpoint_path, map_location=torch.device('cpu'))
             # Filter out the weights related to the 'old' parts
