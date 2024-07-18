@@ -137,7 +137,7 @@ class CLIPDualEncoderModel(LightningModule):
         clip_loss_g = self.all_gather(clip_loss)
         self.log("train/clip_loss", clip_loss_g.mean())
 
-        if self.current_rank > 0:
+        if self.current_task > 0:
             image_embeddings_old, text_embeddings_old = self.forward_old(batch)
             distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
             distill_loss1_g = self.all_gather(distill_loss1)
@@ -159,7 +159,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
 
-        if self.current_rank > 0:
+        if self.current_task > 0:
             image_embeddings_old, text_embeddings_old = self.forward_old(batch)
             distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
             distill_loss1_g = self.all_gather(distill_loss1)
