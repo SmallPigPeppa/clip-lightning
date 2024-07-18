@@ -24,9 +24,9 @@ class CLI(cli.LightningCLI):
         # parser.add_lightning_class_args(
         #     LogPredictionCallback, "log_prediction_callback"
         # )
-        parser.link_arguments(
-            "model.text_encoder_alias", "log_prediction_callback.tokenizer"
-        )
+        # parser.link_arguments(
+        #     "model.text_encoder_alias", "log_prediction_callback.tokenizer"
+        # )
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
         parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
