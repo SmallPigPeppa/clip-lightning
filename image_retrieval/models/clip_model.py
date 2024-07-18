@@ -139,7 +139,7 @@ class CLIPDualEncoderModel(LightningModule):
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
-        val_metrics = self.get_clip_metrics_cpu(
+        val_metrics = self.get_clip_metrics(
             image_features=all_image_features,
             text_features=all_text_features,
         )
