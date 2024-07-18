@@ -170,7 +170,7 @@ class CLIPDualEncoderModel(LightningModule):
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
 
-        logits = {"image_to_text": logits_per_image, "text_to_image": logits_per_text}
+        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
         ground_truth = torch.arange(len(text_features)).view(-1, 1)
 
         for name, logit in logits.items():
