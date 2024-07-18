@@ -70,7 +70,7 @@ if __name__ == "__main__":
         text_encoder_alias='distilbert-base-uncased',
         image_embedding_dims=2048,
         text_embedding_dims=768,
-        projection_dims=256, )
+        projection_dims=512, )
     print(model.hparams)
     model.load_w()
     # mdata.setup()
