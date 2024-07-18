@@ -3,7 +3,7 @@ python image_retrieval/cli_aug_dilv2.py fit \
     --data.dataset_name flickr30k_aug \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
     --data.train_batch_size 256 \
-    --data.val_batch_size 16 \
+    --data.val_batch_size 256 \
     --data.config config.yaml \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
