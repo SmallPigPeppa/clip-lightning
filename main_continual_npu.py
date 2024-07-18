@@ -16,7 +16,7 @@ def read_base_command(file_path):
         if line.startswith('--'):
             key, value = line.split(maxsplit=1)
             params_dict[key] = value
-    print(params_dict)
+    # print(params_dict)
     return base_command, params_dict
 
 
@@ -46,7 +46,7 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks):
     for key, value in params_dict.items():
         command_parts.append(f"{key} {value}")
     modified_command = " \\\n    ".join(command_parts)
-    print(modified_command)
+    # print(modified_command)
     return modified_command
 
 
