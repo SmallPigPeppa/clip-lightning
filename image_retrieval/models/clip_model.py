@@ -195,7 +195,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.text_projection_old = copy.deepcopy(self.text_projection)
 
     def load_w(self):
-        old_checkpoint_path = ''
+        old_checkpoint_path = '/ppio_net0/code/clip-lightning/ckpt/task-0.ckpt'
         checkpoint = torch.load(old_checkpoint_path)
         self.load_state_dict(checkpoint['state_dict'], strict=True)
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
