@@ -159,18 +159,15 @@ class CLIPDualEncoderModel(LightningModule):
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
-        clip_loss_g = self.all_gather(clip_loss)
-        self.log("train/clip_loss", clip_loss_g.mean())
+        self.log("train/clip_loss", clip_loss, sync_dist=True)
 
         if self.hparams.current_task > 0:
             image_embeddings_old, text_embeddings_old = self.forward_old(batch)
             distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
-            distill_loss1_g = self.all_gather(distill_loss1)
             distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
-            distill_loss2_g = self.all_gather(distill_loss1)
-            self.log("train/distill_loss1", distill_loss1_g.mean())
-            self.log("train/distill_loss2", distill_loss2_g.mean())
-            self.log("train/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
+            self.log("train/distill_loss1", distill_loss1, sync_dist=True)
+            self.log("train/distill_loss2", distill_loss2, sync_dist=True)
+            self.log("train/all_loss", clip_loss + distill_loss1 + distill_loss2, sync_dist=True)
             return clip_loss + distill_loss1 + distill_loss2
         else:
             return clip_loss
@@ -178,20 +175,17 @@ class CLIPDualEncoderModel(LightningModule):
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
-        clip_loss_g = self.all_gather(clip_loss)
-        self.log("val/clip_loss", clip_loss_g.mean())
+        self.log("val/clip_loss", clip_loss, sync_dist=True)
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
 
         if self.hparams.current_task > 0:
             image_embeddings_old, text_embeddings_old = self.forward_old(batch)
             distill_loss1 = self._compute_losses(image_embeddings_old, text_embeddings).mean()
-            distill_loss1_g = self.all_gather(distill_loss1)
             distill_loss2 = self._compute_losses(image_embeddings, text_embeddings_old).mean()
-            distill_loss2_g = self.all_gather(distill_loss1)
-            self.log("val/distill_loss1", distill_loss1_g.mean())
-            self.log("val/distill_loss2", distill_loss2_g.mean())
-            self.log("val/all_loss", clip_loss_g.mean() + distill_loss1_g.mean() + distill_loss2_g.mean())
+            self.log("val/distill_loss1", distill_loss1, sync_dist=True)
+            self.log("val/distill_loss2", distill_loss2, sync_dist=True)
+            self.log("val/all_loss", clip_loss + distill_loss1 + distill_loss2, sync_dist=True)
             return clip_loss + distill_loss1 + distill_loss2
         else:
             return clip_loss
@@ -203,7 +197,7 @@ class CLIPDualEncoderModel(LightningModule):
             image_features=all_image_features,
             text_features=all_text_features,
         )
-        self.log_dict(val_metrics)
+        self.log_dict(val_metrics, sync_dist=True)
         self.val_img_feats.clear()
         self.val_text_feats.clear()
 
