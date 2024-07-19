@@ -19,7 +19,7 @@ python image_retrieval/cli_aug_dilv2_distill_v3.py fit \
     --trainer.accelerator npu \
     --trainer.strategy ddp_find_unused_parameters_true \
     --trainer.precision 16 \
-    --trainer.max_epochs 1 \
+    --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL-DIL \
