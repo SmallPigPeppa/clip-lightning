@@ -54,16 +54,6 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dim=projection_dims,
             dropout=dropout,
         )
-        self.image_projection_old = ProjectionHead(
-            embedding_dim=image_embedding_dims,
-            projection_dim=projection_dims,
-            dropout=dropout,
-        )
-        self.text_projection_old = ProjectionHead(
-            embedding_dim=text_embedding_dims,
-            projection_dim=projection_dims,
-            dropout=dropout,
-        )
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.temperature = temperature
@@ -79,6 +69,18 @@ class CLIPDualEncoderModel(LightningModule):
         self.old_checkpoint_path = old_checkpoint_path
         self.current_task = current_task
         self.save_hyperparameters()
+
+        if current_task > 0:
+            self.image_projection_old = ProjectionHead(
+                embedding_dim=image_embedding_dims,
+                projection_dim=projection_dims,
+                dropout=dropout,
+            )
+            self.text_projection_old = ProjectionHead(
+                embedding_dim=text_embedding_dims,
+                projection_dim=projection_dims,
+                dropout=dropout,
+            )
 
     def _compute_losses(self, image_embeddings, text_embeddings):
         logits = (text_embeddings @ image_embeddings.T) / self.temperature
