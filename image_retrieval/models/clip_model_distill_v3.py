@@ -65,16 +65,18 @@ class CLIPDualEncoderModel(LightningModule):
             self.initialize_old_modules()
 
     def initialize_old_modules(self):
-        self.image_projection_old = ProjectionHead(
-            embedding_dim=self.hparams.image_embedding_dims,
-            projection_dim=self.hparams.projection_dims,
-            dropout=self.hparams.dropout,
-        )
-        self.text_projection_old = ProjectionHead(
-            embedding_dim=self.hparams.text_embedding_dims,
-            projection_dim=self.hparams.projection_dims,
-            dropout=self.hparams.dropout,
-        )
+        # self.image_projection_old = ProjectionHead(
+        #     embedding_dim=self.hparams.image_embedding_dims,
+        #     projection_dim=self.hparams.projection_dims,
+        #     dropout=self.hparams.dropout,
+        # )
+        # self.text_projection_old = ProjectionHead(
+        #     embedding_dim=self.hparams.text_embedding_dims,
+        #     projection_dim=self.hparams.projection_dims,
+        #     dropout=self.hparams.dropout,
+        # )
+        self.image_projection_old = copy.deepcopy(self.image_projection)
+        self.text_projection_old = copy.deepcopy(self.text_projection)
 
         # load task N-1 checkpoint
         checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
