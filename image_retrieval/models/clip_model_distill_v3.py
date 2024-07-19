@@ -90,6 +90,12 @@ class CLIPDualEncoderModel(LightningModule):
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
 
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.image_encoder_old.parameters():
+            param.requires_grad = False
+        for param in self.text_encoder_old.parameters():
+            param.requires_grad = False
+
     def on_before_optimizer_step(self, optimizer) -> None:
         print("**************on_before_opt enter*********")
         # for p in self.trainable_variables:
