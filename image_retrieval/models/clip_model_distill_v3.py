@@ -37,7 +37,7 @@ class CLIPDualEncoderModel(LightningModule):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
-        self.log_softmax = nn.LogSoftmax(dim=-1)
+
         self.image_encoder = ImageEncoder(
             model_name=image_encoder_alias,
             pretrained=image_encoder_pretrained,
@@ -57,7 +57,9 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dim=projection_dims,
             dropout=dropout,
         )
-
+        self.log_softmax = nn.LogSoftmax(dim=-1)
+        self.val_img_feats = []
+        self.val_text_feats = []
 
         if current_task > 0:
             self.initialize_old_modules()
