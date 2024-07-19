@@ -22,7 +22,7 @@ python image_retrieval/cli_aug_dilv2_distill_cassle.py fit \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-PL-DIL \
+    --trainer.logger.project CLIP-DIL \
     --trainer.logger.name r50-aug-bs256-debug-ILR-PLR-distill-cassle \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
