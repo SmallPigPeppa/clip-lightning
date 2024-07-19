@@ -44,13 +44,12 @@ def modify_command_for_task(base_command, params_dict, task_idx, num_tasks, sub_
     # Update parameters for incremental learning
     params_dict['--data.num_tasks'] = str(num_tasks)
     params_dict['--data.current_task'] = str(task_idx)
-    ckpt_dir = params_dict['--model_checkpoint.dirpath']
-    params_dict['--model_checkpoint.dirpath'] = os.path.join(ckpt_dir, sub_dir)
+    params_dict['--model_checkpoint.dirpath'] = os.path.join(params_dict['--model_checkpoint.dirpath'], sub_dir)
 
     # # Update ckpt path
     if task_idx > 0:
         ckpt_dir = params_dict['--model_checkpoint.dirpath']
-        params_dict['--model.old_checkpoint_path'] = os.path.join(ckpt_dir, sub_dir, f"task-{task_idx - 1}.ckpt")
+        params_dict['--model.old_checkpoint_path'] = os.path.join(ckpt_dir, f"task-{task_idx - 1}.ckpt")
     params_dict['--model_checkpoint.filename'] = f"task-{task_idx}"
 
     # Update current task id
