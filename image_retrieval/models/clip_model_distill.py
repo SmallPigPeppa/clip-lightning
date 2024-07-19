@@ -253,7 +253,7 @@ class CLIPDualEncoderModel(LightningModule):
             # Filter out the weights related to the 'old' parts
             filtered_state_dict = {k: v for k, v in checkpoint['state_dict'].items() if not k.startswith(
                 ('image_encoder_old', 'text_encoder_old', 'image_projection_old', 'text_projection_old'))}
-            self.load_state_dict(filtered_state_dict, strict=True)
+            self.load_state_dict(filtered_state_dict, strict=False)
             print("Model weights loaded successfully and old parts copied.")
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
