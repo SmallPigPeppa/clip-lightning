@@ -54,6 +54,17 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dim=projection_dims,
             dropout=dropout,
         )
+        self.image_projection_old = ProjectionHead(
+            embedding_dim=image_embedding_dims,
+            projection_dim=projection_dims,
+            dropout=dropout,
+        )
+        self.text_projection_old = ProjectionHead(
+            embedding_dim=text_embedding_dims,
+            projection_dim=projection_dims,
+            dropout=dropout,
+        )
+
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.temperature = temperature
         self.weight_decay = weight_decay
@@ -244,5 +255,5 @@ class CLIPDualEncoderModel(LightningModule):
             print("Model weights loaded successfully and old parts copied.")
         self.image_encoder_old = copy.deepcopy(self.image_encoder)
         self.text_encoder_old = copy.deepcopy(self.text_encoder)
-        self.image_projection_old = copy.deepcopy(self.image_projection)
-        self.text_projection_old = copy.deepcopy(self.text_projection)
+        # self.image_projection_old = copy.deepcopy(self.image_projection)
+        # self.text_projection_old = copy.deepcopy(self.text_projection)
