@@ -3,8 +3,8 @@
 python image_retrieval/cli_aug_simclr.py fit \
     --data.dataset_name flickr30k_aug \
     --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
-    --data.train_batch_size 128 \
-    --data.val_batch_size 128 \
+    --data.train_batch_size 256 \
+    --data.val_batch_size 256 \
     --data.config config.yaml \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
@@ -24,7 +24,7 @@ python image_retrieval/cli_aug_simclr.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL \
-    --trainer.logger.name r50-aug-bs128-debug-ILR-PLR-simclr-lars \
+    --trainer.logger.name r50-aug-bs256-debug-ILR-PLR-simclr-lars \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
