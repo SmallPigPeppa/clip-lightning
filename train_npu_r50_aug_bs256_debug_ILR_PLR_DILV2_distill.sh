@@ -18,7 +18,7 @@ python image_retrieval/cli_aug_dilv2_distill.py fit \
     --model.projection_dims 512 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-PL-DIL \
