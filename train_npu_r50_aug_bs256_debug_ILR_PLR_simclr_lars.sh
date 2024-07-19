@@ -18,6 +18,7 @@ python image_retrieval/cli_aug_simclr.py fit \
     --model.text_embedding_dims 768 \
     --model.text_encoder_lr 0.3 \
     --model.projection_dims 512 \
+    --model.temperature 0.2 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
