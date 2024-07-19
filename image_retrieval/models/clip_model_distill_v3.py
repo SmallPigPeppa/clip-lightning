@@ -92,7 +92,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_before_optimizer_step(self, optimizer) -> None:
         print("**************on_before_opt enter*********")
-        for p in self.trainable_params:
+        for p in self.trainable_variables:
             if p.grad is None:
                 print(p)
         print("***************on_before_opt exit*********")
