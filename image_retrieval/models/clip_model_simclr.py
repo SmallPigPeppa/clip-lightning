@@ -195,6 +195,7 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
+            logit_scale=1 / self.temperature,
         )
         self.log_dict(val_metrics)
         self.val_img_feats.clear()
@@ -218,9 +219,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    def get_clip_metrics_cpu(self, image_features, text_features):
+    def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
-        logit_scale = 1 / self.temperature
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
 
