@@ -142,6 +142,7 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
+            logit_scale=1. / self.temperature,
         )
         self.log_dict(val_metrics)
         self.val_img_feats.clear()
