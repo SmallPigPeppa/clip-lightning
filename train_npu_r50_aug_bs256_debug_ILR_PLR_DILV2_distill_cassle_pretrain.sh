@@ -17,7 +17,7 @@ python image_retrieval/cli_aug_dilv2_distill_cassle.py fit \
     --model.text_encoder_lr 1e-5 \
     --model.projection_dims 512 \
     --model.temperature 0.1 \
-    --model.weight_decay 0.1 \
+    --model.weight_decay 1e-6 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
