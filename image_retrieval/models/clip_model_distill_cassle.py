@@ -82,9 +82,9 @@ class CLIPDualEncoderModel(LightningModule):
             param.requires_grad = False
         for param in self.text_encoder_old.parameters():
             param.requires_grad = False
-        for param in self.image_projection.parameters():
+        for param in self.image_projection_old.parameters():
             param.requires_grad = False
-        for param in self.text_projection.parameters():
+        for param in self.text_projection_old.parameters():
             param.requires_grad = False
 
         # distill project
