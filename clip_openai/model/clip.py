@@ -15,14 +15,13 @@ from .simple_tokenizer import SimpleTokenizer as _Tokenizer
 
 try:
     from torchvision.transforms import InterpolationMode
+
     BICUBIC = InterpolationMode.BICUBIC
 except ImportError:
     BICUBIC = Image.BICUBIC
 
-
 if version.parse(torch.__version__) < version.parse("1.7.1"):
     warnings.warn("PyTorch version 1.7.1 or higher is recommended")
-
 
 __all__ = ["available_models", "load", "tokenize"]
 _tokenizer = _Tokenizer()
@@ -57,7 +56,8 @@ def _download(url: str, root: str):
             warnings.warn(f"{download_target} exists, but the SHA256 checksum does not match; re-downloading the file")
 
     with urllib.request.urlopen(url) as source, open(download_target, "wb") as output:
-        with tqdm(total=int(source.info().get("Content-Length")), ncols=80, unit='iB', unit_scale=True, unit_divisor=1024) as loop:
+        with tqdm(total=int(source.info().get("Content-Length")), ncols=80, unit='iB', unit_scale=True,
+                  unit_divisor=1024) as loop:
             while True:
                 buffer = source.read(8192)
                 if not buffer:
@@ -91,7 +91,8 @@ def available_models() -> List[str]:
     return list(_MODELS.keys())
 
 
-def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_available() else "cpu", jit: bool = False, download_root: str = None):
+def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_available() else "cpu",
+         jit: bool = False, download_root: str = None):
     """Load a CLIP model
 
     Parameters
@@ -202,7 +203,44 @@ def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_a
     return model, _transform(model.input_resolution.item())
 
 
-def tokenize(texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False) -> Union[torch.IntTensor, torch.LongTensor]:
+def my_load(name: str, download_root: str = None):
+    """Load a CLIP model
+
+    Parameters
+    ----------
+    name : str
+        A model name listed by `clip.available_models()`, or the path to a model checkpoint containing the state_dict
+
+    download_root: str
+        path to download the model files; by default, it uses "~/.cache/clip"
+
+    Returns
+    -------
+    model : torch.nn.Module
+        The CLIP model
+    """
+    if name in _MODELS:
+        model_path = _download(_MODELS[name], download_root or os.path.expanduser("~/.cache/clip"))
+    elif os.path.isfile(name):
+        model_path = name
+    else:
+        raise RuntimeError(f"Model {name} not found; available models = {available_models()}")
+
+    with open(model_path, 'rb') as opened_file:
+        try:
+            # loading JIT archive
+            model = torch.jit.load(opened_file, map_location="cpu").eval()
+            state_dict = None
+        except RuntimeError:
+            # loading saved state dict
+            state_dict = torch.load(opened_file, map_location="cpu")
+
+    model = build_model(state_dict or model.state_dict())
+    return model
+
+
+def tokenize(texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False) -> Union[
+    torch.IntTensor, torch.LongTensor]:
     """
     Returns the tokenized representation of given input string(s)
 

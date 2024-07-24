@@ -21,7 +21,6 @@ class ImageRetrievalDataset(Dataset):
     def tokenize(self, text):
         sot_token = self.tokenizer.encoder["<|startoftext|>"]
         eot_token = self.tokenizer.encoder["<|endoftext|>"]
-        a = self.tokenizer.encode(text)
         tokens = [sot_token] + self.tokenizer.encode(text) + [eot_token]
         result = torch.zeros(self.max_length, dtype=torch.long)
         if len(tokens) <= self.max_length:
