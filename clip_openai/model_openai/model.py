@@ -7,7 +7,8 @@ import torch.nn.functional as F
 from torch import nn
 from lightning import LightningModule
 
-class Bottleneck(nn.Module):
+
+class Bottleneck(LightningModule):
     expansion = 4
 
     def __init__(self, inplanes, planes, stride=1):
@@ -55,7 +56,7 @@ class Bottleneck(nn.Module):
         return out
 
 
-class AttentionPool2d(nn.Module):
+class AttentionPool2d(LightningModule):
     def __init__(self, spacial_dim: int, embed_dim: int, num_heads: int, output_dim: int = None):
         super().__init__()
         self.positional_embedding = nn.Parameter(torch.randn(spacial_dim ** 2 + 1, embed_dim) / embed_dim ** 0.5)
@@ -91,7 +92,7 @@ class AttentionPool2d(nn.Module):
         return x.squeeze(0)
 
 
-class ModifiedResNet(nn.Module):
+class ModifiedResNet(LightningModule):
     """
     A ResNet class that is similar to torchvision's but contains the following changes:
     - There are now 3 "stem" convolutions as opposed to 1, with an average pool instead of a max pool.
@@ -143,7 +144,6 @@ class ModifiedResNet(nn.Module):
             x = self.avgpool(x)
             return x
 
-
         x = stem(x)
         x = self.layer1(x)
         x = self.layer2(x)
@@ -162,7 +162,7 @@ class LayerNorm(nn.LayerNorm):
         return ret
 
 
-class QuickGELU(nn.Module):
+class QuickGELU(LightningModule):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
 
@@ -170,7 +170,6 @@ class QuickGELU(nn.Module):
 class ResidualAttentionBlock(LightningModule):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
         super().__init__()
-
         self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
         self.mlp = nn.Sequential(OrderedDict([
@@ -191,7 +190,7 @@ class ResidualAttentionBlock(LightningModule):
         return x
 
 
-class Transformer(nn.Module):
+class Transformer(LightningModule):
     def __init__(self, width: int, layers: int, heads: int, attn_mask: torch.Tensor = None):
         super().__init__()
         self.width = width
@@ -241,7 +240,7 @@ class VisionTransformer(LightningModule):
         return x
 
 
-class CLIP(nn.Module):
+class CLIP(LightningModule):
     def __init__(self,
                  embed_dim: int,
                  # vision
@@ -334,7 +333,6 @@ class CLIP(nn.Module):
         mask.triu_(1)  # zero out the lower diagonal
         return mask
 
-
     def encode_image(self, image):
         return self.visual(image)
 
@@ -370,7 +368,7 @@ class CLIP(nn.Module):
         return logits_per_image, logits_per_text
 
 
-def convert_weights(model: nn.Module):
+def convert_weights(model):
     """Convert applicable model parameters to fp16"""
 
     def _convert_weights_to_fp16(l):
@@ -431,6 +429,6 @@ def build_model(state_dict: dict):
         if key in state_dict:
             del state_dict[key]
 
-    convert_weights(model)
+    # convert_weights(model)
     model.load_state_dict(state_dict)
     return model.eval()
