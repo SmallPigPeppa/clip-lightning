@@ -1,0 +1,1 @@
+from .clip_pl_distill_cassle import CLIPDualEncoderModel
