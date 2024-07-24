@@ -59,6 +59,16 @@ class CLIPDualEncoderModel(LightningModule):
             "lr_scheduler": lr_scheduler,
         }
 
+    def _compute_losses_old(self, image_embeddings, text_embeddings):
+        logits = (text_embeddings @ image_embeddings.T) / self.hparams.temperature
+        images_similarity = image_embeddings @ image_embeddings.T
+        texts_similarity = text_embeddings @ text_embeddings.T
+        targets = F.softmax(
+            (images_similarity + texts_similarity) / 2 * self.hparams.temperature, dim=-1
+        )
+        images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
+        texts_loss = (-targets * self.log_softmax(logits)).sum(1)
+        return (images_loss + texts_loss) / 2.0
 
     def _compute_losses(
             self,
@@ -87,7 +97,7 @@ class CLIPDualEncoderModel(LightningModule):
         z = torch.cat((z1, z2), dim=0)
         z = F.normalize(z, dim=-1)
 
-        logits = torch.einsum("if, jf -> ij", z, z) * self.model.logit_scale.exp()
+        logits = torch.einsum("if, jf -> ij", z, z) / self.hparams.temperature
         logits_max, _ = torch.max(logits, dim=1, keepdim=True)
         logits = logits - logits_max.detach()
 
@@ -134,7 +144,7 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
-            logit_scale=self.model.logit_scale.exp(),
+            logit_scale=1 / self.hparams.temperature,
         )
         self.log_dict(val_metrics, sync_dist=True)
         self.val_img_feats.clear()
@@ -171,3 +181,5 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
+
