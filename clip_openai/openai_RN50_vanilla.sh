@@ -15,7 +15,7 @@ python cli_vanilla.py fit \
     --model.lr_warmup_epochs 8 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
-    --trainer.accelerator gpu \
+    --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
