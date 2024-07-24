@@ -22,6 +22,7 @@ python clip_cli_distill_cassle.py fit \
     --trainer.logger.project CLIP-DIL-OpenAI \
     --trainer.logger.name RN50-bs256-distill-cassle \
     --trainer.logger.log_model False \
+    --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
