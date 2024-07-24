@@ -71,35 +71,26 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        parameters = [
-            {"params": self.image_encoder.parameters(), "lr": self.hparams.image_encoder_lr},
-            {"params": self.text_encoder.parameters(), "lr": self.hparams.text_encoder_lr},
-            {
-                "params": itertools.chain(
-                    self.image_projection.parameters(),
-                    self.text_projection.parameters(),
-                ),
-                "lr": self.hparams.head_lr,
-                "weight_decay": self.hparams.weight_decay,
-            },
-        ]
-
+        parameters = [{
+            "params": self.model.parameters(),
+             "lr": self.hparams.lr,
+             "weight_decay": self.hparams.weight_decay
+        }]
         if self.hparams.current_task > 0:
             distill_params = [{
                 "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.head_lr,
+                "lr": self.hparams.lr,
                 "weight_decay": self.hparams.weight_decay,
             }]
             parameters.extend(distill_params)
 
         optimizer = optim.Adam(parameters, weight_decay=self.hparams.weight_decay)
-        base_lr = min(self.hparams.image_encoder_lr, self.hparams.text_encoder_lr, self.hparams.head_lr)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
             warmup_epochs=self.hparams.lr_warmup_epochs,
             max_epochs=self.trainer.max_epochs,
-            warmup_start_lr=0.01 * base_lr,
-            eta_min=0.01 * base_lr
+            warmup_start_lr=0.01 * self.hparams.lr,
+            eta_min=0.01 * self.hparams.lr
         )
 
         return {
@@ -310,9 +301,6 @@ if __name__ == "__main__":
     inputs = next(iter(a))
 
     model = my_load(name='RN50', download_root='./')
-    # print(model)
-    # image_features = inputs["image"]
-    # text_features = inputs["caption"]
     image_features = model.encode_image(inputs["image"])
     text_features = model.encode_text(inputs["caption"])
     print(image_features.shape)
