@@ -394,5 +394,9 @@ def build_model(state_dict: dict):
         if key in state_dict:
             del state_dict[key]
 
+    for key in ["logit_scale"]:
+        if key in state_dict:
+            del state_dict[key]
+
     model.load_state_dict(state_dict)
     return model
