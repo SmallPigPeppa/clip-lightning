@@ -2,10 +2,10 @@ from typing import Optional
 from torchvision import transforms
 from torch.utils.data import random_split, DataLoader, Subset
 from lightning import LightningDataModule
-from clip_openai.dataloaders import ImageRetrievalDataset
-from clip_openai.dataloaders import Flickr30kDataset
-from clip_openai.dataloaders import image_transform_v2
-from clip_openai.model import SimpleTokenizer
+from .base import ImageRetrievalDataset
+from .flickr30k import Flickr30kDataset
+from .img_transforms import image_transform_v2
+from ..model import SimpleTokenizer
 
 DATASET_LOOKUP = {
     "flickr30k": Flickr30kDataset

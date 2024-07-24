@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from clip_openai.dataloaders import ImageRetrievalDataset
+from .base import ImageRetrievalDataset
 
 
 class Flickr30kDataset(ImageRetrievalDataset):
