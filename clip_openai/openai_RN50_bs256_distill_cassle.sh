@@ -11,8 +11,9 @@ python clip_cli_distill_cassle.py fit \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 1e-4 \
-    --model.weight_decay 1e-6 \
+    --model.lr 1e-3 \
+    --model.lr_warmup_epochs 8 \
+    --model.weight_decay 0.1 \
     --model.download_root ./ \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
