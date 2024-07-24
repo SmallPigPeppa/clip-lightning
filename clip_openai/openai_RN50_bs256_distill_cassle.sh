@@ -3,7 +3,7 @@ python clip_cli_distill_cassle.py fit \
     --data.current_task 0 \
     --data.val_split 0.2 \
     --data.max_length 77 \
-    --data.batch_size 256 \
+    --data.batch_size 32 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
