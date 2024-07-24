@@ -3,7 +3,7 @@ python cli_vanilla.py fit \
     --data.current_task 0 \
     --data.val_split 0.2 \
     --data.max_length 77 \
-    --data.batch_size 128 \
+    --data.batch_size 280 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
@@ -11,9 +11,9 @@ python cli_vanilla.py fit \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 1e-5 \
+    --model.lr 5e-4 \
     --model.lr_warmup_epochs 5 \
-    --model.weight_decay 0. \
+    --model.weight_decay 0.2 \
     --model.download_root ./ \
     --trainer.accelerator npu \
     --trainer.precision 16 \
@@ -21,7 +21,7 @@ python cli_vanilla.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-DIL-OpenAI \
-    --trainer.logger.name RN50-vanilla-wd0 \
+    --trainer.logger.name RN50-vanilla-wd0.2 \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
