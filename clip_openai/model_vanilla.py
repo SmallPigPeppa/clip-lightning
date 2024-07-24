@@ -59,67 +59,26 @@ class CLIPDualEncoderModel(LightningModule):
             "lr_scheduler": lr_scheduler,
         }
 
-    def _compute_losses(self, image_embeddings, text_embeddings):
-        logits = (text_embeddings @ image_embeddings.T) / self.hparams.temperature
-        images_similarity = image_embeddings @ image_embeddings.T
-        texts_similarity = text_embeddings @ text_embeddings.T
-        targets = F.softmax(
-            (images_similarity + texts_similarity) / 2 * self.hparams.temperature, dim=-1
-        )
-        images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
-        texts_loss = (-targets * self.log_softmax(logits)).sum(1)
-        return (images_loss + texts_loss) / 2.0
+    def _compute_losses(self, image_features, text_features):
 
-    def _compute_losses_new(
-            self,
-            z1: torch.Tensor,
-            z2: torch.Tensor,
-            # temperature: float = 0.1,
-            # extra_pos_mask: Optional[torch.Tensor] = None,
-    ) -> torch.Tensor:
-        """Computes SimCLR's loss given batch of projected features z1 from view 1 and
-        projected features z2 from view 2.
+        # normalized features
+        image_features = image_features / image_features.norm(dim=1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=1, keepdim=True)
 
-        Args:
-            z1 (torch.Tensor): NxD Tensor containing projected features from view 1.
-            z2 (torch.Tensor): NxD Tensor containing projected features from view 2.
-            temperature (float): temperature factor for the loss. Defaults to 0.1.
-            extra_pos_mask (Optional[torch.Tensor]): boolean mask containing extra positives other
-                than normal across-view positives. Defaults to None.
+        # cosine similarity as logits
+        logit_scale = self.model.logit_scale.exp()
+        logits_per_image = logit_scale * image_features @ text_features.t()
+        logits_per_text = logits_per_image.t()
 
-        Returns:
-            torch.Tensor: SimCLR loss.
-        """
+        # shape = [global_batch_size, global_batch_size]
 
-        device = self.device
+        labels = torch.arange(len(logits_per_image)).to(self.device)
 
-        b = z1.size(0)
-        z = torch.cat((z1, z2), dim=0)
-        z = F.normalize(z, dim=-1)
+        image_loss = F.cross_entropy(logits_per_image, labels)
+        text_loss = F.cross_entropy(logits_per_text, labels)
 
-        logits = torch.einsum("if, jf -> ij", z, z) / self.hparams.temperature
-        logits_max, _ = torch.max(logits, dim=1, keepdim=True)
-        logits = logits - logits_max.detach()
+        loss = (image_loss + text_loss) / 2
 
-        # positive mask are matches i, j (i from aug1, j from aug2), where i == j and matches j, i
-        pos_mask = torch.zeros((2 * b, 2 * b), dtype=torch.bool, device=device)
-        pos_mask[:, b:].fill_diagonal_(True)
-        pos_mask[b:, :].fill_diagonal_(True)
-
-        # # if we have extra "positives"
-        # if extra_pos_mask is not None:
-        #     pos_mask = torch.bitwise_or(pos_mask, extra_pos_mask)
-
-        # all matches excluding the main diagonal
-        logit_mask = torch.ones_like(pos_mask, device=device).fill_diagonal_(0)
-
-        exp_logits = torch.exp(logits) * logit_mask
-        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
-
-        # compute mean of log-likelihood over positives
-        mean_log_prob_pos = (pos_mask * log_prob).sum(1) / pos_mask.sum(1)
-        # loss
-        loss = -mean_log_prob_pos.mean()
         return loss
 
     def training_step(self, batch, *args, **kwargs):
@@ -189,5 +148,3 @@ class CLIPDualEncoderModel(LightningModule):
     #             print(name)
     #
     #     print("***************on_before_opt exit*********")
-
-

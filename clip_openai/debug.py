@@ -2,7 +2,7 @@ from dataloaders import Flickr30kDataset
 from clip_openai.model_openai.simple_tokenizer import SimpleTokenizer
 
 if __name__ == "__main__":
-    from clip_openai.model_openai import my_load
+    from clip_openai.model_openai.clip_old import my_load
     from dataloaders import ImageRetrievalDataModule
 
     dm = ImageRetrievalDataModule(

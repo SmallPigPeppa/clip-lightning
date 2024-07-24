@@ -76,6 +76,15 @@ class CLIPDualEncoderModel(LightningModule):
         )
         images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
         texts_loss = (-targets * self.log_softmax(logits)).sum(1)
+
+
+        labels = torch.arange(len(logits_per_image)).to(logits_per_image.device)
+
+        image_loss = F.cross_entropy(logits_per_image, labels)
+        text_loss  = F.cross_entropy(logits_per_text, labels)
+
+        loss = (image_loss + text_loss) / 2
+
         return (images_loss + texts_loss) / 2.0
 
     def forward(self, inputs):
