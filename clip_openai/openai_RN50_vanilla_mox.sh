@@ -21,7 +21,7 @@ python cli_vanilla.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-DIL-OpenAI \
-    --trainer.logger.name RN50-vanilla-wd0.2 \
+    --trainer.logger.name RN50-vanilla-mox \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
