@@ -10,7 +10,7 @@ from PIL import Image
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 from tqdm import tqdm
 
-from .model import build_model
+from clip_openai.model import build_model
 from .simple_tokenizer import SimpleTokenizer as _Tokenizer
 
 try:

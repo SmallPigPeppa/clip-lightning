@@ -3,9 +3,10 @@ from torchvision import transforms
 from torch.utils.data import random_split, DataLoader
 from lightning import LightningDataModule
 from transformers import DistilBertTokenizer
-from .base import ImageRetrievalDataset
-from .flickr30k import Flickr30kDataset
-from .img_transforms import image_transform_v2
+from clip_openai.dataloaders import ImageRetrievalDataset
+from clip_openai.dataloaders import Flickr30kDataset
+from clip_openai.dataloaders import image_transform_v2
+from clip_openai.model import SimpleTokenizer
 
 DATASET_LOOKUP = {"flickr30k": Flickr30kDataset}
 
@@ -29,7 +30,9 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.dataset_name = dataset_name
         self.config = config
         self.val_split = val_split
-        if tokenizer_alias == '':
+        if tokenizer_alias == 'simple_tokenizer':
+            self.tokenizer = SimpleTokenizer()
+        else:
             self.tokenizer = DistilBertTokenizer.from_pretrained(tokenizer_alias)
         self.max_length = max_length
         self.train_batch_size = train_batch_size
