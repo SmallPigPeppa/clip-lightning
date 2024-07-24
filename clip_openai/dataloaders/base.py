@@ -41,9 +41,6 @@ class ImageRetrievalDataset(Dataset):
         texts : Union[str, List[str]]
             An input string or a list of input strings to tokenize
 
-        context_length : int
-            The context length to use; all CLIP models use 77 as the context length
-
         truncate: bool
             Whether to truncate the text in case its encoding is longer than the context length
 
@@ -55,8 +52,8 @@ class ImageRetrievalDataset(Dataset):
         if isinstance(texts, str):
             texts = [texts]
 
-        sot_token = self.tokenizer.encoder["<|startoftext|>"]
-        eot_token = self.tokenizer.encoder["<|endoftext|>"]
+        sot_token = self.tokenizer.encode["<|startoftext|>"]
+        eot_token = self.tokenizer.encode["<|endoftext|>"]
         all_tokens = [[sot_token] + self.tokenizer.encode(text) + [eot_token] for text in texts]
         if version.parse(torch.__version__) < version.parse("1.8.0"):
             result = torch.zeros(len(all_tokens), self.max_length, dtype=torch.long)
