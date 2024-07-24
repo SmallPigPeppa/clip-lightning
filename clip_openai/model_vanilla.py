@@ -182,4 +182,12 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
+    def on_before_optimizer_step(self, optimizer) -> None:
+        print("**************on_before_opt enter*********")
+        for name, param in self.named_parameters():
+            if param.grad is None:
+                print(name)
+
+        print("***************on_before_opt exit*********")
+
 
