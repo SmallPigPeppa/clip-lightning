@@ -1,4 +1,4 @@
-python clip_openai/clip_cli_distill_cassle.py fit \
+python clip_cli_distill_cassle.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.val_split 0.2 \
