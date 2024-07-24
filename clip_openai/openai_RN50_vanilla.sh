@@ -1,4 +1,4 @@
-python clip_cli_vanilla.py fit \
+python cli_vanilla.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.val_split 0.2 \

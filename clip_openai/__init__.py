@@ -1,1 +1,1 @@
-from .clip_pl_distill_cassle import CLIPDualEncoderModel
+from .model_distill_cassle import CLIPDualEncoderModel
