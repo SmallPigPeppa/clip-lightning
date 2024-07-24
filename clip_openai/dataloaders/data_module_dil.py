@@ -5,7 +5,7 @@ from lightning import LightningDataModule
 from .base import ImageRetrievalDataset
 from .flickr30k import Flickr30kDataset
 from .img_transforms import image_transform_v2
-from model_openai import SimpleTokenizer
+from ..model_openai import SimpleTokenizer
 
 DATASET_LOOKUP = {
     "flickr30k": Flickr30kDataset
