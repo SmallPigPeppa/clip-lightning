@@ -3,7 +3,7 @@ python clip_cli_distill_cassle.py fit \
     --data.current_task 0 \
     --data.val_split 0.2 \
     --data.max_length 77 \
-    --data.batch_size 32 \
+    --data.batch_size 128 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
@@ -11,7 +11,7 @@ python clip_cli_distill_cassle.py fit \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 1e-3 \
+    --model.lr 1e-4 \
     --model.weight_decay 1e-6 \
     --model.download_root ./ \
     --trainer.accelerator gpu \

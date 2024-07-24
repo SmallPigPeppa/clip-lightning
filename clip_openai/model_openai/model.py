@@ -406,4 +406,4 @@ def build_model(state_dict: dict):
             del state_dict[key]
 
     model.load_state_dict(state_dict)
-    return model.eval()
+    return model
