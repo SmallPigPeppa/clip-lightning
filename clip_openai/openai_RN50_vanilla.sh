@@ -11,7 +11,7 @@ python cli_vanilla.py fit \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 1e-3 \
+    --model.lr 1e-5 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
