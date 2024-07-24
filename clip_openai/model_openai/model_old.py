@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
-from lightning import LightningModule
+
 
 class Bottleneck(nn.Module):
     expansion = 4
@@ -68,7 +68,7 @@ class AttentionPool2d(nn.Module):
     def forward(self, x):
         x = x.flatten(start_dim=2).permute(2, 0, 1)  # NCHW -> (HW)NC
         x = torch.cat([x.mean(dim=0, keepdim=True), x], dim=0)  # (HW+1)NC
-        x = x + self.positional_embedding[:, None, :]  # (HW+1)NC
+        x = x + self.positional_embedding[:, None, :].to(x.dtype)  # (HW+1)NC
         x, _ = F.multi_head_attention_forward(
             query=x[:1], key=x, value=x,
             embed_dim_to_check=x.shape[-1],
@@ -143,7 +143,7 @@ class ModifiedResNet(nn.Module):
             x = self.avgpool(x)
             return x
 
-
+        x = x.type(self.conv1.weight.dtype)
         x = stem(x)
         x = self.layer1(x)
         x = self.layer2(x)
@@ -158,8 +158,9 @@ class LayerNorm(nn.LayerNorm):
     """Subclass torch's LayerNorm to handle fp16."""
 
     def forward(self, x: torch.Tensor):
-        ret = super().forward(x)
-        return ret
+        orig_type = x.dtype
+        ret = super().forward(x.type(torch.float32))
+        return ret.type(orig_type)
 
 
 class QuickGELU(nn.Module):
@@ -167,7 +168,7 @@ class QuickGELU(nn.Module):
         return x * torch.sigmoid(1.702 * x)
 
 
-class ResidualAttentionBlock(LightningModule):
+class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
         super().__init__()
 
@@ -182,7 +183,7 @@ class ResidualAttentionBlock(LightningModule):
         self.attn_mask = attn_mask
 
     def attention(self, x: torch.Tensor):
-        self.attn_mask = self.attn_mask.to(self.device) if self.attn_mask is not None else None
+        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
         return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
 
     def forward(self, x: torch.Tensor):
@@ -202,7 +203,7 @@ class Transformer(nn.Module):
         return self.resblocks(x)
 
 
-class VisionTransformer(LightningModule):
+class VisionTransformer(nn.Module):
     def __init__(self, input_resolution: int, patch_size: int, width: int, layers: int, heads: int, output_dim: int):
         super().__init__()
         self.input_resolution = input_resolution
@@ -224,9 +225,9 @@ class VisionTransformer(LightningModule):
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
         x = torch.cat(
-            [self.class_embedding + torch.zeros(x.shape[0], 1, x.shape[-1], device=self.device),
+            [self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device),
              x], dim=1)  # shape = [*, grid ** 2 + 1, width]
-        x = x + self.positional_embedding
+        x = x + self.positional_embedding.to(x.dtype)
         x = self.ln_pre(x)
 
         x = x.permute(1, 0, 2)  # NLD -> LND
@@ -334,18 +335,21 @@ class CLIP(nn.Module):
         mask.triu_(1)  # zero out the lower diagonal
         return mask
 
+    @property
+    def dtype(self):
+        return self.visual.conv1.weight.dtype
 
     def encode_image(self, image):
-        return self.visual(image)
+        return self.visual(image.type(self.dtype))
 
     def encode_text(self, text):
-        x = self.token_embedding(text)  # [batch_size, n_ctx, d_model]
+        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
 
-        x = x + self.positional_embedding
+        x = x + self.positional_embedding.type(self.dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x)
+        x = self.ln_final(x).type(self.dtype)
 
         # x.shape = [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
