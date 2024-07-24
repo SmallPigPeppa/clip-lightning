@@ -6,12 +6,10 @@ from clip_openai.dataloaders import ImageRetrievalDataset
 class Flickr30kDataset(ImageRetrievalDataset):
     def __init__(
             self,
-            root_dir: str = None,
-            tokenizer=None,
-            max_length: int = 100,
-            transforms=None,
+            *args,
+            **kwargs,
     ) -> None:
-        super().__init__(root_dir, tokenizer, max_length, transforms)
+        super().__init__(*args, **kwargs)
 
     def fetch_dataset(self):
         annotations = pd.read_csv(os.path.join(self.root_dir, "results.csv"), sep='|')

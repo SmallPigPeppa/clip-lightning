@@ -1,6 +1,6 @@
 from typing import Optional
 from torchvision import transforms
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import random_split, DataLoader, Subset
 from lightning import LightningDataModule
 from clip_openai.dataloaders import ImageRetrievalDataset
 from clip_openai.dataloaders import Flickr30kDataset
@@ -21,6 +21,8 @@ class ImageRetrievalDataModule(LightningDataModule):
             train_batch_size: int = 16,
             val_batch_size: int = 16,
             num_workers: int = 8,
+            num_tasks: int = 1,
+            current_task: int = 0,
             *args,
             **kwargs,
     ):
@@ -34,6 +36,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.num_workers = num_workers
+        self.num_tasks = num_tasks
+        self.current_task = current_task
 
     @staticmethod
     def split_data(dataset: ImageRetrievalDataset, val_split: float):
@@ -54,19 +58,24 @@ class ImageRetrievalDataModule(LightningDataModule):
             max_length=self.max_length,
             transforms=transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor()])
         )
-        self.train_dataset, self.val_dataset = self.split_data(
-            dataset, val_split=self.val_split
-        )
 
+        train_dataset, self.val_dataset = self.split_data(dataset, val_split=self.val_split)
+        # 划分训练集为多个任务
+        task_size = len(train_dataset) // self.num_tasks
+        self.task_datasets = [Subset(train_dataset, range(i * task_size, (i + 1) * task_size)) for i in
+                              range(self.num_tasks)]
+
+        # 对每个任务的数据集应用不同的变换
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        self.train_dataset.transforms = train_transforms
-        self.val_dataset.transforms = val_transforms
+        for task_dataset in self.task_datasets:
+            task_dataset.dataset.transforms = train_transforms
+        self.val_dataset.dataset.transforms = val_transforms
 
     def train_dataloader(self):
         return DataLoader(
-            self.train_dataset,
+            self.task_datasets[self.current_task],
             batch_size=self.train_batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
