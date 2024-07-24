@@ -6,9 +6,6 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from lightning import LightningModule
-import os
-
-os.environ['CURL_CA_BUNDLE'] = ''
 
 class Bottleneck(LightningModule):
     expansion = 4
