@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from .model_openai import my_load
+from model_openai import my_load
 import copy
 
 

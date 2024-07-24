@@ -1,8 +1,8 @@
 from lightning.pytorch import cli
 from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
-from .dataloaders.data_module_dil import ImageRetrievalDataModule
-from .clip_pl_distill_cassle import CLIPDualEncoderModel
+from dataloaders.data_module_dil import ImageRetrievalDataModule
+from clip_pl_distill_cassle import CLIPDualEncoderModel
 
 import os
 
