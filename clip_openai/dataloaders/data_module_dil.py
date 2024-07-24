@@ -7,7 +7,9 @@ from clip_openai.dataloaders import Flickr30kDataset
 from clip_openai.dataloaders import image_transform_v2
 from clip_openai.model import SimpleTokenizer
 
-DATASET_LOOKUP = {"flickr30k": Flickr30kDataset}
+DATASET_LOOKUP = {
+    "flickr30k": Flickr30kDataset
+}
 
 
 class ImageRetrievalDataModule(LightningDataModule):
@@ -17,9 +19,8 @@ class ImageRetrievalDataModule(LightningDataModule):
             config: str,
             val_split: float = 0.2,
             root_dir: str = None,
-            max_length: int = 100,
-            train_batch_size: int = 16,
-            val_batch_size: int = 16,
+            max_length: int = 77,
+            batch_size: int = 64,
             num_workers: int = 8,
             num_tasks: int = 1,
             current_task: int = 0,
@@ -31,10 +32,9 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.config = config
         self.root_dir = root_dir
         self.val_split = val_split
+        self.batch_size = batch_size
         self.tokenizer = SimpleTokenizer()
         self.max_length = max_length
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
         self.num_workers = num_workers
         self.num_tasks = num_tasks
         self.current_task = current_task
@@ -76,7 +76,7 @@ class ImageRetrievalDataModule(LightningDataModule):
     def train_dataloader(self):
         return DataLoader(
             self.task_datasets[self.current_task],
-            batch_size=self.train_batch_size,
+            batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
             drop_last=True,
@@ -86,7 +86,7 @@ class ImageRetrievalDataModule(LightningDataModule):
     def val_dataloader(self):
         return DataLoader(
             self.val_dataset,
-            batch_size=self.val_batch_size,
+            batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True
         )
