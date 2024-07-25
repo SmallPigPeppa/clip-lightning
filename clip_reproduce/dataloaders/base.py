@@ -2,6 +2,7 @@ from abc import abstractmethod
 from PIL import Image
 from torch.utils.data import Dataset
 import random
+import torch
 
 
 class ImageRetrievalDataset(Dataset):
@@ -35,6 +36,8 @@ class ImageRetrievalDataset(Dataset):
         if isinstance(caption, list):
             caption = random.choice(caption)
         item = self.tokenize(caption)
+        for key in item.keys():
+            item[key] = torch.tensor(item[key])
         if self.transforms:
             image = self.transforms(image)
         item['image'] = image
