@@ -12,13 +12,14 @@ python cli_cassle.py fit \
     --model.image_encoder_pretrained True \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
-    --model.image_encoder_lr 1e-4 \
-    --model.head_lr 1e-4 \
+    --model.image_encoder_lr 5e-4 \
+    --model.head_lr 51e-4 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 1e-4 \
+    --model.text_encoder_lr 5e-4 \
     --model.projection_dims 1024 \
-    --trainer.accelerator gpu \
+    --model.weight_decay 0.2 \
+    --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
