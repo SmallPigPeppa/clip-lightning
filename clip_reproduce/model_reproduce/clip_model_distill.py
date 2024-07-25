@@ -57,6 +57,7 @@ class CLIPDualEncoderModel(LightningModule):
             dropout=dropout,
         )
         self.log_softmax = nn.LogSoftmax(dim=-1)
+        self.logit_scale = nn.Parameter(torch.tensor([temperature]) * np.log(1 / 0.07))
         self.val_img_feats = []
         self.val_text_feats = []
 
