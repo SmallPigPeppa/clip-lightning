@@ -195,6 +195,6 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_train_start(self):
         if self.hparams.old_checkpoint_path:
-            checkpoint = torch.load(self.old_checkpoint_path, map_location=torch.device('cpu'))
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
             self.load_state_dict(checkpoint, strict=True)
             print("Model weights loaded successfully and old parts copied.")
