@@ -13,7 +13,7 @@ python cli_cassle.py fit \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
     --model.image_encoder_lr 5e-4 \
-    --model.head_lr 51e-4 \
+    --model.head_lr 5e-4 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
     --model.text_encoder_lr 5e-4 \
