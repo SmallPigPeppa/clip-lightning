@@ -117,8 +117,19 @@ class CLIPDualEncoderModel(LightningModule):
 
     def configure_optimizers(self):
         parameters = [
-            {"params": self.image_encoder.parameters(), "lr": self.hparams.image_encoder_lr},
-            {"params": self.text_encoder.parameters(), "lr": self.hparams.text_encoder_lr},
+            {
+                "params": self.image_encoder.parameters(),
+                "lr": self.hparams.image_encoder_lr,
+                "weight_decay": self.hparams.weight_decay},
+            {
+                "params": [self.logit_scale],
+                "lr": self.hparams.head_lr,
+                "weight_decay": self.hparams.weight_decay},
+
+            {
+                "params": self.text_encoder.parameters(),
+                "lr": self.hparams.text_encoder_lr,
+                "weight_decay": self.hparams.weight_decay},
             {
                 "params": itertools.chain(
                     self.image_projection.parameters(),
@@ -128,16 +139,7 @@ class CLIPDualEncoderModel(LightningModule):
                 "weight_decay": self.hparams.weight_decay,
             },
         ]
-
-        if self.hparams.current_task > 0:
-            distill_params = [{
-                "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.head_lr,
-                "weight_decay": self.hparams.weight_decay,
-            }]
-            parameters.extend(distill_params)
-
-        optimizer = optim.Adam(parameters, weight_decay=self.hparams.weight_decay)
+        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         base_lr = min(self.hparams.image_encoder_lr, self.hparams.text_encoder_lr, self.hparams.head_lr)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
@@ -152,16 +154,6 @@ class CLIPDualEncoderModel(LightningModule):
             "lr_scheduler": lr_scheduler,
         }
 
-    def _compute_losses_old(self, image_embeddings, text_embeddings):
-        logits = (text_embeddings @ image_embeddings.T) / self.hparams.temperature
-        images_similarity = image_embeddings @ image_embeddings.T
-        texts_similarity = text_embeddings @ text_embeddings.T
-        targets = F.softmax(
-            (images_similarity + texts_similarity) / 2 * self.hparams.temperature, dim=-1
-        )
-        images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
-        texts_loss = (-targets * self.log_softmax(logits)).sum(1)
-        return (images_loss + texts_loss) / 2.0
 
     def _compute_losses(self, image_features, text_features):
 
@@ -244,9 +236,9 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
-            logit_scale=1 / self.hparams.temperature,
+            logit_scale=self.logit_scale.exp(),
         )
-        self.log_dict(val_metrics, sync_dist=True)
+        self.log_dict(val_metrics)
         self.val_img_feats.clear()
         self.val_text_feats.clear()
 
