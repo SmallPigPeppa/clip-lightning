@@ -19,7 +19,7 @@ python cli_simclr.py fit \
     --model.text_encoder_lr 1e-3 \
     --model.projection_dims 1024 \
     --model.weight_decay 0.2 \
-    --model.temperature 0.07 \
+    --model.temperature 0.1 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
