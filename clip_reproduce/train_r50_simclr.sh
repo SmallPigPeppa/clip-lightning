@@ -1,4 +1,4 @@
-python cli_cassle.py fit \
+python cli_simclr.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -12,13 +12,13 @@ python cli_cassle.py fit \
     --model.image_encoder_pretrained True \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
-    --model.image_encoder_lr 1e-2 \
-    --model.head_lr 1e-2 \
+    --model.image_encoder_lr 5e-4 \
+    --model.head_lr 5e-4 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 1e-2 \
+    --model.text_encoder_lr 5e-4 \
     --model.projection_dims 1024 \
-    --model.weight_decay 1e-6 \
+    --model.weight_decay 0.2 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
