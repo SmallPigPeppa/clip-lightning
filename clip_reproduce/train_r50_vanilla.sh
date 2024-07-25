@@ -19,7 +19,7 @@ python cli_vanilla.py fit \
     --model.text_encoder_lr 5e-4 \
     --model.projection_dims 1024 \
     --model.weight_decay 0.2 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
