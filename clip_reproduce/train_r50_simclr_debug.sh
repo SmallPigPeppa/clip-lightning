@@ -16,7 +16,7 @@ python cli_simclr.py fit \
     --model.head_lr 1e-3 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 1e-5 \
+    --model.text_encoder_lr 1e-3 \
     --model.projection_dims 1024 \
     --model.weight_decay 0.2 \
     --model.temperature 1.0 \
