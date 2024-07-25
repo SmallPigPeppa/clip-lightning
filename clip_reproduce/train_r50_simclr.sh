@@ -12,11 +12,11 @@ python cli_simclr.py fit \
     --model.image_encoder_pretrained True \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
-    --model.image_encoder_lr 5e-4 \
-    --model.head_lr 5e-4 \
+    --model.image_encoder_lr 1e-3 \
+    --model.head_lr 1e-3 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 5e-4 \
+    --model.text_encoder_lr 1e-3 \
     --model.projection_dims 1024 \
     --model.weight_decay 0.2 \
     --trainer.accelerator npu \
