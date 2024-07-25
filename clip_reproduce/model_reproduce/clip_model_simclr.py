@@ -28,8 +28,7 @@ class CLIPDualEncoderModel(LightningModule):
             image_encoder_lr: float = 1e-4,
             text_encoder_lr: float = 1e-5,
             lr_warmup_epochs: int = 5,
-            train_batch_size: int = 256,
-            val_batch_size: int = 256,
+            batch_size: int = 32,
             old_checkpoint_path: str = None,
             *args,
             **kwargs,
@@ -53,32 +52,13 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dim=projection_dims,
             dropout=dropout,
         )
+        self.save_hyperparameters()
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.temperature = temperature
-        self.weight_decay = weight_decay
-        self.head_lr = head_lr
-        self.image_encoder_lr = image_encoder_lr
-        self.text_encoder_lr = text_encoder_lr
-        self.lr_warmup_epochs = lr_warmup_epochs
+        self.logit_scale = nn.Parameter(torch.tensor([temperature]) * np.log(1 / 0.07))
         self.val_img_feats = []
         self.val_text_feats = []
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-        self.old_checkpoint_path = old_checkpoint_path
         self.save_hyperparameters()
 
-    def _compute_losses_old(self, image_embeddings, text_embeddings):
-        logits = (text_embeddings @ image_embeddings.T) / self.temperature
-        images_similarity = image_embeddings @ image_embeddings.T
-        texts_similarity = text_embeddings @ text_embeddings.T
-        targets = F.softmax(
-            (images_similarity + texts_similarity) / 2 * self.temperature, dim=-1
-        )
-        images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
-        texts_loss = (-targets * self.log_softmax(logits)).sum(1)
-        return (images_loss + texts_loss) / 2.0
-
-    # simclr_loss_func
     def _compute_losses(
             self,
             z1: torch.Tensor,
@@ -106,7 +86,7 @@ class CLIPDualEncoderModel(LightningModule):
         z = torch.cat((z1, z2), dim=0)
         z = F.normalize(z, dim=-1)
 
-        logits = torch.einsum("if, jf -> ij", z, z) / self.temperature
+        logits = torch.einsum("if, jf -> ij", z, z) * self.logit_scale.exp()
         logits_max, _ = torch.max(logits, dim=1, keepdim=True)
         logits = logits - logits_max.detach()
 
@@ -144,23 +124,33 @@ class CLIPDualEncoderModel(LightningModule):
 
     def configure_optimizers(self):
         parameters = [
-            {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
-            {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
+            {
+                "params": self.image_encoder.parameters(),
+                "lr": self.hparams.image_encoder_lr,
+                "weight_decay": self.hparams.weight_decay},
+            {
+                "params": [self.logit_scale],
+                "lr": self.hparams.head_lr,
+                "weight_decay": self.hparams.weight_decay},
+
+            {
+                "params": self.text_encoder.parameters(),
+                "lr": self.hparams.text_encoder_lr,
+                "weight_decay": self.hparams.weight_decay},
             {
                 "params": itertools.chain(
                     self.image_projection.parameters(),
                     self.text_projection.parameters(),
                 ),
-                "lr": self.head_lr,
-                "weight_decay": self.weight_decay,
+                "lr": self.hparams.head_lr,
+                "weight_decay": self.hparams.weight_decay,
             },
         ]
-        optimizer = optim.AdamW(parameters, weight_decay=self.weight_decay)
-        # optimizer = optim.SGD(parameters, weight_decay=5e-4, momentum=0.9)
-        base_lr = min(self.image_encoder_lr, self.text_encoder_lr, self.head_lr)
+        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
+        base_lr = min(self.hparams.image_encoder_lr, self.hparams.text_encoder_lr, self.hparams.head_lr)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
-            warmup_epochs=self.lr_warmup_epochs,
+            warmup_epochs=self.hparams.lr_warmup_epochs,
             max_epochs=self.trainer.max_epochs,
             warmup_start_lr=0.01 * base_lr,
             eta_min=0.01 * base_lr
@@ -195,7 +185,7 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
-            logit_scale=1 / self.temperature,
+            logit_scale=self.logit_scale.exp(),
         )
         self.log_dict(val_metrics)
         self.val_img_feats.clear()
@@ -211,9 +201,6 @@ class CLIPDualEncoderModel(LightningModule):
         for name, logit in logits.items():
             ranking = torch.argsort(logit, descending=True).to(self.device)
             preds = torch.where(ranking == ground_truth)[1]
-            # metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
-            # metrics[f"{name}_median_rank"] = preds.float().median() + 1
-            # for k in [1, 5, 10]:
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100  # Convert recall to percentage
 
@@ -231,23 +218,7 @@ class CLIPDualEncoderModel(LightningModule):
             ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
-            # metrics[f"{name}_mean_rank"] = preds.mean() + 1
-            # metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
-            # for k in [1, 5, 10]:
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
-
-    def on_train_start(self):
-        if self.old_checkpoint_path:
-            checkpoint = torch.load(self.old_checkpoint_path, map_location=torch.device('cpu'))
-            # Filter out the weights related to the 'old' parts
-            filtered_state_dict = {k: v for k, v in checkpoint['state_dict'].items() if not k.startswith(
-                ('image_encoder_old', 'text_encoder_old', 'image_projection_old', 'text_projection_old'))}
-            self.load_state_dict(filtered_state_dict, strict=True)
-            print("Model weights loaded successfully and old parts copied.")
-        self.image_encoder_old = copy.deepcopy(self.image_encoder)
-        self.text_encoder_old = copy.deepcopy(self.text_encoder)
-        self.image_projection_old = copy.deepcopy(self.image_projection)
-        self.text_projection_old = copy.deepcopy(self.text_projection)

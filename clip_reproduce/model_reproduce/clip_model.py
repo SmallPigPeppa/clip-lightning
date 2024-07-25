@@ -59,16 +59,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.save_hyperparameters()
 
-    # def _compute_losses(self, image_embeddings, text_embeddings):
-    #     logits = (text_embeddings @ image_embeddings.T) / self.temperature
-    #     images_similarity = image_embeddings @ image_embeddings.T
-    #     texts_similarity = text_embeddings @ text_embeddings.T
-    #     targets = F.softmax(
-    #         (images_similarity + texts_similarity) / 2 * self.temperature, dim=-1
-    #     )
-    #     images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
-    #     texts_loss = (-targets * self.log_softmax(logits)).sum(1)
-    #     return (images_loss + texts_loss) / 2.0
 
     def _compute_losses(self, image_features, text_features):
 
