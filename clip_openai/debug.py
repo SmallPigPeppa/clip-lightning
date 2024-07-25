@@ -27,11 +27,11 @@ if __name__ == "__main__":
     # d = dm.train_dataset
     # print(len(d))
 
-    # a = dm.train_dataloader()
-    # inputs = next(iter(a))
-    #
-    # model = my_load(name='RN50', download_root='./')
-    # image_features = model.encode_image(inputs["image"])
-    # text_features = model.encode_text(inputs["caption"])
-    # print(image_features.shape)
-    # print(text_features.shape)
+    a = dm.train_dataloader()
+    inputs = next(iter(a))
+
+    model = my_load(name='RN50', download_root='./')
+    image_features = model.encode_image(inputs["image"])
+    text_features = model.encode_text(inputs["caption"])
+    print(image_features.shape)
+    print(text_features.shape)

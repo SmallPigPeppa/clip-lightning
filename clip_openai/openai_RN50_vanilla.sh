@@ -1,7 +1,6 @@
 python cli_vanilla.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
-    --data.val_split 0.2 \
     --data.max_length 77 \
     --data.batch_size 128 \
     --data.num_workers 8 \
