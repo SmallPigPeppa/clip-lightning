@@ -14,10 +14,7 @@ class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("model.text_encoder_alias", "data.tokenizer_alias")
         parser.link_arguments(
-            "data.train_batch_size", "model.train_batch_size"
-        )
-        parser.link_arguments(
-            "data.val_batch_size", "model.val_batch_size"
+            "data.batch_size", "model.batch_size"
         )
 
         # log prediction
