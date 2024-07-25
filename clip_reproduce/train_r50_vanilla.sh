@@ -18,7 +18,7 @@ python cli_vanilla.py fit \
     --model.text_embedding_dims 768 \
     --model.text_encoder_lr 1e-5 \
     --model.projection_dims 1024 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
