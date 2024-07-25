@@ -1,49 +1,36 @@
 import os
+import wandb
 import pandas as pd
+from typing import Optional
+
 from .base import ImageRetrievalDataset
-import json
 
 
-class Flickr30kDataset(ImageRetrievalDataset):
+class Flickr30kDatase(ImageRetrievalDataset):
     def __init__(
             self,
-            *args,
-            **kwargs,
+            artifact_id: str,
+            tokenizer=None,
+            max_length: int = 100,
+            transforms=None
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(artifact_id, tokenizer, max_length, transforms)
 
-    def fetch_dataset(self, split):
-        json_path = os.path.join(self.root_dir, 'dataset.json')
-        with open(json_path, 'r') as file:
-            all_data = json.load(file)['images']
-
-        if split == 'train':
-            split_data = [item for item in all_data if item['split'] in ['train', 'val']]
-        elif split == 'val':
-            split_data = [item for item in all_data if item['split'] == 'test']
-        else:
-            raise ValueError('Split must be either "train" or "val"')
-
-        images = []
-        captions = []
-
-        for item in split_data:
-            img = os.path.join(self.root_dir, "flickr30k_images", item['filename'])
-            caps = [sentence['raw'] for sentence in item['sentences']]
-            assert os.path.isfile(img)
-            images.append(img)
-            captions.append(caps)
-
-        return images, captions
-
-
-if __name__ == "__main__":
-    from clip_openai.model import SimpleTokenizer
-
-    tokenizer = SimpleTokenizer()
-    dataset = Flickr30kDataset(
-        root_dir='../../artifacts/flickr-30k:v0/flickr30k_images',
-        tokenizer=tokenizer,
-    )
-    a = dataset[0]
-    print(a)
+    def fetch_dataset(self):
+        # if wandb.run is None:
+        #     api = wandb.Api()
+        #     artifact = api.artifact(self.artifact_id, type="dataset")
+        # else:
+        #     artifact = wandb.use_artifact(self.artifact_id, type="dataset")
+        # artifact_dir = artifact.download()
+        artifact_dir = 'artifacts/flickr-30k:v0'
+        annotations = pd.read_csv(os.path.join(artifact_dir, "results.csv"), sep='|')
+        annotations = annotations.dropna()
+        image_files = [
+            os.path.join(artifact_dir, "flickr30k_images", image_file)
+            for image_file in annotations["image_name"].to_list()
+        ]
+        for image_file in image_files:
+            assert os.path.isfile(image_file)
+        captions = annotations[" comment"].tolist()
+        return image_files, captions

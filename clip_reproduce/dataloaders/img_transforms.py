@@ -335,8 +335,7 @@ def image_transform(
             else:
                 input_size = (3, image_size, image_size)
 
-            # disable by default
-            aug_cfg_dict.setdefault('color_jitter', None)
+            aug_cfg_dict.setdefault('color_jitter', None)  # disable by default
             # drop extra non-timm items
             aug_cfg_dict.pop('color_jitter_prob', None)
             aug_cfg_dict.pop('gray_scale_prob', None)

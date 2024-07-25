@@ -19,6 +19,9 @@ class ImageRetrievalDataset(Dataset):
         self.split = split
         self.images, self.captions = self.fetch_dataset(split=split)
 
+    @abstractmethod
+    def fetch_dataset(self, split):
+        pass
     def __len__(self):
         return len(self.captions)
 
@@ -37,14 +40,6 @@ class ImageRetrievalDataset(Dataset):
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
 
-    # def __getitem__(self, index):
-    #     image = Image.open(self.images[index])
-    #     caption = self.tokenize(self.captions[index])
-    #     if self.transforms:
-    #         image = self.transforms(image)
-    #
-    #     return {"image": image, "caption": caption}
-
     def __getitem__(self, index):
         image = Image.open(self.images[index])
         caption = self.captions[index]
@@ -56,6 +51,4 @@ class ImageRetrievalDataset(Dataset):
 
         return {"image": image, "caption": caption}
 
-    @abstractmethod
-    def fetch_dataset(self, split):
-        pass
+
