@@ -2,7 +2,7 @@ python cli_cassle.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
-    --data.batch_size 128 \
+    --data.batch_size 256 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
@@ -12,11 +12,11 @@ python cli_cassle.py fit \
     --model.image_encoder_pretrained True \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
-    --model.image_encoder_lr 1e-4 \
-    --model.head_lr 1e-4 \
+    --model.image_encoder_lr 1e-3 \
+    --model.head_lr 1e-3 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 1e-4 \
+    --model.text_encoder_lr 1e-5 \
     --model.projection_dims 1024 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
