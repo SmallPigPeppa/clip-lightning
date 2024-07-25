@@ -30,6 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
             lr_warmup_epochs: int = 5,
             batch_size: int = 32,
             old_checkpoint_path: str = None,
+            current_task: int = 0,
             *args,
             **kwargs,
     ) -> None:
