@@ -3,7 +3,7 @@ from torchvision import transforms
 from torch.utils.data import random_split, DataLoader, Subset
 from lightning import LightningDataModule
 from .base import ImageRetrievalDataset
-from .flickr30k import Flickr30kDataset
+from .flickr30k_json import Flickr30kDataset
 from .img_transforms import image_transform_v2
 from model_openai import SimpleTokenizer
 
@@ -17,7 +17,6 @@ class ImageRetrievalDataModule(LightningDataModule):
             self,
             dataset_name: str,
             config: str,
-            val_split: float = 0.2,
             root_dir: str = None,
             max_length: int = 77,
             batch_size: int = 64,
@@ -31,7 +30,6 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.dataset_name = dataset_name
         self.config = config
         self.root_dir = root_dir
-        self.val_split = val_split
         self.batch_size = batch_size
         self.tokenizer = SimpleTokenizer()
         self.max_length = max_length
@@ -52,27 +50,25 @@ class ImageRetrievalDataModule(LightningDataModule):
             self,
             stage: Optional[str] = None,
     ) -> None:
-        dataset = DATASET_LOOKUP[self.dataset_name](
+        train_dataset = DATASET_LOOKUP[self.dataset_name](
             root_dir=self.root_dir,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
-            transforms=transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor()])
+            split="train",
+            transforms=image_transform_v2(config_path=self.config, is_train=True)
+        )
+        self.val_dataset = DATASET_LOOKUP[self.dataset_name](
+            root_dir=self.root_dir,
+            tokenizer=self.tokenizer,
+            max_length=self.max_length,
+            split="val",
+            transforms=image_transform_v2(config_path=self.config, is_train=False)
         )
 
-        train_dataset, self.val_dataset = self.split_data(dataset, val_split=self.val_split)
-        self.train_dataset = train_dataset
         # 划分训练集为多个任务
         task_size = len(train_dataset) // self.num_tasks
         self.task_datasets = [Subset(train_dataset, range(i * task_size, (i + 1) * task_size)) for i in
                               range(self.num_tasks)]
-
-        # 对每个任务的数据集应用不同的变换
-        train_transforms = image_transform_v2(config_path=self.config, is_train=True)
-        val_transforms = image_transform_v2(config_path=self.config, is_train=False)
-
-        for task_dataset in self.task_datasets:
-            task_dataset.dataset.transforms = train_transforms
-        self.val_dataset.dataset.transforms = val_transforms
 
     def train_dataloader(self):
         return DataLoader(
