@@ -1,1 +1,1 @@
-from .flickr30k import Flickr30kDatase
+from .flickr30k import Flickr30kDataset
