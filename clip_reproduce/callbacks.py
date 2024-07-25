@@ -9,7 +9,7 @@ from lightning.pytorch.callbacks import Callback
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from models import CLIPDualEncoderModel
+from model_reproduce import CLIPDualEncoderModel
 
 
 class LogPredictionCallback(Callback):
