@@ -25,7 +25,7 @@ class ImageRetrievalDataset(Dataset):
 
     def tokenize(self, text):
         result = self.tokenizer(
-            text, padding=True, truncation=True, max_length=self.max_length
+            text, padding='max_length', truncation=True, max_length=self.max_length
         )
         return result
 
@@ -34,8 +34,9 @@ class ImageRetrievalDataset(Dataset):
         caption = self.captions[index]
         if isinstance(caption, list):
             caption = random.choice(caption)
-        caption = self.tokenize(caption)
+        item = self.tokenize(caption)
         if self.transforms:
             image = self.transforms(image)
-
-        return {"image": image, "caption": caption}
+        item['image'] = image
+        item['caption'] = caption
+        return item

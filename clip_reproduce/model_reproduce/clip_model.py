@@ -52,18 +52,10 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dim=projection_dims,
             dropout=dropout,
         )
+        self.save_hyperparameters()
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.temperature = temperature
-        self.weight_decay = weight_decay
-        self.head_lr = head_lr
-        self.image_encoder_lr = image_encoder_lr
-        self.text_encoder_lr = text_encoder_lr
-        self.lr_warmup_epochs = lr_warmup_epochs
         self.val_img_feats = []
         self.val_text_feats = []
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-        self.old_checkpoint_path = old_checkpoint_path
         self.save_hyperparameters()
 
     def _compute_losses(self, image_embeddings, text_embeddings):
@@ -76,6 +68,28 @@ class CLIPDualEncoderModel(LightningModule):
         images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
         texts_loss = (-targets * self.log_softmax(logits)).sum(1)
         return (images_loss + texts_loss) / 2.0
+
+    def _compute_losses(self, image_features, text_features):
+
+        # normalized features
+        image_features = image_features / image_features.norm(dim=1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=1, keepdim=True)
+
+        # cosine similarity as logits
+        logit_scale = self.logit_scale.exp()
+        logits_per_image = logit_scale * image_features @ text_features.t()
+        logits_per_text = logits_per_image.t()
+
+        # shape = [global_batch_size, global_batch_size]
+
+        labels = torch.arange(len(logits_per_image)).to(self.device)
+
+        image_loss = F.cross_entropy(logits_per_image, labels)
+        text_loss = F.cross_entropy(logits_per_text, labels)
+
+        loss = (image_loss + text_loss) / 2
+
+        return loss
 
     def forward(self, inputs):
         image_features = self.image_encoder(inputs["image"])

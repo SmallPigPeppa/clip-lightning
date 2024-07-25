@@ -15,7 +15,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             root_dir: str = None,
             tokenizer_alias: Optional[str] = None,
             max_length: int = 77,
-            batch_size: int = 16,
+            batch_size: int = 64,
             num_workers: int = 8,
             num_tasks: int = 1,
             current_task: int = 0,
