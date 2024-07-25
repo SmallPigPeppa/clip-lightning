@@ -2,7 +2,7 @@ python cli_simclr.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
-    --data.batch_size 512 \
+    --data.batch_size 256 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
@@ -16,7 +16,7 @@ python cli_simclr.py fit \
     --model.head_lr 1e-3 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
-    --model.text_encoder_lr 1e-3 \
+    --model.text_encoder_lr 1e-5 \
     --model.projection_dims 1024 \
     --model.weight_decay 0.2 \
     --model.temperature 1.0 \
