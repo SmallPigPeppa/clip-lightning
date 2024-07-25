@@ -1,7 +1,7 @@
 from abc import abstractmethod
-import torch
 from PIL import Image
 from torch.utils.data import Dataset
+import random
 
 
 class ImageRetrievalDataset(Dataset):
@@ -30,13 +30,12 @@ class ImageRetrievalDataset(Dataset):
         return result
 
     def __getitem__(self, index):
-        item = {
-            key: torch.tensor(values[index])
-            for key, values in self.tokenized_captions.items()
-        }
-        image = Image.open(self.image_files[index])
+        image = Image.open(self.images[index])
+        caption = self.captions[index]
+        if isinstance(caption, list):
+            caption = random.choice(caption)
+        caption = self.tokenize(caption)
         if self.transforms:
             image = self.transforms(image)
-        item["image"] = image
-        item["caption"] = self.captions[index]
-        return item
+
+        return {"image": image, "caption": caption}
