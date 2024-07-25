@@ -59,7 +59,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.save_hyperparameters()
 
-
     def _compute_losses(self, image_features, text_features):
 
         # normalized features
@@ -156,7 +155,7 @@ class CLIPDualEncoderModel(LightningModule):
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
-            logit_scale= self.logit_scale.exp(),
+            logit_scale=self.logit_scale.exp(),
         )
         self.log_dict(val_metrics)
         self.val_img_feats.clear()
@@ -194,3 +193,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
+    def on_train_start(self):
+        if self.hparams.old_checkpoint_path:
+            checkpoint = torch.load(self.old_checkpoint_path, map_location=torch.device('cpu'))
+            self.load_state_dict(checkpoint, strict=True)
+            print("Model weights loaded successfully and old parts copied.")
