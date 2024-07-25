@@ -182,9 +182,6 @@ class CLIPDualEncoderModel(LightningModule):
         for name, logit in logits.items():
             ranking = torch.argsort(logit, descending=True).to(self.device)
             preds = torch.where(ranking == ground_truth)[1]
-            # metrics[f"{name}_mean_rank"] = preds.float().mean() + 1
-            # metrics[f"{name}_median_rank"] = preds.float().median() + 1
-            # for k in [1, 5, 10]:
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100  # Convert recall to percentage
 
@@ -202,23 +199,8 @@ class CLIPDualEncoderModel(LightningModule):
             ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
-            # metrics[f"{name}_mean_rank"] = preds.mean() + 1
-            # metrics[f"{name}_median_rank"] = np.floor(np.median(preds)) + 1
-            # for k in [1, 5, 10]:
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
 
-    def on_train_start(self):
-        if self.old_checkpoint_path:
-            checkpoint = torch.load(self.old_checkpoint_path, map_location=torch.device('cpu'))
-            # Filter out the weights related to the 'old' parts
-            filtered_state_dict = {k: v for k, v in checkpoint['state_dict'].items() if not k.startswith(
-                ('image_encoder_old', 'text_encoder_old', 'image_projection_old', 'text_projection_old'))}
-            self.load_state_dict(filtered_state_dict, strict=True)
-            print("Model weights loaded successfully and old parts copied.")
-        self.image_encoder_old = copy.deepcopy(self.image_encoder)
-        self.text_encoder_old = copy.deepcopy(self.text_encoder)
-        self.image_projection_old = copy.deepcopy(self.image_projection)
-        self.text_projection_old = copy.deepcopy(self.text_projection)
