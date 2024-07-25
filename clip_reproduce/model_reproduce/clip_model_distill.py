@@ -60,7 +60,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.logit_scale = nn.Parameter(torch.tensor([temperature]) * np.log(1 / 0.07))
         self.val_img_feats = []
         self.val_text_feats = []
-        import pdb; pdb.set_trace()
         if current_task > 0:
             self.initialize_old_modules()
 
@@ -95,8 +94,6 @@ class CLIPDualEncoderModel(LightningModule):
             nn.ReLU(),
             nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         )
-        for param in self.distill_predictor.parameters():
-            param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.image_encoder(inputs["image"])
@@ -156,7 +153,6 @@ class CLIPDualEncoderModel(LightningModule):
             "lr_scheduler": lr_scheduler,
         }
 
-
     def _compute_losses(self, image_features, text_features):
 
         # normalized features
@@ -207,8 +203,7 @@ class CLIPDualEncoderModel(LightningModule):
                                    + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
             self.log("train/distill_loss", distill_loss, sync_dist=True)
-            # return clip_loss + distill_loss
-            return clip_loss
+            return clip_loss + distill_loss
         else:
             return clip_loss
 
