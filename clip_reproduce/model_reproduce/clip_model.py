@@ -110,7 +110,7 @@ class CLIPDualEncoderModel(LightningModule):
                 "lr": self.hparams.image_encoder_lr,
                 "weight_decay": self.hparams.weight_decay},
             {
-                "params": self.logit_scale.parameters(),
+                "params": [self.logit_scale],
                 "lr": self.hparams.head_lr,
                 "weight_decay": self.hparams.weight_decay},
 
