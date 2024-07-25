@@ -41,5 +41,5 @@ class ImageRetrievalDataset(Dataset):
         if self.transforms:
             image = self.transforms(image)
         item['image'] = image
-        item['caption'] = caption
+        # item['caption'] = caption
         return item
