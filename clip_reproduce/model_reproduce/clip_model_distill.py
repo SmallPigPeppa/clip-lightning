@@ -60,7 +60,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.logit_scale = nn.Parameter(torch.tensor([temperature]) * np.log(1 / 0.07))
         self.val_img_feats = []
         self.val_text_feats = []
-
+        import pdb; pdb.set_trace()
         if current_task > 0:
             self.initialize_old_modules()
 
