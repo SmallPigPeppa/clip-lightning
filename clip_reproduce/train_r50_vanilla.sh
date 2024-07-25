@@ -21,7 +21,7 @@ python cli_vanilla.py fit \
     --model.weight_decay 0.2 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-DIL-Reproduce \
