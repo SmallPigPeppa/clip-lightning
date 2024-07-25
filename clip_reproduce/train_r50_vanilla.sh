@@ -1,29 +1,32 @@
-python cli_dil fit \
-    --data.num_tasks 5 \
-    --data.dataset_name flickr30k_aug \
-    --data.artifact_id wandb/clip.lightning-image_retrieval/flickr-30k:latest \
-    --data.train_batch_size 256 \
-    --data.val_batch_size 256 \
+python cli_vanilla.py fit \
+    --data.num_tasks 1 \
+    --data.current_task 0 \
+    --data.max_length 77 \
+    --data.batch_size 128 \
+    --data.num_workers 8 \
     --data.config config.yaml \
+    --data.dataset_name flickr30k \
+    --data.root_dir ../artifacts/flickr-30k:v0/flickr30k_images \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
     --model.image_encoder_pretrained True \
     --model.image_encoder_trainable True \
     --model.image_embedding_dims 2048 \
-    --model.image_encoder_lr 1e-3 \
-    --model.head_lr 1e-3 \
+    --model.image_encoder_lr 1e-5 \
+    --model.head_lr 1e-5 \
     --model.text_encoder_trainable True \
     --model.text_embedding_dims 768 \
     --model.text_encoder_lr 1e-5 \
-    --model.projection_dims 512 \
+    --model.projection_dims 1024 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-DIL \
-    --trainer.logger.name r50-aug-bs256-debug-ILR-PLR \
+    --trainer.logger.project CLIP-DIL-Reproduce \
+    --trainer.logger.name RN50-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
-    --model_checkpoint.save_weights_only True
+    --model_checkpoint.save_weights_only True \
+    --model_checkpoint.filename  RN50-vanilla
