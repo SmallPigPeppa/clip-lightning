@@ -45,7 +45,7 @@ class CLIPDualEncoderModel(LightningModule):
             "weight_decay": self.hparams.weight_decay
         }]
 
-        optimizer = optim.Adam(parameters, weight_decay=self.hparams.weight_decay)
+        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
             warmup_epochs=self.hparams.lr_warmup_epochs,
@@ -58,7 +58,6 @@ class CLIPDualEncoderModel(LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": lr_scheduler,
         }
-
 
     def _compute_losses(
             self,
@@ -114,14 +113,14 @@ class CLIPDualEncoderModel(LightningModule):
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
         return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
@@ -171,3 +170,11 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
+    # def on_before_optimizer_step(self, optimizer) -> None:
+    #     print("**************on_before_opt enter*********")
+    #     for name, param in self.named_parameters():
+    #         if param.grad is None:
+    #             print(name)
+    #
+    #     print("***************on_before_opt exit*********")
