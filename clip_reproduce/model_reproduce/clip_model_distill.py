@@ -193,7 +193,7 @@ class CLIPDualEncoderModel(LightningModule):
     #     loss2 = self._compute_losses(z1, p2)
     #
     #     return (loss1 + loss2) / 2
-    def distill_loss_func(self, p1, p2, z1, z2, logits_scale=1.0):
+    def distill_loss_func(self, p1, p2, z1, z2):
         # 合并p和z
         p = torch.cat([p1, p2], dim=0)
         z = torch.cat([z1, z2], dim=0)
@@ -210,7 +210,7 @@ class CLIPDualEncoderModel(LightningModule):
         sim[len(p1):, len(z1):].fill_diagonal_(float('-inf'))
 
         # 计算logits，应用logits_scale
-        logits = sim * logits_scale
+        logits = sim * self.logit_scale.exp()
 
         # 创建标签
         labels = torch.arange(len(p)).to(self.device)
