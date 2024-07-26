@@ -221,3 +221,9 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
+    def on_train_start(self):
+        if self.hparams.old_checkpoint_path:
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+            self.load_state_dict(checkpoint['state_dict'], strict=True)
+            print("Model weights loaded successfully and old parts copied.")
