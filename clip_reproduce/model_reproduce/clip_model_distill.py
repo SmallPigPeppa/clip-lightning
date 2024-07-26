@@ -220,44 +220,83 @@ class CLIPDualEncoderModel(LightningModule):
     #
     #     return loss
 
-    def simclr_distill_loss_func(self, p1, p2, z1, z2):
-        # 合并p和z
-        p = torch.cat([p1, p2], dim=0)
-        z = torch.cat([z1, z2], dim=0)
+    # def simclr_distill_loss_func(self, p1, p2, z1, z2):
+    #     # 合并p和z
+    #     p = torch.cat([p1, p2], dim=0)
+    #     z = torch.cat([z1, z2], dim=0)
+    #
+    #     # 计算归一化特征
+    #     p = p / p.norm(dim=1, keepdim=True)
+    #     z = z / z.norm(dim=1, keepdim=True)
+    #
+    #     # 全部相似度计算
+    #     sim = torch.mm(p, z.t())
+    #
+    #     # 计算logits，应用温度参数
+    #     logits = sim * self.logit_scale.exp()
+    #
+    #     # 对于p1，我们需要使用z中除z1第i项外的所有项
+    #     mask_p1 = torch.ones_like(logits[:len(p1), :], dtype=torch.bool)
+    #     mask_p1[:, :len(z1)].fill_diagonal_(0)
+    #     logits_p1 = logits[:len(p1)][mask_p1].view(len(p1), -1)
+    #
+    #     # p1的正确标签应该是指向z2的索引
+    #     labels_p1 = torch.arange(len(z1), len(z1) + len(p2)).to(self.device)
+    #
+    #     # 对于p2，我们需要使用z中除z2第i项外的所有项
+    #     mask_p2 = torch.ones_like(logits[len(p1):, :], dtype=torch.bool)
+    #     mask_p2[:, len(z1):].fill_diagonal_(0)
+    #     logits_p2 = logits[len(p1):][mask_p2].view(len(p2), -1)
+    #
+    #     # p2的正确标签应该是指向z1的索引
+    #     labels_p2 = torch.arange(len(z1)).to(self.device)
+    #
+    #     # 合并logits和标签
+    #     final_logits = torch.cat([logits_p1, logits_p2], dim=0)
+    #     final_labels = torch.cat([labels_p1, labels_p2], dim=0)
+    #
+    #     # 计算交叉熵loss
+    #     loss = F.cross_entropy(final_logits, final_labels)
+    #
+    #     return loss
 
-        # 计算归一化特征
-        p = p / p.norm(dim=1, keepdim=True)
-        z = z / z.norm(dim=1, keepdim=True)
+    def simclr_distill_loss_func(
+            self,
+            p1: torch.Tensor,
+            p2: torch.Tensor,
+            z1: torch.Tensor,
+            z2: torch.Tensor,
+            # temperature: float = 0.1,
+    ) -> torch.Tensor:
 
-        # 全部相似度计算
-        sim = torch.mm(p, z.t())
+        device = self.device
 
-        # 计算logits，应用温度参数
-        logits = sim * self.logit_scale.exp()
+        b = z1.size(0)
 
-        # 对于p1，我们需要使用z中除z1第i项外的所有项
-        mask_p1 = torch.ones_like(logits[:len(p1), :], dtype=torch.bool)
-        mask_p1[:, :len(z1)].fill_diagonal_(0)
-        logits_p1 = logits[:len(p1)][mask_p1].view(len(p1), -1)
+        p = F.normalize(torch.cat([p1, p2]), dim=-1)
+        z = F.normalize(torch.cat([z1, z2]), dim=-1)
 
-        # p1的正确标签应该是指向z2的索引
-        labels_p1 = torch.arange(len(z1), len(z1) + len(p2)).to(self.device)
+        logits = torch.einsum("if, jf -> ij", p, z) * self.logit_scale.exp()
+        logits_max, _ = torch.max(logits, dim=1, keepdim=True)
+        logits = logits - logits_max.detach()
 
-        # 对于p2，我们需要使用z中除z2第i项外的所有项
-        mask_p2 = torch.ones_like(logits[len(p1):, :], dtype=torch.bool)
-        mask_p2[:, len(z1):].fill_diagonal_(0)
-        logits_p2 = logits[len(p1):][mask_p2].view(len(p2), -1)
+        # positive mask are matches i, j (i from aug1, j from aug2), where i == j and matches j, i
+        pos_mask = torch.zeros((2 * b, 2 * b), dtype=torch.bool, device=device)
+        pos_mask.fill_diagonal_(True)
 
-        # p2的正确标签应该是指向z1的索引
-        labels_p2 = torch.arange(len(z1)).to(self.device)
+        # all matches excluding the main diagonal
+        logit_mask = torch.ones_like(pos_mask, device=device)
+        logit_mask.fill_diagonal_(True)
+        logit_mask[:, b:].fill_diagonal_(True)
+        logit_mask[b:, :].fill_diagonal_(True)
 
-        # 合并logits和标签
-        final_logits = torch.cat([logits_p1, logits_p2], dim=0)
-        final_labels = torch.cat([labels_p1, labels_p2], dim=0)
+        exp_logits = torch.exp(logits) * logit_mask
+        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
 
-        # 计算交叉熵loss
-        loss = F.cross_entropy(final_logits, final_labels)
-
+        # compute mean of log-likelihood over positives
+        mean_log_prob_pos = (pos_mask * log_prob).sum(1) / pos_mask.sum(1)
+        # loss
+        loss = -mean_log_prob_pos.mean()
         return loss
 
     # def training_step(self, batch, *args, **kwargs):
@@ -285,13 +324,13 @@ class CLIPDualEncoderModel(LightningModule):
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
         if self.hparams.current_task > 0:
-            frozen_p1, frozen_z1 = self.forward_old(batch)
+            frozen_z1, frozen_z2 = self.forward_old(batch)
             p1 = self.distill_predictor(image_embeddings)
-            z1 = self.distill_predictor(text_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
-                                   self.simclr_distill_loss_func(p1, frozen_p1, z1, frozen_z1)
-                                   + self.simclr_distill_loss_func(z1, frozen_z1, p1, frozen_p1)
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
