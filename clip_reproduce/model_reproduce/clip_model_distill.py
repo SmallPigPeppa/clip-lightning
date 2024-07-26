@@ -193,7 +193,7 @@ class CLIPDualEncoderModel(LightningModule):
     #     loss2 = self._compute_losses(z1, p2)
     #
     #     return (loss1 + loss2) / 2
-    def distill_loss_func(self, p1, p2, z1, z2):
+    def simclr_distill_loss_func(self, p1, p2, z1, z2):
         # 合并p和z
         p = torch.cat([p1, p2], dim=0)
         z = torch.cat([z1, z2], dim=0)
@@ -250,8 +250,8 @@ class CLIPDualEncoderModel(LightningModule):
             z1 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
-                                   self.distill_loss_func(p1, frozen_p1, z1, frozen_z1)
-                                   + self.distill_loss_func(z1, frozen_z1, p1, frozen_p1)
+                                   self.simclr_distill_loss_func(p1, frozen_p1, z1, frozen_z1)
+                                   + self.simclr_distill_loss_func(z1, frozen_z1, p1, frozen_p1)
                            ) / 2
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
