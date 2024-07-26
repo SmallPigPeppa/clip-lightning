@@ -181,18 +181,63 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
-    def simclr_distill_loss_func(
-            self,
-            p1: torch.Tensor,
-            p2: torch.Tensor,
-            z1: torch.Tensor,
-            z2: torch.Tensor,
-    ) -> torch.Tensor:
+    # def simclr_distill_loss_func(
+    #         self,
+    #         p1: torch.Tensor,
+    #         p2: torch.Tensor,
+    #         z1: torch.Tensor,
+    #         z2: torch.Tensor,
+    # ) -> torch.Tensor:
+    #
+    #     loss1 = self._compute_losses(p1, z2)
+    #     loss2 = self._compute_losses(z1, p2)
+    #
+    #     return (loss1 + loss2) / 2
+    def distill_loss_func(self, p1, p2, z1, z2, logits_scale=1.0):
+        # 合并p和z
+        p = torch.cat([p1, p2], dim=0)
+        z = torch.cat([z1, z2], dim=0)
 
-        loss1 = self._compute_losses(p1, z2)
-        loss2 = self._compute_losses(z1, p2)
+        # 计算归一化特征
+        p = p / p.norm(dim=1, keepdim=True)
+        z = z / z.norm(dim=1, keepdim=True)
 
-        return (loss1 + loss2) / 2
+        # 全部相似度计算
+        sim = torch.mm(p, z.t())
+
+        # 排除相应项，先对z1和z2对角线元素置零（即p1对应z1，p2对应z2）
+        sim[:len(p1), :len(z1)].fill_diagonal_(float('-inf'))
+        sim[len(p1):, len(z1):].fill_diagonal_(float('-inf'))
+
+        # 计算logits，应用logits_scale
+        logits = sim * logits_scale
+
+        # 创建标签
+        labels = torch.arange(len(p)).to(self.device)
+
+        # 计算交叉熵loss
+        loss = F.cross_entropy(logits, labels)
+
+        return loss
+
+    # def training_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("train/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.hparams.current_task > 0:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         distill_loss = (
+    #                                self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #                                + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #                        ) / 2
+    #         self.log("train/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss
+    #     else:
+    #         return clip_loss
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
@@ -200,13 +245,13 @@ class CLIPDualEncoderModel(LightningModule):
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
         if self.hparams.current_task > 0:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
+            frozen_p1, frozen_z1 = self.forward_old(batch)
             p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            z1 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
-                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                                   self.simclr_distill_loss_func(p1, frozen_p1, z1, frozen_z1)
+                                   + self.simclr_distill_loss_func(z1, frozen_z1, p1, frozen_p1)
                            ) / 2
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
