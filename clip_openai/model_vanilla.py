@@ -45,7 +45,7 @@ class CLIPDualEncoderModel(LightningModule):
             "weight_decay": self.hparams.weight_decay
         }]
 
-        optimizer = optim.Adam(parameters, weight_decay=self.hparams.weight_decay)
+        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
             warmup_epochs=self.hparams.lr_warmup_epochs,
