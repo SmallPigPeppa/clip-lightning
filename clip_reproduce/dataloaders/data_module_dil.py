@@ -3,9 +3,14 @@ from torch.utils.data import DataLoader, Subset
 from lightning import LightningDataModule
 from transformers import DistilBertTokenizer
 from .flickr30k import Flickr30kDataset
+from .coco2014 import COCO2014Dataset
 from .img_transforms import image_transform_v2
 
-DATASET_LOOKUP = {"flickr30k": Flickr30kDataset}
+DATASET_LOOKUP = {
+    "flickr30k": Flickr30kDataset,
+    "coco2014": COCO2014Dataset
+}
+
 
 class ImageRetrievalDataModule(LightningDataModule):
     def __init__(
@@ -32,7 +37,6 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.num_tasks = num_tasks
         self.current_task = current_task
-
 
     def setup(
             self,
