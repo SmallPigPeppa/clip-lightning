@@ -3,7 +3,7 @@ python cli_vanilla.py fit \
     --data.current_task 0 \
     --data.max_length 77 \
     --data.batch_size 256 \
-    --data.num_workers 4 \
+    --data.num_workers 0 \
     --data.config config.yaml \
     --data.dataset_name coco2014 \
     --data.root_dir /mnt/ShareDB_1TB/datasets/coco \
