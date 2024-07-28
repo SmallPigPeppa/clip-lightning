@@ -1,9 +1,7 @@
 torch==2.1.0
 lightning-bolts==0.7.0
-matplotlib>=3.5.1
-pandas>=1.4.2
-pytest>=7.1.2
-timm>=0.5.4
-transformers>=4.18.0
-wandb>=0.12.15
+matplotlib
+timm
+transformers
+wandb
 git+https://github.com/SmallPigPeppa/pytorch-lightning.git@npu_support_fp16_mixed#egg=pytorch-lightning
