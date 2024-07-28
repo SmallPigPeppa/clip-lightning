@@ -1,5 +1,5 @@
 torch==2.1.0
-lightning-bolts==0.7.0
+lightning-bolts
 matplotlib
 timm
 transformers
