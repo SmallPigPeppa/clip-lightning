@@ -22,7 +22,7 @@ python cli_vanilla.py fit \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
-    --trainer.strategy deepspeed \
+    --trainer.strategy ddp \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-coco2014 \
