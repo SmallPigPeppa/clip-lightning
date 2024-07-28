@@ -28,7 +28,7 @@ class COCO2014Dataset(ImageRetrievalDataset):
 
         for item in split_data:
             img = os.path.join(self.root_dir, item['filepath'], item['filename'])
-            caps = item['raw']
+            caps = [sentence['raw'] for sentence in item['sentences']]
             assert os.path.isfile(img)
             images.append(img)
             captions.append(caps)
