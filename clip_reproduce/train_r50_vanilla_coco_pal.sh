@@ -3,7 +3,7 @@ python cli_vanilla.py fit \
     --data.current_task 0 \
     --data.max_length 77 \
     --data.batch_size 256 \
-    --data.num_workers 8 \
+    --data.num_workers 4 \
     --data.config config.yaml \
     --data.dataset_name coco2014 \
     --data.root_dir /mnt/ShareDB_1TB/datasets/coco \
@@ -22,6 +22,7 @@ python cli_vanilla.py fit \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
+    --trainer.strategy deepspeed \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-coco2014 \
