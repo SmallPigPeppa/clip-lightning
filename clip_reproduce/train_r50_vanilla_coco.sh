@@ -6,7 +6,7 @@ python cli_vanilla.py fit \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name coco2014 \
-    --data.root_dir /mnt/ShareDB_1TB/datasets/coco_caption \
+    --data.root_dir /ppio_net0/torch_ds/coco \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
     --model.image_encoder_pretrained True \
