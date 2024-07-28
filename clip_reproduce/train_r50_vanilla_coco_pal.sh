@@ -27,7 +27,6 @@ python cli_vanilla.py fit \
     --trainer.logger.project CLIP-coco2014 \
     --trainer.logger.name RN50-vanilla \
     --trainer.logger.log_model False \
-    --trainer.logger.offline True \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
