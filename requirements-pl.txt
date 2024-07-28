@@ -1,7 +1,2 @@
 torch==2.1.0
-lightning-bolts
-matplotlib
-timm
-transformers
-wandb
 git+https://github.com/SmallPigPeppa/pytorch-lightning.git@npu_support_fp16_mixed#egg=pytorch-lightning
