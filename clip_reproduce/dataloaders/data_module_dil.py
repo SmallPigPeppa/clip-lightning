@@ -24,6 +24,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             num_workers: int = 8,
             num_tasks: int = 1,
             current_task: int = 0,
+            pin_memory: bool = True,
             *args,
             **kwargs,
     ):
@@ -37,6 +38,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.num_tasks = num_tasks
         self.current_task = current_task
+        self.pin_memory = pin_memory
 
     def setup(
             self,
@@ -67,7 +69,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.task_datasets[self.current_task],
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True,
+            pin_memory=self.pin_memory,
             drop_last=True,
             shuffle=True,
         )
@@ -77,5 +79,5 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.val_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=self.pin_memory,
         )
