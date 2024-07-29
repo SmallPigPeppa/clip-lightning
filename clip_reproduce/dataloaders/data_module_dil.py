@@ -4,11 +4,13 @@ from lightning import LightningDataModule
 from transformers import DistilBertTokenizer
 from .flickr30k import Flickr30kDataset
 from .coco2014 import COCO2014Dataset
+from .cub200 import CUB200Dataset
 from .img_transforms import image_transform_v2
 
 DATASET_LOOKUP = {
-    "flickr30k": Flickr30kDataset,
-    "coco2014": COCO2014Dataset
+    'flickr30k': Flickr30kDataset,
+    'coco2014': COCO2014Dataset,
+    'cub200': CUB200Dataset
 }
 
 
@@ -48,14 +50,14 @@ class ImageRetrievalDataModule(LightningDataModule):
             root_dir=self.root_dir,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
-            split="train",
+            split='train',
             transforms=image_transform_v2(config_path=self.config, is_train=True)
         )
         self.val_dataset = DATASET_LOOKUP[self.dataset_name](
             root_dir=self.root_dir,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
-            split="val",
+            split='val',
             transforms=image_transform_v2(config_path=self.config, is_train=False)
         )
 
