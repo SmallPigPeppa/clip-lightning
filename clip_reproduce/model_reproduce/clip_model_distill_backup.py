@@ -181,6 +181,84 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
+    # def simclr_distill_loss_func(
+    #         self,
+    #         p1: torch.Tensor,
+    #         p2: torch.Tensor,
+    #         z1: torch.Tensor,
+    #         z2: torch.Tensor,
+    # ) -> torch.Tensor:
+    #
+    #     loss1 = self._compute_losses(p1, z2)
+    #     loss2 = self._compute_losses(z1, p2)
+    #
+    #     return (loss1 + loss2) / 2
+    # def simclr_distill_loss_func(self, p1, p2, z1, z2):
+    #     # 合并p和z
+    #     p = torch.cat([p1, p2], dim=0)
+    #     z = torch.cat([z1, z2], dim=0)
+    #
+    #     # 计算归一化特征
+    #     p = p / p.norm(dim=1, keepdim=True)
+    #     z = z / z.norm(dim=1, keepdim=True)
+    #
+    #     # 全部相似度计算
+    #     sim = torch.mm(p, z.t())
+    #
+    #     # 排除相应项，先对z1和z2对角线元素置零（即p1对应z1，p2对应z2）
+    #     sim[:len(p1), :len(z1)].fill_diagonal_(float('-inf'))
+    #     sim[len(p1):, len(z1):].fill_diagonal_(float('-inf'))
+    #
+    #     # 计算logits，应用logits_scale
+    #     logits = sim * self.logit_scale.exp()
+    #
+    #     # 创建标签
+    #     labels = torch.arange(len(p)).to(self.device)
+    #
+    #     # 计算交叉熵loss
+    #     loss = F.cross_entropy(logits, labels)
+    #
+    #     return loss
+
+    # def simclr_distill_loss_func(self, p1, p2, z1, z2):
+    #     # 合并p和z
+    #     p = torch.cat([p1, p2], dim=0)
+    #     z = torch.cat([z1, z2], dim=0)
+    #
+    #     # 计算归一化特征
+    #     p = p / p.norm(dim=1, keepdim=True)
+    #     z = z / z.norm(dim=1, keepdim=True)
+    #
+    #     # 全部相似度计算
+    #     sim = torch.mm(p, z.t())
+    #
+    #     # 计算logits，应用温度参数
+    #     logits = sim * self.logit_scale.exp()
+    #
+    #     # 对于p1，我们需要使用z中除z1第i项外的所有项
+    #     mask_p1 = torch.ones_like(logits[:len(p1), :], dtype=torch.bool)
+    #     mask_p1[:, :len(z1)].fill_diagonal_(0)
+    #     logits_p1 = logits[:len(p1)][mask_p1].view(len(p1), -1)
+    #
+    #     # p1的正确标签应该是指向z2的索引
+    #     labels_p1 = torch.arange(len(z1), len(z1) + len(p2)).to(self.device)
+    #
+    #     # 对于p2，我们需要使用z中除z2第i项外的所有项
+    #     mask_p2 = torch.ones_like(logits[len(p1):, :], dtype=torch.bool)
+    #     mask_p2[:, len(z1):].fill_diagonal_(0)
+    #     logits_p2 = logits[len(p1):][mask_p2].view(len(p2), -1)
+    #
+    #     # p2的正确标签应该是指向z1的索引
+    #     labels_p2 = torch.arange(len(z1)).to(self.device)
+    #
+    #     # 合并logits和标签
+    #     final_logits = torch.cat([logits_p1, logits_p2], dim=0)
+    #     final_labels = torch.cat([labels_p1, labels_p2], dim=0)
+    #
+    #     # 计算交叉熵loss
+    #     loss = F.cross_entropy(final_logits, final_labels)
+    #
+    #     return loss
 
     def simclr_distill_loss_func(
             self,
@@ -221,6 +299,24 @@ class CLIPDualEncoderModel(LightningModule):
         loss = -mean_log_prob_pos.mean()
         return loss
 
+    # def training_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("train/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.hparams.current_task > 0:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         distill_loss = (
+    #                                self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #                                + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #                        ) / 2
+    #         self.log("train/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss
+    #     else:
+    #         return clip_loss
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
