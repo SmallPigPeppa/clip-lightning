@@ -83,5 +83,5 @@ def incremental_learning(num_tasks, script_path):
 
 if __name__ == "__main__":
     num_tasks = 5  # Total number of tasks
-    script_path = "train_r50_vanilla_coco_pal.sh"
+    script_path = "train_r50_vanilla_coco.sh"
     incremental_learning(num_tasks, script_path)
