@@ -37,15 +37,8 @@ class CLIPDualEncoderModel(LightningModule):
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
-
         # Set requires_grad to False for all parameters in the old modules
-        for param in self.image_encoder_old.parameters():
-            param.requires_grad = False
-        for param in self.text_encoder_old.parameters():
-            param.requires_grad = False
-        for param in self.image_projection_old.parameters():
-            param.requires_grad = False
-        for param in self.text_projection_old.parameters():
+        for param in self.model_old.parameters():
             param.requires_grad = False
 
         # distill project
