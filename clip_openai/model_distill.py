@@ -49,6 +49,9 @@ class CLIPDualEncoderModel(LightningModule):
             nn.ReLU(),
             nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         )
+        if not self.distill:
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
