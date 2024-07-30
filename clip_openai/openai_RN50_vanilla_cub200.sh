@@ -1,4 +1,4 @@
-python cli_vanilla.py fit \
+python cli_vanilla.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -6,7 +6,7 @@ python cli_vanilla.py fit \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name cub200 \
-    --data.root_dir /ppio_net0/torch_ds/cub200 \
+    --data.root_dir /mnt/ShareDB_1TB/datasets/cub200 \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
