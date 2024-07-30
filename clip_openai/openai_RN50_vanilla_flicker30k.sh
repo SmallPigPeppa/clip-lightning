@@ -1,4 +1,4 @@
-python cli_vanilla.py validate \
+python cli_vanilla.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
