@@ -6,7 +6,7 @@ python cli_distill.py fit \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
-    --data.root_dir ../artifacts/flickr-30k:v0/flickr30k_images \
+    --data.root_dir /home/ma-user/work/dataset/all/torch_ds/flickr30k \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
     --model.image_encoder_pretrained True \
