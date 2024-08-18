@@ -5,7 +5,6 @@ model_names = [
     'vit_base_patch16_224',
     'vit_base_patch16_224.augreg_in21k_ft_in1k',
     'deit_base_distilled_patch16_224.fb_in1k',
-    'vit_base_patch16_224.clip_openai_ft_in1k',
     'pvt_v2_b3.in1k',
     'mobilenetv3_small_050.lamb_in1k',
     'resnet18.a1_in1k',
