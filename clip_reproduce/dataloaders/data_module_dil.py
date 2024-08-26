@@ -5,12 +5,14 @@ from transformers import DistilBertTokenizer
 from .flickr30k import Flickr30kDataset
 from .coco2014 import COCO2014Dataset
 from .cub200 import CUB200Dataset
+from .food import UPMCFood101Dataset
 from .img_transforms import image_transform_v2
 
 DATASET_LOOKUP = {
     'flickr30k': Flickr30kDataset,
     'coco2014': COCO2014Dataset,
-    'cub200': CUB200Dataset
+    'cub200': CUB200Dataset,
+    'food': UPMCFood101Dataset
 }
 
 
@@ -46,7 +48,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             self,
             stage: Optional[str] = None,
     ) -> None:
-        train_dataset = DATASET_LOOKUP[self.dataset_name](
+        self.train_dataset = DATASET_LOOKUP[self.dataset_name](
             root_dir=self.root_dir,
             tokenizer=self.tokenizer,
             max_length=self.max_length,
@@ -62,8 +64,8 @@ class ImageRetrievalDataModule(LightningDataModule):
         )
 
         # 划分训练集为多个任务
-        task_size = len(train_dataset) // self.num_tasks
-        self.task_datasets = [Subset(train_dataset, range(i * task_size, (i + 1) * task_size)) for i in
+        task_size = len(self.train_dataset) // self.num_tasks
+        self.task_datasets = [Subset(self.train_dataset, range(i * task_size, (i + 1) * task_size)) for i in
                               range(self.num_tasks)]
 
     def train_dataloader(self):
