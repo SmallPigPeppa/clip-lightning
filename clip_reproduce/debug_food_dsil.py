@@ -2,7 +2,7 @@
 
 if __name__ == "__main__":
     # from clip_openai.model_openai.clip_old import my_load
-    from dataloaders.data_module_dil import ImageRetrievalDataModule
+    from dataloaders.data_module_dsil import ImageRetrievalDataModule
 
     dm = ImageRetrievalDataModule(
         dataset_name='food',
@@ -23,13 +23,16 @@ if __name__ == "__main__":
 
     b = dm.task_datasets[0]
     print(len(b))
-    c = dm.val_dataset
+    c = dm.val_datasets[-1]
     print(len(c))
     # d = dm.train_dataset
     # print(len(d))
 
     a = dm.train_dataloader()
     inputs = next(iter(a))
+    print(inputs)
+    b = dm.val_dataloader()
+    inputs = next(iter(b[-1]))
     print(inputs)
 
 
