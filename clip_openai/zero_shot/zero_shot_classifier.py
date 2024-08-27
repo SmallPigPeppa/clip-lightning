@@ -58,7 +58,7 @@ class ZeroShotClassifier(LightningModule):
             texts = [template.format(c) if use_format else template(c) for c in batch_classnames for template in
                      self.templates]
             # texts = self.tokenizer.encode(texts).to(self.device)
-            import pdb; pdb.set_trace()
+            print(self.device)
             texts = [self.tokenize(t).to(self.device) for t in texts]
             texts = torch.stack(texts)
             class_embeddings = self.model.encode_text(texts)
