@@ -15,6 +15,7 @@ class ZeroShotClassifier(LightningModule):
             num_classes_per_batch: Optional[int] = 10,
             use_tqdm: bool = True,
             max_length: int = 77,
+            device: Union[str, torch.device] = "cpu",
     ):
         super().__init__()
         self.model = model
@@ -58,6 +59,7 @@ class ZeroShotClassifier(LightningModule):
             texts = [template.format(c) if use_format else template(c) for c in batch_classnames for template in
                      self.templates]
             # texts = self.tokenizer.encode(texts).to(self.device)
+            import pdb; pdb.set_trace()
             texts = [self.tokenize(t).to(self.device) for t in texts]
             texts = torch.stack(texts)
             self.model.to(self.device)
