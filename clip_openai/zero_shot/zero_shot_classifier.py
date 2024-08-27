@@ -39,7 +39,8 @@ class ZeroShotClassifier(LightningModule):
         def _process_batch(batch_classnames):
             texts = [template.format(c) if use_format else template(c) for c in batch_classnames for template in
                      self.templates]
-            texts = self.tokenizer.encode(texts).to(self.device)
+            # texts = self.tokenizer.encode(texts).to(self.device)
+            texts = [self.tokenizer.encode(t).to(self.device) for t in texts]
             class_embeddings = self.model.encode_text(texts)
             class_embeddings = class_embeddings.reshape(len(batch_classnames), num_templates, -1).mean(dim=1)
             class_embeddings = class_embeddings / class_embeddings.norm(dim=1, keepdim=True)
