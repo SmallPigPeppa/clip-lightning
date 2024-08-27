@@ -22,9 +22,9 @@ class ZeroShotClassifier(LightningModule):
         self.templates = templates
         self.num_classes_per_batch = num_classes_per_batch
         self.use_tqdm = use_tqdm
+        self.max_length = max_length
         # self.zeroshot_weights = None
         self.compute_weights()
-        self.max_length = max_length
 
 
     def tokenize(self, text):
