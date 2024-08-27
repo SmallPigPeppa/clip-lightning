@@ -8,7 +8,10 @@ from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
 import copy
-
+from zero_shot.zero_shot_classifier_pl import ZeroShotClassifier
+from model_openai import SimpleTokenizer
+from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
+from timm.utils import accuracy
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -32,6 +35,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
+
+
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -139,5 +144,37 @@ class CLIPDualEncoderModel(LightningModule):
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
+        return metrics
+
+    def get_zero_shot_metrics(self, dataloader,):
+        self.tokenizer = SimpleTokenizer()
+        self.zero_shot_classifier = ZeroShotClassifier(
+            model=self.model,
+            tokenizer=self.tokenizer,
+            classnames=IMAGENET_CLASSNAMES,
+            templates=OPENAI_IMAGENET_TEMPLATES,
+            num_classes_per_batch=self.hparams.batch_size,
+            use_tqdm=True
+        )
+
+        top1, top5, n = 0., 0., 0.
+
+        with torch.no_grad():
+            for batch in dataloader:
+                images, targets = batch["image"].to(self.device), batch["target"].to(self.device)
+                logits = self.zero_shot_classifier(images)
+
+                # Measure accuracy
+                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
+                top1 += acc1.item() * images.size(0)
+                top5 += acc5.item() * images.size(0)
+                n += images.size(0)
+
+        top1 = top1 / n
+        top5 = top5 / n
+        metrics = {
+            "zero_shot/top1_accuracy": top1,
+            "zero_shot/top5_accuracy": top5
+        }
         return metrics
 
