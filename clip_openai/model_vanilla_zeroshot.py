@@ -102,16 +102,16 @@ class CLIPDualEncoderModel(LightningModule):
         return clip_loss
 
     def on_validation_epoch_end(self):
-        # all_image_features = torch.cat(self.val_img_feats)
-        # all_text_features = torch.cat(self.val_text_feats)
-        # val_metrics = self.get_clip_metrics_cpu(
-        #     image_features=all_image_features,
-        #     text_features=all_text_features,
-        #     logit_scale=self.model.logit_scale.exp(),
-        # )
-        # self.log_dict(val_metrics, sync_dist=True)
-        # self.val_img_feats.clear()
-        # self.val_text_feats.clear()
+        all_image_features = torch.cat(self.val_img_feats)
+        all_text_features = torch.cat(self.val_text_feats)
+        val_metrics = self.get_clip_metrics_cpu(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            logit_scale=self.model.logit_scale.exp(),
+        )
+        self.log_dict(val_metrics, sync_dist=True)
+        self.val_img_feats.clear()
+        self.val_text_feats.clear()
 
         zero_shot_metric = self.get_zero_shot_metrics(self.zero_shot_loader)
         self.log_dict(zero_shot_metric, sync_dist=True)
