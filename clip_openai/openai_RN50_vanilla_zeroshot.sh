@@ -6,7 +6,7 @@ python cli_vanilla_zeroshot.py validate \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
-    --data.root_dir ../artifacts/flickr-30k:v0/flickr30k_images \
+    --data.root_dir /ppio_net0/torch_ds \
     --model.model_name RN50 \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
