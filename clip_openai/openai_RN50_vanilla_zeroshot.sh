@@ -1,3 +1,4 @@
+MODEL_NAME=RN101
 python cli_vanilla_zeroshot.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
@@ -7,7 +8,7 @@ python cli_vanilla_zeroshot.py validate \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
     --data.root_dir /ppio_net0/torch_ds \
-    --model.model_name RN101 \
+    --model.model_name ${MODEL_NAME} \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
     --model.lr 1e-5 \
@@ -20,7 +21,7 @@ python cli_vanilla_zeroshot.py validate \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-DIL-OpenAI-zeroshot \
-    --trainer.logger.name RN50-vanilla \
+    --trainer.logger.name ${MODEL_NAME}-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
