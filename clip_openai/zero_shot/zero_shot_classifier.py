@@ -14,7 +14,7 @@ class ZeroShotClassifier(LightningModule):
             templates: Sequence[Union[Callable, str]],
             num_classes_per_batch: Optional[int] = 10,
             use_tqdm: bool = True,
-            max_length: int = 100,
+            max_length: int = 77,
     ):
         super().__init__()
         self.model = model
