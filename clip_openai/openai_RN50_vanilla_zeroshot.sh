@@ -2,7 +2,7 @@ python cli_vanilla_zeroshot.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
-    --data.batch_size 128 \
+    --data.batch_size 32 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name flickr30k \
