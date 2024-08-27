@@ -15,10 +15,8 @@ class ZeroShotClassifier(LightningModule):
             num_classes_per_batch: Optional[int] = 10,
             use_tqdm: bool = True,
             max_length: int = 77,
-            device: Union[str, torch.device] = "cpu",
     ):
         super().__init__()
-        self.device = device
         self.model = model
         self.tokenizer = tokenizer
         self.classnames = classnames

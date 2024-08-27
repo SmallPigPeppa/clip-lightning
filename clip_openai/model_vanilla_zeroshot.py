@@ -113,7 +113,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats.clear()
         self.val_text_feats.clear()
 
-
         # zero-shot metric
         zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
@@ -160,8 +159,7 @@ class CLIPDualEncoderModel(LightningModule):
             templates=OPENAI_IMAGENET_TEMPLATES,
             num_classes_per_batch=self.hparams.batch_size,
             use_tqdm=True,
-            device=self.device
-        )
+        ).to(self.device)
 
         top1, top5, n = 0., 0., 0.
 
