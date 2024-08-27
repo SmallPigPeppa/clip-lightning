@@ -4,6 +4,7 @@ from lightning import LightningModule
 from typing import Sequence, Callable, Union, Optional
 from packaging import version
 
+
 class ZeroShotClassifier(LightningModule):
     def __init__(
             self,
@@ -25,7 +26,6 @@ class ZeroShotClassifier(LightningModule):
         self.max_length = max_length
         # self.zeroshot_weights = None
         self.compute_weights()
-
 
     def tokenize(self, text):
         sot_token = self.tokenizer.encoder["<|startoftext|>"]
@@ -60,6 +60,7 @@ class ZeroShotClassifier(LightningModule):
             # texts = self.tokenizer.encode(texts).to(self.device)
             texts = [self.tokenize(t).to(self.device) for t in texts]
             texts = torch.stack(texts)
+            self.model.to(self.device)
             class_embeddings = self.model.encode_text(texts)
             class_embeddings = class_embeddings.reshape(len(batch_classnames), num_templates, -1).mean(dim=1)
             class_embeddings = class_embeddings / class_embeddings.norm(dim=1, keepdim=True)
