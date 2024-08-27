@@ -24,7 +24,7 @@ python cli_vanilla.py fit \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-coco2014 \
+    --trainer.logger.project CLIP-food \
     --trainer.logger.name RN50-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
