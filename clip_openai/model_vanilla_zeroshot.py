@@ -161,6 +161,8 @@ class CLIPDualEncoderModel(LightningModule):
             use_tqdm=True,
         ).to(self.device)
 
+        self.zero_shot_classifier.compute_weights()
+
         top1, top5, n = 0., 0., 0.
 
         with torch.no_grad():
