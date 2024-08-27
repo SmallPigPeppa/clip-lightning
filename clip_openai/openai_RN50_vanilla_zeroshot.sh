@@ -1,4 +1,4 @@
-MODEL_NAME=RN101
+MODEL_NAME=ViT-B/16
 python cli_vanilla_zeroshot.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
