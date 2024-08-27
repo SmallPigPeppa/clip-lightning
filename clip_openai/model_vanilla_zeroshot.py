@@ -159,7 +159,8 @@ class CLIPDualEncoderModel(LightningModule):
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
             num_classes_per_batch=self.hparams.batch_size,
-            use_tqdm=True
+            use_tqdm=True,
+            device=self.device
         )
 
         top1, top5, n = 0., 0., 0.

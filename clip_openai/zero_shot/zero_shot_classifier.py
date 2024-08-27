@@ -18,6 +18,7 @@ class ZeroShotClassifier(LightningModule):
             device: Union[str, torch.device] = "cpu",
     ):
         super().__init__()
+        self.device = device
         self.model = model
         self.tokenizer = tokenizer
         self.classnames = classnames
