@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from lightning import LightningModule
 from typing import Sequence, Callable, Union, Optional
-
+from packaging import version
 
 class ZeroShotClassifier(LightningModule):
     def __init__(
@@ -13,6 +13,7 @@ class ZeroShotClassifier(LightningModule):
             templates: Sequence[Union[Callable, str]],
             num_classes_per_batch: Optional[int] = 10,
             use_tqdm: bool = True,
+            max_length: int = 200,
     ):
         super().__init__()
         self.model = model
@@ -23,6 +24,23 @@ class ZeroShotClassifier(LightningModule):
         self.use_tqdm = use_tqdm
         # self.zeroshot_weights = None
         self.compute_weights()
+        self.max_length = max_length
+
+
+    def tokenize(self, text):
+        sot_token = self.tokenizer.encoder["<|startoftext|>"]
+        eot_token = self.tokenizer.encoder["<|endoftext|>"]
+        tokens = [sot_token] + self.tokenizer.encode(text) + [eot_token]
+        if version.parse(torch.__version__) < version.parse("1.8.0"):
+            result = torch.zeros(self.max_length, dtype=torch.long)
+        else:
+            result = torch.zeros(self.max_length, dtype=torch.int)
+
+        if len(tokens) <= self.max_length:
+            result[:len(tokens)] = torch.tensor(tokens)
+        else:
+            result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
+        return result
 
     def forward(self, images):
         if self.zeroshot_weights is None:
@@ -40,7 +58,7 @@ class ZeroShotClassifier(LightningModule):
             texts = [template.format(c) if use_format else template(c) for c in batch_classnames for template in
                      self.templates]
             # texts = self.tokenizer.encode(texts).to(self.device)
-            texts = [self.tokenizer.encode(t).to(self.device) for t in texts]
+            texts = [self.tokenize(t).to(self.device) for t in texts]
             class_embeddings = self.model.encode_text(texts)
             class_embeddings = class_embeddings.reshape(len(batch_classnames), num_templates, -1).mean(dim=1)
             class_embeddings = class_embeddings / class_embeddings.norm(dim=1, keepdim=True)
