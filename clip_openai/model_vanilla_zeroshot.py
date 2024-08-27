@@ -8,7 +8,7 @@ from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
 import copy
-from zero_shot.zero_shot_classifier_pl import ZeroShotClassifier
+from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
