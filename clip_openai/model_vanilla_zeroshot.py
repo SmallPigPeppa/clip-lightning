@@ -167,8 +167,9 @@ class CLIPDualEncoderModel(LightningModule):
 
         with torch.no_grad():
             for images, targets in dataloader:
+                images = images.to(self.device)
+                targets = targets.to(self.device)
                 logits = self.zero_shot_classifier(images)
-
                 # Measure accuracy
                 acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
                 top1 += acc1.item() * images.size(0)
