@@ -11,9 +11,10 @@ class Flickr30kDataset(ImageRetrievalDataset):
             **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.root_dir = os.path.join(self.root_dir, 'flickr30k')
+
 
     def fetch_dataset(self, split):
+        self.root_dir = os.path.join(self.root_dir, 'flickr30k')
         json_path = os.path.join(self.root_dir, 'dataset.json')
         with open(json_path, 'r') as file:
             all_data = json.load(file)['images']
