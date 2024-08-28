@@ -113,9 +113,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats.clear()
 
         # zero-shot metric
-        zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        self.log_dict(zero_shot_metric, sync_dist=True)
+        if self.current_epoch % 5 == 0:
+            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+            self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
