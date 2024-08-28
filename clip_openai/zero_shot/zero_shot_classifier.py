@@ -3,7 +3,7 @@ from lightning import LightningModule
 from typing import Sequence, Callable, Union, Optional
 from packaging import version
 from tqdm import tqdm
-
+import copy
 class ZeroShotClassifier(LightningModule):
     def __init__(
             self,
@@ -15,7 +15,7 @@ class ZeroShotClassifier(LightningModule):
             max_length: int = 77,
     ):
         super().__init__()
-        self.model = model.eval()
+        self.model = copy.deepcopy(model).eval()
         self.tokenizer = tokenizer
         self.classnames = classnames
         self.templates = templates
