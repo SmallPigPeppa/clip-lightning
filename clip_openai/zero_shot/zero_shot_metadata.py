@@ -1,8 +1,3 @@
-MY_TEMPLATES = (
-    lambda c: f'a photo of a {c}.',
-    lambda c: f'a photo of a {c}.'
-)
-
 OPENAI_IMAGENET_TEMPLATES = (
     lambda c: f'a bad photo of a {c}.',
     lambda c: f'a photo of many {c}.',
