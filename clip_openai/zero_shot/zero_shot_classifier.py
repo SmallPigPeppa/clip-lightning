@@ -15,7 +15,7 @@ class ZeroShotClassifier(LightningModule):
             max_length: int = 77,
     ):
         super().__init__()
-        self.model = model
+        self.model = model.eval()
         self.tokenizer = tokenizer
         self.classnames = classnames
         self.templates = templates
