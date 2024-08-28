@@ -120,7 +120,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats.clear()
 
         # zero-shot metric
-        if (self.current_epoch + 1) % 1 == 0:
+        if (self.current_epoch + 1) % 5 == 0:
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
