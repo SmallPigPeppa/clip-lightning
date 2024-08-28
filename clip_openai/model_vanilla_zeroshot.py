@@ -1,4 +1,3 @@
-import itertools
 import numpy as np
 import torch
 import torch.nn as nn
@@ -7,11 +6,11 @@ import torch.optim as optim
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
-import copy
 from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
+from tqdm import tqdm
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -158,7 +157,6 @@ class CLIPDualEncoderModel(LightningModule):
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
             num_classes_per_batch=self.hparams.batch_size,
-            use_tqdm=True,
         ).to(self.device)
 
         self.zero_shot_classifier.compute_weights()
@@ -166,7 +164,7 @@ class CLIPDualEncoderModel(LightningModule):
         top1, top5, n = 0., 0., 0.
 
         with torch.no_grad():
-            for images, targets in dataloader:
+            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
                 images = images.to(self.device)
                 targets = targets.to(self.device)
                 logits = self.zero_shot_classifier(images)
