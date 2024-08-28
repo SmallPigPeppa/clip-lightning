@@ -70,7 +70,7 @@ class ZeroShotClassifier(LightningModule):
             if self.num_classes_per_batch:
                 batched_embeds = []
                 for batch in tqdm(self.batch_classes(self.classnames, self.num_classes_per_batch),
-                                  desc="Computing Weights", unit="batch"):
+                                  desc="Computing Zero-shot Weights", unit="batch"):
                     batched_embeds.append(_process_batch(batch))
                 self.zeroshot_weights = torch.cat(batched_embeds, dim=1)
             else:
