@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,6 +7,8 @@ import torch.optim as optim
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
+import copy
+
 from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
@@ -37,10 +40,36 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
+        self.distill = True
+        self.initialize_old_modules()
+
+    def initialize_old_modules(self):
+        self.model_old = copy.deepcopy(self.model)
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.model_old.parameters():
+            param.requires_grad = False
+
+        # distill project
+        distill_proj_hidden_dim = 2048
+        self.distill_predictor = nn.Sequential(
+            nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+            nn.BatchNorm1d(distill_proj_hidden_dim),
+            nn.ReLU(),
+            nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        )
+        if not self.distill:
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
+        return image_features, text_features
+
+    def forward_old(self, inputs):
+        with torch.no_grad():
+            image_features = self.model_old.encode_image(inputs["image"])
+            text_features = self.model_old.encode_text(inputs["caption"])
         return image_features, text_features
 
     def configure_optimizers(self):
@@ -86,12 +115,64 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
+    def simclr_distill_loss_func(
+            self,
+            p1: torch.Tensor,
+            p2: torch.Tensor,
+            z1: torch.Tensor,
+            z2: torch.Tensor,
+            # temperature: float = 0.1,
+    ) -> torch.Tensor:
+
+        device = self.device
+        logit_scale = self.model.logit_scale.exp()
+
+        b = z1.size(0)
+
+        p = F.normalize(torch.cat([p1, p2]), dim=-1)
+        z = F.normalize(torch.cat([z1, z2]), dim=-1)
+
+        logits = torch.einsum("if, jf -> ij", p, z) * logit_scale
+        logits_max, _ = torch.max(logits, dim=1, keepdim=True)
+        logits = logits - logits_max.detach()
+
+        # positive mask are matches i, j (i from aug1, j from aug2), where i == j and matches j, i
+        pos_mask = torch.zeros((2 * b, 2 * b), dtype=torch.bool, device=device)
+        pos_mask.fill_diagonal_(True)
+
+        # all matches excluding the main diagonal
+        logit_mask = torch.ones_like(pos_mask, device=device)
+        logit_mask.fill_diagonal_(True)
+        logit_mask[:, b:].fill_diagonal_(True)
+        logit_mask[b:, :].fill_diagonal_(True)
+
+        exp_logits = torch.exp(logits) * logit_mask
+        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
+
+        # compute mean of log-likelihood over positives
+        mean_log_prob_pos = (pos_mask * log_prob).sum(1) / pos_mask.sum(1)
+        # loss
+        loss = -mean_log_prob_pos.mean()
+        return loss
+
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
-        return clip_loss
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            distill_loss = (
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                           ) / 2
+            self.log("train/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss
+        else:
+            return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
@@ -100,7 +181,19 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
 
-        return clip_loss
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            distill_loss = (
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                           ) / 2
+            self.log("val/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss
+        else:
+            return clip_loss
 
     def on_train_start(self):
         # Zero-shot metric evaluation before training starts
