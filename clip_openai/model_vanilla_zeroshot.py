@@ -10,7 +10,9 @@ from model_openai import my_load
 import copy
 from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
-from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
+# from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
+from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES
+from zero_shot.zero_shot_metadata import MY_TEMPLATES as OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 
 

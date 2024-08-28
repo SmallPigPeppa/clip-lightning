@@ -1,3 +1,6 @@
+MY_TEMPLATES = (
+    lambda c: f'a photo of a {c}.'
+)
 
 OPENAI_IMAGENET_TEMPLATES = (
     lambda c: f'a bad photo of a {c}.',
@@ -82,7 +85,6 @@ OPENAI_IMAGENET_TEMPLATES = (
     lambda c: f'a tattoo of the {c}.',
 )
 
-
 # a much smaller subset of above prompts
 # from https://github.com/openai/CLIP/blob/main/notebooks/Prompt_Engineering_for_ImageNet.ipynb
 SIMPLE_IMAGENET_TEMPLATES = (
@@ -94,7 +96,6 @@ SIMPLE_IMAGENET_TEMPLATES = (
     lambda c: f'art of the {c}.',
     lambda c: f'a photo of the small {c}.',
 )
-
 
 IMAGENET_CLASSNAMES = (
     "tench", "goldfish", "great white shark", "tiger shark", "hammerhead shark", "electric ray",
@@ -263,4 +264,3 @@ IMAGENET_CLASSNAMES = (
     "rose hip", "horse chestnut seed", "coral fungus", "agaric", "gyromitra", "stinkhorn mushroom",
     "earth star fungus", "hen of the woods mushroom", "bolete", "corn cob", "toilet paper"
 )
-
