@@ -16,6 +16,7 @@ python cli_vanilla_zeroshot.py fit \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0. \
     --model.download_root ./ \
+    --trainer.devices 0,1 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
