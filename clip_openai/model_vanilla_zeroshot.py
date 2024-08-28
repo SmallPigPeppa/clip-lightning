@@ -100,7 +100,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    def on_train_start(self):
+    def on_train_epoch_start(self):
         # Zero-shot metric evaluation before training starts
         zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
