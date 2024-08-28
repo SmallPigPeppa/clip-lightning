@@ -15,6 +15,7 @@ python cli_vanilla_zeroshot.py fit \
     --model.temperature 0.1 \
     --model.lr 1e-5 \
     --model.lr_warmup_epochs 5 \
+    --model.zero_shot_eval_interval 5 \
     --model.weight_decay 0. \
     --model.download_root ./ \
     --trainer.devices 0,1 \
