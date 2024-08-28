@@ -1,6 +1,6 @@
 #MODEL_NAME=ViT-L/14
 MODEL_NAME=RN50
-python cli_vanilla_zeroshot.py validate \
+python cli_vanilla_zeroshot.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
