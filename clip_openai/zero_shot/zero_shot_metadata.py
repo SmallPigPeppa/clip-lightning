@@ -1,4 +1,5 @@
 MY_TEMPLATES = (
+    lambda c: f'a photo of a {c}.',
     lambda c: f'a photo of a {c}.'
 )
 
