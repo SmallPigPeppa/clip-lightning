@@ -101,11 +101,11 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    # def on_train_start(self):
-    #     # Zero-shot metric evaluation before training starts
-    #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #     self.log_dict(zero_shot_metric, sync_dist=True)
+    def on_train_start(self):
+        # Zero-shot metric evaluation before training starts
+        zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+        zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+        self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
