@@ -27,6 +27,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             root_dir: str = None,
             max_length: int = 77,
             batch_size: int = 64,
+            batch_size_zs: int = 256,
             num_workers: int = 8,
             num_tasks: int = 1,
             current_task: int = 0,
@@ -38,6 +39,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.config = config
         self.root_dir = root_dir
         self.batch_size = batch_size
+        self.batch_size_zs = batch_size_zs
         self.tokenizer = SimpleTokenizer()
         self.max_length = max_length
         self.num_workers = num_workers
@@ -113,7 +115,7 @@ class ImageRetrievalDataModule(LightningDataModule):
     def zero_shot_dataloader(self):
         return DataLoader(
             self.zero_shot_dataset,
-            batch_size=self.batch_size,
+            batch_size=self.batch_size_zs,
             num_workers=self.num_workers,
             pin_memory=True
         )

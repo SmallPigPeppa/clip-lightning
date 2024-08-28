@@ -24,6 +24,7 @@ class CLIPDualEncoderModel(LightningModule):
             lr: float = 1e-3,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
+            batch_size_zs: int = 256,
             old_checkpoint_path: str = None,
             current_task: int = 0,
             *args,
@@ -163,7 +164,7 @@ class CLIPDualEncoderModel(LightningModule):
             tokenizer=self.tokenizer,
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size,
+            num_classes_per_batch=self.hparams.batch_size_zs,
         ).to(self.device)
 
         self.zero_shot_classifier.compute_weights()
