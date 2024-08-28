@@ -188,4 +188,6 @@ class CLIPDualEncoderModel(LightningModule):
             "zero_shot/top1_accuracy": top1,
             "zero_shot/top5_accuracy": top5
         }
+        # Release the zero-shot classifier model to free up GPU memory
+        del self.zero_shot_classifier
         return metrics
