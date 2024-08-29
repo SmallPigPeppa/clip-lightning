@@ -14,26 +14,36 @@ from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
-from peft import LoraConfig, get_peft_model
 
+from peft import get_peft_model, LoraConfig, TaskType
+from transformers.pytorch_utils import Conv1D
 
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.Conv2d)):
+        if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
             target_modules.append(name)
-    print(target_modules)
     return target_modules
 
 
-def find_target_modules2(model):
-    target_modules = []
-    for name, module in model.named_modules():
-        if isinstance(module, (nn.Linear)):
-            target_modules.append(name)
-    print(target_modules)
-    return target_modules
+def get_lora_model(model):
+    # Define the target modules where LoRA should be applied
+    target_modules = find_target_modules(model)
 
+    # Initialize LoRA configuration with target modules
+    lora_config = LoraConfig(
+        inference_mode=False,
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
+        task_type=TaskType.SEQ_CLS,  # Task type
+        lora_dropout=0.1,  # Dropout rate for LoRA
+        target_modules=target_modules  # Specify the target modules
+    )
+
+    # Apply LoRA to the model
+    lora_model = get_peft_model(model, lora_config)
+
+    return lora_model
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -61,39 +71,11 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.distill = True
         self.initialize_old_modules()
-        # Apply LoRA to the model
-        # LoRA configuration
-        # lora_config = LoraConfig(
-        #     r=8,  # 矩阵的秩
-        #     lora_alpha=32,  # LoRA缩放因子
-        #     task_type="vision",  # 任务类型
-        #     target_modules=find_target_modules(self.model.visual),
-        #
-        # )
-        # # print(self.model.visual)
-        # # Apply LoRA to the visual part of the model
-        # self.model.visual = get_peft_model(self.model.visual, lora_config)
 
-
-
-
-        lora_config2 = LoraConfig(
-            r=8,  # 矩阵的秩
-            lora_alpha=32,  # LoRA缩放因子
-            task_type="text",  # 任务类型
-            target_modules=find_target_modules2(self.model.transformer),
-
-        )
-        # print(self.model.visual)
-        # Apply LoRA to the visual part of the model
-        self.model.transformer = get_peft_model(self.model.transformer, lora_config2)
+        self.model = get_lora_model(self.model)
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
-
-        # # lora
-        # self.model_old = get_lora_model(self.model_old)
-
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
             param.requires_grad = False
@@ -106,7 +88,6 @@ class CLIPDualEncoderModel(LightningModule):
             nn.ReLU(),
             nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         )
-
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
@@ -219,6 +200,7 @@ class CLIPDualEncoderModel(LightningModule):
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
                                    + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
+
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
         else:
