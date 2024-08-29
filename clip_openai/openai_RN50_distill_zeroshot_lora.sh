@@ -12,7 +12,7 @@ python cli_distill_zeroshot_lora.py fit \
     --data.dataset_name flickr30k \
     --data.root_dir /ppio_net0/torch_ds \
     --model.model_name ${MODEL_NAME} \
-    --model.projection_dims 1024 \
+    --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr 1e-5 \
     --model.lr_warmup_epochs 5 \
