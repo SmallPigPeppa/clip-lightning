@@ -36,8 +36,8 @@ def get_lora_model(model):
 
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=32,  # Rank of the low-rank decomposition
+        lora_alpha=64,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -91,21 +91,12 @@ class CLIPDualEncoderModel(LightningModule):
 
         # distill project
         distill_proj_hidden_dim = 2048
-        # self.distill_predictor = nn.Sequential(
-        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-        #     nn.BatchNorm1d(distill_proj_hidden_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        # )
-        self.distill_predictor = nn.Sequential(OrderedDict([
-            ('dp_fc1', nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim)),
-            ('dp_bn1', nn.BatchNorm1d(distill_proj_hidden_dim)),
-            ('dp_relu', nn.ReLU()),
-            ('dp_fc2', nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims))
-        ]))
-
-        # lora
-        self.distill_predictor = get_lora_model(self.distill_predictor)
+        self.distill_predictor = nn.Sequential(
+            nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+            nn.BatchNorm1d(distill_proj_hidden_dim),
+            nn.ReLU(),
+            nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        )
 
         if not self.distill:
             for param in self.distill_predictor.parameters():
