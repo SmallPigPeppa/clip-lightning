@@ -20,7 +20,16 @@ from peft import LoraConfig, get_peft_model
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.Linear, nn.Conv2d)):
+        if isinstance(module, (nn.Conv2d)):
+            target_modules.append(name)
+    print(target_modules)
+    return target_modules
+
+
+def find_target_modules2(model):
+    target_modules = []
+    for name, module in model.named_modules():
+        if isinstance(module, (nn.Linear)):
             target_modules.append(name)
     print(target_modules)
     return target_modules
@@ -54,16 +63,30 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
         # Apply LoRA to the model
         # LoRA configuration
-        lora_config = LoraConfig(
+        # lora_config = LoraConfig(
+        #     r=8,  # 矩阵的秩
+        #     lora_alpha=32,  # LoRA缩放因子
+        #     task_type="vision",  # 任务类型
+        #     target_modules=find_target_modules(self.model.visual),
+        #
+        # )
+        # # print(self.model.visual)
+        # # Apply LoRA to the visual part of the model
+        # self.model.visual = get_peft_model(self.model.visual, lora_config)
+
+
+
+
+        lora_config2 = LoraConfig(
             r=8,  # 矩阵的秩
             lora_alpha=32,  # LoRA缩放因子
-            task_type="vision",  # 任务类型
-            target_modules=find_target_modules(self.model.visual),
+            task_type="text",  # 任务类型
+            target_modules=find_target_modules2(self.model.transformer),
 
         )
         # print(self.model.visual)
         # Apply LoRA to the visual part of the model
-        self.model.visual = get_peft_model(self.model.visual, lora_config)
+        self.model.transformer = get_peft_model(self.model.transformer, lora_config2)
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
