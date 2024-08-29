@@ -187,8 +187,11 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            # p1 = self.distill_predictor(image_embeddings)
+            # p2 = self.distill_predictor(text_embeddings)
+
+            p1 = image_embeddings
+            p2 = text_embeddings
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
