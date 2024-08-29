@@ -106,7 +106,7 @@ class CLIPDualEncoderModel(LightningModule):
     def on_train_batch_end(self, outputs, batch, batch_idx):
         # Perform weight averaging every `avg_freq` iterations after the batch is processed
         if self.hparams.use_we:
-            if batch_idx % self.hparams.we_avg_freq == 0:
+            if self.global_step % self.hparams.we_avg_freq == 0:
                 self.we_n += 1
                 self.model_old = self.merge_we(self.model, self.model_old, self.we_n)
                 # update weight
