@@ -34,8 +34,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=64,  # Rank of the low-rank decomposition
-        lora_alpha=64,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -54,8 +54,8 @@ def get_lora_model2(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=64,  # Rank of the low-rank decomposition
-        lora_alpha=64,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         task_type='vision',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -75,11 +75,20 @@ class DistillPredictor(nn.Module):
         self.pd_relu = nn.ReLU()
         self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
 
+    # def forward(self, x):
+    #     x = self.pd_linear1(x)
+    #     x = self.pd_batch_norm(x)
+    #     x = self.pd_relu(x)
+    #     x = self.pd_linear2(x)
+    #     return x
+
     def forward(self, x):
+        residual = x  # 保存输入以用于残差连接
         x = self.pd_linear1(x)
         x = self.pd_batch_norm(x)
         x = self.pd_relu(x)
         x = self.pd_linear2(x)
+        x += residual  # 加上残差连接
         return x
 
 
@@ -242,7 +251,7 @@ class CLIPDualEncoderModel(LightningModule):
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
                                    + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-                           ) / 2
+                           ) / 2 * 1000.
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
@@ -264,7 +273,7 @@ class CLIPDualEncoderModel(LightningModule):
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
                                    + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-                           ) / 2
+                           ) / 2 * 1000.
             self.log("val/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
         else:
