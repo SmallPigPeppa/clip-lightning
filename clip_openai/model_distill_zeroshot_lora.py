@@ -21,7 +21,7 @@ from transformers.pytorch_utils import Conv1D
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
+        if isinstance(module, (nn.Linear, nn.Embedding)):
             target_modules.append(name)
     return target_modules
 
@@ -33,8 +33,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=32,  # Rank of the low-rank decomposition
+        lora_alpha=64,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
