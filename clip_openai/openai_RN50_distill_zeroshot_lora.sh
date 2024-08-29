@@ -1,5 +1,6 @@
 #MODEL_NAME=ViT-L/14
-MODEL_NAME=RN50
+#MODEL_NAME=RN50
+MODEL_NAME=ViT-B/16
 python cli_distill_zeroshot_lora.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
