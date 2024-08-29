@@ -50,16 +50,16 @@ class CLIPDualEncoderModel(LightningModule):
             param.requires_grad = False
 
         # distill project
-        distill_proj_hidden_dim = 2048
-        self.distill_predictor = nn.Sequential(
-            nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-            nn.BatchNorm1d(distill_proj_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        )
-        if not self.distill:
-            for param in self.distill_predictor.parameters():
-                param.requires_grad = False
+        # distill_proj_hidden_dim = 2048
+        # self.distill_predictor = nn.Sequential(
+        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+        #     nn.BatchNorm1d(distill_proj_hidden_dim),
+        #     nn.ReLU(),
+        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        # )
+        # if not self.distill:
+        #     for param in self.distill_predictor.parameters():
+        #         param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -162,8 +162,11 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            # p1 = self.distill_predictor(image_embeddings)
+            # p2 = self.distill_predictor(text_embeddings)
+
+            p1 = image_embeddings
+            p2 = text_embeddings
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
