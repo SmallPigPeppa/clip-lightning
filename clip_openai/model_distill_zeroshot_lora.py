@@ -18,20 +18,14 @@ from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 
 
-# def find_target_modules(model):
-#     target_modules = []
-#     for name, module in model.named_modules():
-#         if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
-#             target_modules.append(name)
-#     return target_modules
-
-
 def find_target_modules(model):
     target_modules = []
-    for module in model.modules():
+    for name, module in model.named_modules():
         if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
-            target_modules.append(module)
+            target_modules.append(name)
     return target_modules
+
+
 
 
 
@@ -87,8 +81,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.model_old = copy.deepcopy(self.model)
 
 
-        # lora
-        self.model_old = get_lora_model(self.model_old)
+        # # lora
+        # self.model_old = get_lora_model(self.model_old)
 
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
@@ -96,11 +90,17 @@ class CLIPDualEncoderModel(LightningModule):
 
         # distill project
         distill_proj_hidden_dim = 2048
+        # self.distill_predictor = nn.Sequential(
+        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+        #     nn.BatchNorm1d(distill_proj_hidden_dim),
+        #     nn.ReLU(),
+        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        # )
         self.distill_predictor = nn.Sequential(
-            nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-            nn.BatchNorm1d(distill_proj_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+            ('fc1', nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim)),
+            ('bn1', nn.BatchNorm1d(distill_proj_hidden_dim)),
+            ('relu', nn.ReLU()),
+            ('fc2', nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims))
         )
 
         # lora
