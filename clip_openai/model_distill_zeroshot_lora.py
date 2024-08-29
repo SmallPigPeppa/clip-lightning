@@ -16,6 +16,13 @@ from timm.utils import accuracy
 from tqdm import tqdm
 from peft import LoraConfig, get_peft_model
 
+def find_target_modules(model):
+    target_modules = []
+    for name, module in model.named_modules():
+        if isinstance(module, (nn.Linear)):
+            target_modules.append(name)
+    print(target_modules)
+    return target_modules
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -49,10 +56,10 @@ class CLIPDualEncoderModel(LightningModule):
             r=8,  # 矩阵的秩
             lora_alpha=32,  # LoRA缩放因子
             task_type="vision",  # 任务类型
-            target_modules="all-linear"
+            target_modules=find_target_modules(self.model.visual),
 
         )
-        print(self.model.visual)
+        # print(self.model.visual)
         # Apply LoRA to the visual part of the model
         self.model.visual = get_peft_model(self.model.visual, lora_config)
 
