@@ -16,7 +16,7 @@ from transformers.pytorch_utils import Conv1D
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.MultiheadAttention, nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
+        if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
             target_modules.append(name)
     return target_modules
 
