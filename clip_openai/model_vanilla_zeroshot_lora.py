@@ -13,6 +13,13 @@ from timm.utils import accuracy
 from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 
+def find_target_modules(model):
+    target_modules = []
+    for name, module in model.named_modules():
+        if isinstance(module, nn.MultiheadAttention):
+            target_modules.append(name)
+    return target_modules
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -39,14 +46,20 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats = []
         self.val_text_feats = []
 
-        # Initialize LoRA configuration
+        # Define the target modules where LoRA should be applied
+        target_modules = find_target_modules(self.model)
+
+        # Initialize LoRA configuration with target modules
         lora_config = LoraConfig(
-            r=16, # Rank of the low-rank decomposition
-            lora_alpha=32, # Scaling factor
-            task_type=TaskType.SEQ_CLS, # Task type
-            lora_dropout=0.1 # Dropout rate for LoRA
+            r=16,  # Rank of the low-rank decomposition
+            lora_alpha=32,  # Scaling factor
+            task_type=TaskType.SEQ_CLS,  # Task type
+            lora_dropout=0.1,  # Dropout rate for LoRA
+            target_modules=target_modules  # Specify the target modules
         )
 
+        # Apply LoRA to the model
+        self.model = get_peft_model(self.model, lora_config)
         # Apply LoRA to the model
         self.model = get_peft_model(self.model, lora_config)
 
