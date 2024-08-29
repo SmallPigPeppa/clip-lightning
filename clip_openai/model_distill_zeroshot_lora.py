@@ -47,6 +47,26 @@ def get_lora_model(model):
     return lora_model
 
 
+def get_lora_model2(model):
+    # Define the target modules where LoRA should be applied
+    target_modules = find_target_modules(model)
+
+    # Initialize LoRA configuration with target modules
+    lora_config = LoraConfig(
+        inference_mode=False,
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
+        task_type='vision',  # Task type
+        lora_dropout=0.1,  # Dropout rate for LoRA
+        target_modules=target_modules  # Specify the target modules
+    )
+
+    # Apply LoRA to the model
+    lora_model = get_peft_model(model, lora_config)
+
+    return lora_model
+
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -96,7 +116,7 @@ class CLIPDualEncoderModel(LightningModule):
             "pd_relu": nn.ReLU(),
             "pd_linear2": nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         })
-        self.distill_predictor = get_lora_model(self.distill_predictor)
+        self.distill_predictor = get_lora_model2(self.distill_predictor)
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
