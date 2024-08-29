@@ -76,6 +76,11 @@ class CLIPDualEncoderModel(LightningModule):
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
+
+
+        # lora
+        self.model_old = get_lora_model(self.model_old)
+
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
             param.requires_grad = False
