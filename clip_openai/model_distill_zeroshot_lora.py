@@ -16,13 +16,15 @@ from timm.utils import accuracy
 from tqdm import tqdm
 from peft import LoraConfig, get_peft_model
 
+
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.Linear)):
+        if isinstance(module, (nn.Linear, nn.Conv2d)):
             target_modules.append(name)
     print(target_modules)
     return target_modules
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
