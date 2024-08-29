@@ -19,6 +19,7 @@ python cli_vanilla_zeroshot_lora.py fit \
     --model.weight_decay 0. \
     --model.download_root ./ \
     --trainer.accelerator gpu \
+    --trainer.strategy ddp_find_unused_parameters_true \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
