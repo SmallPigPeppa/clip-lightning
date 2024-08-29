@@ -76,10 +76,12 @@ class DistillPredictor(nn.Module):
         self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
 
     def forward(self, x):
+        residual = x  # 保存输入以用于残差连接
         x = self.pd_linear1(x)
         x = self.pd_batch_norm(x)
         x = self.pd_relu(x)
         x = self.pd_linear2(x)
+        x += residual  # 加上残差连接
         return x
 
 
@@ -236,10 +238,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            # p1 = self.distill_predictor(image_embeddings)
-            # p2 = self.distill_predictor(text_embeddings)
-            p1 = image_embeddings
-            p2 = text_embeddings
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
