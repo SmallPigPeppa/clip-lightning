@@ -67,6 +67,22 @@ def get_lora_model2(model):
     return lora_model
 
 
+class DistillPredictor(nn.Module):
+    def __init__(self, projection_dims, distill_proj_hidden_dim):
+        super(DistillPredictor, self).__init__()
+        self.pd_linear1 = nn.Linear(projection_dims, distill_proj_hidden_dim)
+        self.pd_batch_norm = nn.BatchNorm1d(distill_proj_hidden_dim)
+        self.pd_relu = nn.ReLU()
+        self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
+
+    def forward(self, x):
+        x = self.pd_linear1(x)
+        x = self.pd_batch_norm(x)
+        x = self.pd_relu(x)
+        x = self.pd_linear2(x)
+        return x
+
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -110,12 +126,10 @@ class CLIPDualEncoderModel(LightningModule):
         #     nn.ReLU(),
         #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         # )
-        self.distill_predictor = nn.ModuleDict({
-            "pd_linear1": nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-            "pd_batch_norm": nn.BatchNorm1d(distill_proj_hidden_dim),
-            "pd_relu": nn.ReLU(),
-            "pd_linear2": nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        })
+        self.distill_predictor = DistillPredictor(
+            projection_dims=self.hparams.projection_dims,
+            distill_proj_hidden_dim=distill_proj_hidden_dim
+        )
         self.distill_predictor = get_lora_model2(self.distill_predictor)
         if not self.distill:
             for param in self.distill_predictor.parameters():
