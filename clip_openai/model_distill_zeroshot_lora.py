@@ -17,7 +17,6 @@ from tqdm import tqdm
 from peft import LoraConfig, get_peft_model
 
 
-
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -49,7 +48,9 @@ class CLIPDualEncoderModel(LightningModule):
         lora_config = LoraConfig(
             r=8,  # 矩阵的秩
             lora_alpha=32,  # LoRA缩放因子
-            task_type="vision"  # 任务类型
+            task_type="vision",  # 任务类型
+            target_modules="all-linear"
+
         )
 
         # Apply LoRA to the visual part of the model
