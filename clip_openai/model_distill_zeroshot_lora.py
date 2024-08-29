@@ -16,6 +16,7 @@ from timm.utils import accuracy
 from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
+from collections import OrderedDict
 
 
 def find_target_modules(model):
@@ -96,12 +97,12 @@ class CLIPDualEncoderModel(LightningModule):
         #     nn.ReLU(),
         #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         # )
-        self.distill_predictor = nn.Sequential(
-            ('fc1', nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim)),
-            ('bn1', nn.BatchNorm1d(distill_proj_hidden_dim)),
-            ('relu', nn.ReLU()),
-            ('fc2', nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims))
-        )
+        self.distill_predictor = nn.Sequential(OrderedDict([
+            ('dp_fc1', nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim)),
+            ('dp_bn1', nn.BatchNorm1d(distill_proj_hidden_dim)),
+            ('dp_relu', nn.ReLU()),
+            ('dp_fc2', nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims))
+        ]))
 
         # lora
         self.distill_predictor = get_lora_model(self.distill_predictor)
