@@ -60,8 +60,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         # Apply LoRA to the model
         self.model = get_peft_model(self.model, lora_config)
-        # Apply LoRA to the model
-        self.model = get_peft_model(self.model, lora_config)
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
