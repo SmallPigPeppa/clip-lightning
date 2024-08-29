@@ -52,7 +52,7 @@ class CLIPDualEncoderModel(LightningModule):
             target_modules="all-linear"
 
         )
-
+        print(self.model.visual)
         # Apply LoRA to the visual part of the model
         self.model.visual = get_peft_model(self.model.visual, lora_config)
 
