@@ -15,6 +15,25 @@ from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TE
 from timm.utils import accuracy
 from tqdm import tqdm
 
+class DistillPredictor(nn.Module):
+    def __init__(self, projection_dims, distill_proj_hidden_dim):
+        super(DistillPredictor, self).__init__()
+        self.pd_linear1 = nn.Linear(projection_dims, distill_proj_hidden_dim)
+        self.pd_batch_norm = nn.BatchNorm1d(distill_proj_hidden_dim)
+        self.pd_relu = nn.ReLU()
+        self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
+
+    def forward(self, x):
+        residual = x  # 保存输入以用于残差连接
+        x = self.pd_linear1(x)
+        x = self.pd_batch_norm(x)
+        x = self.pd_relu(x)
+        x = self.pd_linear2(x)
+        x += residual  # 加上残差连接
+        return x
+
+
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -50,7 +69,8 @@ class CLIPDualEncoderModel(LightningModule):
             param.requires_grad = False
 
         # distill project
-        # distill_proj_hidden_dim = 2048
+        distill_proj_hidden_dim = 2048
+
         # self.distill_predictor = nn.Sequential(
         #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
         #     nn.BatchNorm1d(distill_proj_hidden_dim),
@@ -60,6 +80,14 @@ class CLIPDualEncoderModel(LightningModule):
         # if not self.distill:
         #     for param in self.distill_predictor.parameters():
         #         param.requires_grad = False
+
+        self.distill_predictor = DistillPredictor(
+            projection_dims=self.hparams.projection_dims,
+            distill_proj_hidden_dim=distill_proj_hidden_dim
+        )
+        if not self.distill:
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -162,11 +190,9 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            # p1 = self.distill_predictor(image_embeddings)
-            # p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
-            p1 = image_embeddings
-            p2 = text_embeddings
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
@@ -187,11 +213,9 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            # p1 = self.distill_predictor(image_embeddings)
-            # p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
-            p1 = image_embeddings
-            p2 = text_embeddings
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
