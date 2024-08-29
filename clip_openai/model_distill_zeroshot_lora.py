@@ -18,6 +18,7 @@ from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 
+
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
@@ -33,8 +34,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=32,  # Rank of the low-rank decomposition
-        lora_alpha=64,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -44,6 +45,7 @@ def get_lora_model(model):
     lora_model = get_peft_model(model, lora_config)
 
     return lora_model
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -82,12 +84,19 @@ class CLIPDualEncoderModel(LightningModule):
 
         # distill project
         distill_proj_hidden_dim = 2048
-        self.distill_predictor = nn.Sequential(
-            nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-            nn.BatchNorm1d(distill_proj_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        )
+        # self.distill_predictor = nn.Sequential(
+        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+        #     nn.BatchNorm1d(distill_proj_hidden_dim),
+        #     nn.ReLU(),
+        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        # )
+        self.distill_predictor = nn.ModuleDict({
+            "pd_linear1": nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
+            "pd_batch_norm": nn.BatchNorm1d(distill_proj_hidden_dim),
+            "pd_relu": nn.ReLU(),
+            "pd_linear2": nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
+        })
+        self.distill_predictor = get_lora_model(self.distill_predictor)
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
