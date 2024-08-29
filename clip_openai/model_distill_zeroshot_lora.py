@@ -16,12 +16,15 @@ from timm.utils import accuracy
 from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
+
+
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
             target_modules.append(name)
     return target_modules
+
 
 def get_lora_model(model):
     # Define the target modules where LoRA should be applied
@@ -40,6 +43,8 @@ def get_lora_model(model):
     lora_model = get_peft_model(model, lora_config)
 
     return lora_model
+
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -64,7 +69,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
-        self.distill = False
+        self.distill = True
         self.initialize_old_modules()
         # Apply LoRA to the model
         self.model = get_lora_model(self.model)
@@ -83,6 +88,10 @@ class CLIPDualEncoderModel(LightningModule):
             nn.ReLU(),
             nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         )
+
+        # lora
+        self.distill_predictor = get_lora_model(self.distill_predictor)
+
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
