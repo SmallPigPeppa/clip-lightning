@@ -165,10 +165,17 @@ class CLIPDualEncoderModel(LightningModule):
             p1 = self.distill_predictor(image_embeddings)
             p2 = self.distill_predictor(text_embeddings)
 
+            # distill_loss = (
+            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+            #                ) / 2
+
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
                                    + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-                           ) / 2
+                                   + self.simclr_distill_loss_func(p2, p1, frozen_z2, frozen_z1)
+                                   + self.simclr_distill_loss_func(frozen_z2, frozen_z1, p2, p1)
+                           ) / 4
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
         else:
