@@ -23,7 +23,7 @@ python cli_vanilla_zeroshot.py fit \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-DIL-OpenAI-zeroshot \
-    --trainer.logger.name ${MODEL_NAME}-vanilla-debug \
+    --trainer.logger.name ${MODEL_NAME}-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
