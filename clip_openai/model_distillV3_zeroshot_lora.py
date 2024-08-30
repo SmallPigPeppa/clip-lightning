@@ -234,128 +234,137 @@ class CLIPDualEncoderModel(LightningModule):
             #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
             #                ) / 2
 
-            distill_loss = (
-                                   self._compute_losses(p1, frozen_z1)
-                                   + self._compute_losses(p2, frozen_z2)
-                           ) / 2
-
-            self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss
-        else:
-            return clip_loss
-
-    def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
-        self.val_img_feats.append(image_embeddings)
-        self.val_text_feats.append(text_embeddings)
-
-        if self.distill:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor_visual(image_embeddings)
-            p2 = self.distill_predictor_text(text_embeddings)
-
             # distill_loss = (
-            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+            #                        self._compute_losses(p1, frozen_z1)
+            #                        + self._compute_losses(p2, frozen_z2)
             #                ) / 2
-            distill_loss = (
-                                   self._compute_losses(p1, frozen_z1)
-                                   + self._compute_losses(p2, frozen_z2)
-                           ) / 2
-            self.log("val/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss
-        else:
-            return clip_loss
 
-    def on_train_start(self):
-        # Zero-shot metric evaluation before training starts
+            distill_loss = self._compute_losses(p2, frozen_z2)
+
+        self.log("train/distill_loss", distill_loss, sync_dist=True)
+        return clip_loss + distill_loss
+
+    else:
+    return clip_loss
+
+
+def validation_step(self, batch, *args, **kwargs):
+    image_embeddings, text_embeddings = self.forward(batch)
+    clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    self.log("val/clip_loss", clip_loss, sync_dist=True)
+    self.val_img_feats.append(image_embeddings)
+    self.val_text_feats.append(text_embeddings)
+
+    if self.distill:
+        frozen_z1, frozen_z2 = self.forward_old(batch)
+        p1 = self.distill_predictor_visual(image_embeddings)
+        p2 = self.distill_predictor_text(text_embeddings)
+
+        # distill_loss = (
+        #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+        #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+        #                ) / 2
+        distill_loss = (
+                               self._compute_losses(p1, frozen_z1)
+                               + self._compute_losses(p2, frozen_z2)
+                       ) / 2
+        self.log("val/distill_loss", distill_loss, sync_dist=True)
+        return clip_loss + distill_loss
+    else:
+        return clip_loss
+
+
+def on_train_start(self):
+    # Zero-shot metric evaluation before training starts
+    zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+    zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+    self.log_dict(zero_shot_metric, sync_dist=True)
+
+
+def on_validation_epoch_end(self):
+    all_image_features = torch.cat(self.val_img_feats)
+    all_text_features = torch.cat(self.val_text_feats)
+    val_metrics = self.get_clip_metrics_cpu(
+        image_features=all_image_features,
+        text_features=all_text_features,
+        logit_scale=self.model.logit_scale.exp(),
+    )
+    self.log_dict(val_metrics, sync_dist=True)
+    self.val_img_feats.clear()
+    self.val_text_feats.clear()
+
+    # zero-shot metric
+    if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
         zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
         self.log_dict(zero_shot_metric, sync_dist=True)
 
-    def on_validation_epoch_end(self):
-        all_image_features = torch.cat(self.val_img_feats)
-        all_text_features = torch.cat(self.val_text_feats)
-        val_metrics = self.get_clip_metrics_cpu(
-            image_features=all_image_features,
-            text_features=all_text_features,
-            logit_scale=self.model.logit_scale.exp(),
-        )
-        self.log_dict(val_metrics, sync_dist=True)
-        self.val_img_feats.clear()
-        self.val_text_feats.clear()
 
-        # zero-shot metric
-        if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-            self.log_dict(zero_shot_metric, sync_dist=True)
+def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
+    metrics = {}
+    logits_per_image = (logit_scale * image_features @ text_features.t())
+    logits_per_text = logits_per_image.t()
+    logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
 
-    def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t())
-        logits_per_text = logits_per_image.t()
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
+    for name, logit in logits.items():
+        ranking = torch.argsort(logit, descending=True).to(self.device)
+        preds = torch.where(ranking == ground_truth)[1]
+        for k in [1]:
+            metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100  # Convert recall to percentage
 
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True).to(self.device)
-            preds = torch.where(ranking == ground_truth)[1]
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100  # Convert recall to percentage
+    return metrics
 
-        return metrics
 
-    def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        logits_per_text = logits_per_image.t().detach().cpu()
+def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    metrics = {}
+    logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+    logits_per_text = logits_per_image.t().detach().cpu()
 
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
+    logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    ground_truth = torch.arange(len(text_features)).view(-1, 1)
 
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
-            preds = preds.detach().cpu().numpy()
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+    for name, logit in logits.items():
+        ranking = torch.argsort(logit, descending=True)
+        preds = torch.where(ranking == ground_truth)[1]
+        preds = preds.detach().cpu().numpy()
+        for k in [1]:
+            metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
-        return metrics
+    return metrics
 
-    def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
-        self.zero_shot_classifier = ZeroShotClassifier(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            classnames=IMAGENET_CLASSNAMES,
-            templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size_zs,
-        ).to(self.device)
 
-        self.zero_shot_classifier.compute_weights()
+def get_zero_shot_metrics(self, dataloader):
+    self.tokenizer = SimpleTokenizer()
+    self.zero_shot_classifier = ZeroShotClassifier(
+        model=self.model,
+        tokenizer=self.tokenizer,
+        classnames=IMAGENET_CLASSNAMES,
+        templates=OPENAI_IMAGENET_TEMPLATES,
+        num_classes_per_batch=self.hparams.batch_size_zs,
+    ).to(self.device)
 
-        top1, top5, n = 0., 0., 0.
+    self.zero_shot_classifier.compute_weights()
 
-        with torch.no_grad():
-            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
-                images = images.to(self.device)
-                targets = targets.to(self.device)
-                logits = self.zero_shot_classifier(images)
-                # Measure accuracy
-                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
-                top1 += acc1.item() * images.size(0)
-                top5 += acc5.item() * images.size(0)
-                n += images.size(0)
+    top1, top5, n = 0., 0., 0.
 
-        top1 = top1 / n
-        top5 = top5 / n
-        metrics = {
-            "zero_shot/top1_accuracy": top1,
-            "zero_shot/top5_accuracy": top5
-        }
-        # Release the zero-shot classifier model to free up GPU memory
-        del self.zero_shot_classifier
-        return metrics
+    with torch.no_grad():
+        for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
+            images = images.to(self.device)
+            targets = targets.to(self.device)
+            logits = self.zero_shot_classifier(images)
+            # Measure accuracy
+            acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
+            top1 += acc1.item() * images.size(0)
+            top5 += acc5.item() * images.size(0)
+            n += images.size(0)
+
+    top1 = top1 / n
+    top5 = top5 / n
+    metrics = {
+        "zero_shot/top1_accuracy": top1,
+        "zero_shot/top5_accuracy": top5
+    }
+    # Release the zero-shot classifier model to free up GPU memory
+    del self.zero_shot_classifier
+    return metrics
