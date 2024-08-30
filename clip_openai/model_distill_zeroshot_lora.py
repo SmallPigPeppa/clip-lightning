@@ -34,8 +34,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=128,  # Rank of the low-rank decomposition
+        lora_alpha=128,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -47,24 +47,24 @@ def get_lora_model(model):
     return lora_model
 
 
-def get_lora_model2(model):
-    # Define the target modules where LoRA should be applied
-    target_modules = find_target_modules(model)
-
-    # Initialize LoRA configuration with target modules
-    lora_config = LoraConfig(
-        inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
-        task_type='vision',  # Task type
-        lora_dropout=0.1,  # Dropout rate for LoRA
-        target_modules=target_modules  # Specify the target modules
-    )
-
-    # Apply LoRA to the model
-    lora_model = get_peft_model(model, lora_config)
-
-    return lora_model
+# def get_lora_model2(model):
+#     # Define the target modules where LoRA should be applied
+#     target_modules = find_target_modules(model)
+#
+#     # Initialize LoRA configuration with target modules
+#     lora_config = LoraConfig(
+#         inference_mode=False,
+#         r=16,  # Rank of the low-rank decomposition
+#         lora_alpha=32,  # Scaling factor
+#         task_type='vision',  # Task type
+#         lora_dropout=0.1,  # Dropout rate for LoRA
+#         target_modules=target_modules  # Specify the target modules
+#     )
+#
+#     # Apply LoRA to the model
+#     lora_model = get_peft_model(model, lora_config)
+#
+#     return lora_model
 
 
 class DistillPredictor(nn.Module):
@@ -75,21 +75,21 @@ class DistillPredictor(nn.Module):
         self.pd_relu = nn.ReLU()
         self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
 
-    # def forward(self, x):
-    #     x = self.pd_linear1(x)
-    #     x = self.pd_batch_norm(x)
-    #     x = self.pd_relu(x)
-    #     x = self.pd_linear2(x)
-    #     return x
-
     def forward(self, x):
-        residual = x  # 保存输入以用于残差连接
         x = self.pd_linear1(x)
         x = self.pd_batch_norm(x)
         x = self.pd_relu(x)
         x = self.pd_linear2(x)
-        x += residual  # 加上残差连接
         return x
+
+    # def forward(self, x):
+    #     residual = x  # 保存输入以用于残差连接
+    #     x = self.pd_linear1(x)
+    #     x = self.pd_batch_norm(x)
+    #     x = self.pd_relu(x)
+    #     x = self.pd_linear2(x)
+    #     x += residual  # 加上残差连接
+    #     return x
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -139,7 +139,7 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
-        self.distill_predictor = get_lora_model2(self.distill_predictor)
+        # self.distill_predictor = get_lora_model2(self.distill_predictor)
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
