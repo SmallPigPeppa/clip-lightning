@@ -25,12 +25,10 @@ class DistillPredictor(nn.Module):
         self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
 
     def forward(self, x):
-        residual = x  # 保存输入以用于残差连接
         x = self.pd_linear1(x)
         x = self.pd_batch_norm(x)
         x = self.pd_relu(x)
         x = self.pd_linear2(x)
-        x += residual  # 加上残差连接
         return x
 
 
