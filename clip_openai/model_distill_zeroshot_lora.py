@@ -210,7 +210,7 @@ class CLIPDualEncoderModel(LightningModule):
         # 冻结参数
         for name, param in self.model.visual.named_parameters():
             # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(10)):
+            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
                 param.requires_grad = False
 
 
