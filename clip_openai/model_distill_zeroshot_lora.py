@@ -47,10 +47,10 @@ def get_lora_model(model):
     return lora_model
 
 
-
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
+    print(target_modules)
 
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
@@ -161,7 +161,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
 
         # self.model = get_lora_model(self.model)
-        self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        self.model.vision = get_lora_model_vision(self.model.vision)
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
