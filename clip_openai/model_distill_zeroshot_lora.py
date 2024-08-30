@@ -240,24 +240,16 @@ class CLIPDualEncoderModel(LightningModule):
         #     nn.ReLU(),
         #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
         # )
-        self.distill_predictor_visual = DistillPredictor(
+        self.distill_predictor = DistillPredictor(
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         # self.distill_predictor = get_lora_model2(self.distill_predictor)
         if not self.distill:
-            for param in self.distill_predictor_visual.parameters():
+            for param in self.distill_predictor.parameters():
                 param.requires_grad = False
 
 
-        self.distill_predictor_text = DistillPredictor(
-            projection_dims=self.hparams.projection_dims,
-            distill_proj_hidden_dim=distill_proj_hidden_dim
-        )
-        # self.distill_predictor = get_lora_model2(self.distill_predictor)
-        if not self.distill:
-            for param in self.distill_predictor_text.parameters():
-                param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -360,8 +352,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor_visual(image_embeddings)
-            p2 = self.distill_predictor_text(text_embeddings)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
@@ -382,8 +374,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor_visual(image_embeddings)
-            p2 = self.distill_predictor_text(text_embeddings)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
