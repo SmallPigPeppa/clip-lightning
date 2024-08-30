@@ -188,11 +188,11 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
-        print(self.model.visual)
+        print(self.model)
         # print(self.model.visual.named_parameters())
 
-        # for name, param in self.model.visual.named_parameters():
-        #     print(name)
+        for name, param in self.model.named_parameters():
+            print(name)
 
         # 定义需要冻结的完整参数名
         exact_layers_to_freeze = [
