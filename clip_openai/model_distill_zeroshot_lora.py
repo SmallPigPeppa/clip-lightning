@@ -34,8 +34,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=128,  # Rank of the low-rank decomposition
-        lora_alpha=128,  # Scaling factor
+        r=8,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -184,9 +184,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        # self.model = get_lora_model(self.model)
-        self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual = get_lora_model_vision(self.model.visual)
+        self.model = get_lora_model(self.model)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
