@@ -71,9 +71,9 @@ def filter_layers(target_modules, layers_to_include):
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
-    print(target_modules)
-    target_modules = filter_layers(target_modules, [0, 1, 2, 3, 4, 5, 6])
-    print(target_modules)
+    # print(target_modules)
+    # target_modules = filter_layers(target_modules, [0, 1, 2, 3, 4, 5, 6])
+    # print(target_modules)
 
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
@@ -195,20 +195,20 @@ class CLIPDualEncoderModel(LightningModule):
             print(name)
 
         # 定义需要冻结的完整参数名
-        exact_layers_to_freeze = [
-            "base_model.model.class_embedding",
-            "base_model.model.positional_embedding",
-            "base_model.model.proj",
-            "base_model.model.conv1.weight",
-            "base_model.model.ln_pre.weight",
-            "base_model.model.ln_pre.bias"
-        ]
-
-        # 冻结参数
-        for name, param in self.model.visual.named_parameters():
-            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(12)):
-                param.requires_grad = False
+        # exact_layers_to_freeze = [
+        #     "base_model.model.class_embedding",
+        #     "base_model.model.positional_embedding",
+        #     "base_model.model.proj",
+        #     "base_model.model.conv1.weight",
+        #     "base_model.model.ln_pre.weight",
+        #     "base_model.model.ln_pre.bias"
+        # ]
+        #
+        # # 冻结参数
+        # for name, param in self.model.visual.named_parameters():
+        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+        #     if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(12)):
+        #         param.requires_grad = False
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
