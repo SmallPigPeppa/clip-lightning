@@ -184,8 +184,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        self.model = get_lora_model(self.model)
-        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model = get_lora_model(self.model)
+        self.model.transformer = get_lora_model_text(self.model.transformer)
         # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
@@ -369,7 +369,7 @@ class CLIPDualEncoderModel(LightningModule):
                            ) / 2
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.05
+            return clip_loss + distill_loss
         else:
             return clip_loss
 
