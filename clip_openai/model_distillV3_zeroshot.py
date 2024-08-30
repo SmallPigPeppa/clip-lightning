@@ -78,12 +78,20 @@ class CLIPDualEncoderModel(LightningModule):
         #     for param in self.distill_predictor.parameters():
         #         param.requires_grad = False
 
-        self.distill_predictor = DistillPredictor(
+        self.distill_predictor_visual = DistillPredictor(
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         if not self.distill:
-            for param in self.distill_predictor.parameters():
+            for param in self.distill_predictor_visual.parameters():
+                param.requires_grad = False
+
+        self.distill_predictor_text = DistillPredictor(
+            projection_dims=self.hparams.projection_dims,
+            distill_proj_hidden_dim=distill_proj_hidden_dim
+        )
+        if not self.distill:
+            for param in self.distill_predictor_text.parameters():
                 param.requires_grad = False
 
     def forward(self, inputs):
@@ -187,8 +195,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor_visual(image_embeddings)
+            p2 = self.distill_predictor_text(text_embeddings)
 
             # distill_loss = (
             #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
@@ -214,8 +222,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor_visual(image_embeddings)
+            p2 = self.distill_predictor_text(text_embeddings)
 
             # distill_loss = (
             #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
