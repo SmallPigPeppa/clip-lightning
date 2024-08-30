@@ -194,8 +194,8 @@ class CLIPDualEncoderModel(LightningModule):
         # for name, param in self.model.visual.named_parameters():
         #     print(name)
 
-        # 需要冻结的层的名称
-        frozen_layers = [
+        # 定义需要冻结的完整参数名
+        exact_layers_to_freeze = [
             "base_model.model.class_embedding",
             "base_model.model.positional_embedding",
             "base_model.model.proj",
@@ -204,30 +204,10 @@ class CLIPDualEncoderModel(LightningModule):
             "base_model.model.ln_pre.bias"
         ]
 
-        # 冻结 resblocks.0 到 resblocks.5 的层
-        for i in range(6):
-            frozen_layers += [
-                f"base_model.model.transformer.resblocks.{i}.attn.in_proj_weight",
-                f"base_model.model.transformer.resblocks.{i}.attn.in_proj_bias",
-                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.base_layer.weight",
-                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.base_layer.bias",
-                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.lora_A.default.weight",
-                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.lora_B.default.weight",
-                f"base_model.model.transformer.resblocks.{i}.ln_1.weight",
-                f"base_model.model.transformer.resblocks.{i}.ln_1.bias",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.base_layer.weight",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.base_layer.bias",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.lora_A.default.weight",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.lora_B.default.weight",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.base_layer.weight",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.base_layer.bias",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.lora_A.default.weight",
-                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.lora_B.default.weight"
-            ]
-
         # 冻结参数
         for name, param in self.model.visual.named_parameters():
-            if name in frozen_layers:
+            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(12)):
                 param.requires_grad = False
 
     def initialize_old_modules(self):
