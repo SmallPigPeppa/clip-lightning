@@ -194,6 +194,9 @@ class CLIPDualEncoderModel(LightningModule):
         for name, param in self.model.named_parameters():
             print(name)
 
+
+
+
         # # 定义需要冻结的完整参数名
         # exact_layers_to_freeze = [
         #     "base_model.model.class_embedding",
@@ -214,6 +217,15 @@ class CLIPDualEncoderModel(LightningModule):
         for param in self.model.transformer.parameters():
             param.requires_grad = False
 
+        for param in self.model.token_embedding.parameters():
+            param.requires_grad = False
+
+        # 冻结 positional_embedding 参数
+        self.model.positional_embedding.requires_grad = False
+
+        # 冻结 ln_final 参数
+        for param in self.model.ln_final.parameters():
+            param.requires_grad = False
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
