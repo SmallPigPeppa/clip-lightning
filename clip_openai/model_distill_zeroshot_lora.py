@@ -47,6 +47,47 @@ def get_lora_model(model):
     return lora_model
 
 
+
+def get_lora_model_vision(model):
+    # Define the target modules where LoRA should be applied
+    target_modules = find_target_modules(model)
+
+    # Initialize LoRA configuration with target modules
+    lora_config = LoraConfig(
+        inference_mode=False,
+        r=8,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
+        task_type='vision',  # Task type
+        lora_dropout=0.1,  # Dropout rate for LoRA
+        target_modules=target_modules  # Specify the target modules
+    )
+
+    # Apply LoRA to the model
+    lora_model = get_peft_model(model, lora_config)
+
+    return lora_model
+
+
+def get_lora_model_text(model):
+    # Define the target modules where LoRA should be applied
+    target_modules = find_target_modules(model)
+
+    # Initialize LoRA configuration with target modules
+    lora_config = LoraConfig(
+        inference_mode=False,
+        r=8,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
+        task_type='text',  # Task type
+        lora_dropout=0.1,  # Dropout rate for LoRA
+        target_modules=target_modules  # Specify the target modules
+    )
+
+    # Apply LoRA to the model
+    lora_model = get_peft_model(model, lora_config)
+
+    return lora_model
+
+
 # def get_lora_model2(model):
 #     # Define the target modules where LoRA should be applied
 #     target_modules = find_target_modules(model)
@@ -119,7 +160,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        self.model = get_lora_model(self.model)
+        # self.model = get_lora_model(self.model)
+        self.model.transformer = get_lora_model_text(self.model.transformer)
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
