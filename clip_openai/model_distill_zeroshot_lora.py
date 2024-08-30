@@ -47,10 +47,32 @@ def get_lora_model(model):
     return lora_model
 
 
+def filter_layers(target_modules, layers_to_include):
+    """
+    根据指定的层索引过滤目标模块。
+
+    参数:
+    - target_modules: List[str]，find_target_modules 函数返回的模块名称列表。
+    - layers_to_include: List[int]，需要包含的层索引列表。
+
+    返回:
+    - filtered_modules: List[str]，经过过滤后的模块名称列表。
+    """
+    filtered_modules = []
+    for layer_index in layers_to_include:
+        # 构造层名字符串，例如 'resblocks.1'
+        layer_name = f'resblocks.{layer_index}'
+        # 过滤出包含该层名的模块
+        filtered_modules.extend([name for name in target_modules if layer_name in name])
+
+    return filtered_modules
+
+
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
     print(target_modules)
+    target_modules = filter_layers(target_modules, [8, 9, 10, 11])
 
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
