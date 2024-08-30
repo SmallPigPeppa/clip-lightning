@@ -189,7 +189,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model.visual)
-        print(self.model.visual.named_parameters())
+        # print(self.model.visual.named_parameters())
+
+        for name, param in self.model.visual.named_parameters():
+            print(name)
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
