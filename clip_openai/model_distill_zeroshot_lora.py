@@ -34,8 +34,8 @@ def get_lora_model(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=128,  # Rank of the low-rank decomposition
-        lora_alpha=128,  # Scaling factor
+        r=512,  # Rank of the low-rank decomposition
+        lora_alpha=512,  # Scaling factor
         task_type=TaskType.SEQ_CLS,  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
