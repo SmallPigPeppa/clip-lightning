@@ -210,7 +210,7 @@ class CLIPDualEncoderModel(LightningModule):
         # 冻结参数
         for name, param in self.model.visual.named_parameters():
             # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(1)):
+            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(5)):
                 param.requires_grad = False
 
 
@@ -369,7 +369,7 @@ class CLIPDualEncoderModel(LightningModule):
                            ) / 2
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.02
+            return clip_loss + distill_loss * 0.05
         else:
             return clip_loss
 
