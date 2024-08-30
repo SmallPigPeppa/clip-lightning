@@ -191,8 +191,44 @@ class CLIPDualEncoderModel(LightningModule):
         print(self.model.visual)
         # print(self.model.visual.named_parameters())
 
+        # for name, param in self.model.visual.named_parameters():
+        #     print(name)
+
+        # 需要冻结的层的名称
+        frozen_layers = [
+            "base_model.model.class_embedding",
+            "base_model.model.positional_embedding",
+            "base_model.model.proj",
+            "base_model.model.conv1.weight",
+            "base_model.model.ln_pre.weight",
+            "base_model.model.ln_pre.bias"
+        ]
+
+        # 冻结 resblocks.0 到 resblocks.5 的层
+        for i in range(6):
+            frozen_layers += [
+                f"base_model.model.transformer.resblocks.{i}.attn.in_proj_weight",
+                f"base_model.model.transformer.resblocks.{i}.attn.in_proj_bias",
+                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.base_layer.weight",
+                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.base_layer.bias",
+                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.lora_A.default.weight",
+                f"base_model.model.transformer.resblocks.{i}.attn.out_proj.lora_B.default.weight",
+                f"base_model.model.transformer.resblocks.{i}.ln_1.weight",
+                f"base_model.model.transformer.resblocks.{i}.ln_1.bias",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.base_layer.weight",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.base_layer.bias",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.lora_A.default.weight",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_fc.lora_B.default.weight",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.base_layer.weight",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.base_layer.bias",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.lora_A.default.weight",
+                f"base_model.model.transformer.resblocks.{i}.mlp.c_proj.lora_B.default.weight"
+            ]
+
+        # 冻结参数
         for name, param in self.model.visual.named_parameters():
-            print(name)
+            if name in frozen_layers:
+                param.requires_grad = False
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
