@@ -78,8 +78,8 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=8,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=1,  # Rank of the low-rank decomposition
+        lora_alpha=4,  # Scaling factor
         task_type='vision',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
