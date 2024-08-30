@@ -78,8 +78,8 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=1,  # Rank of the low-rank decomposition
-        lora_alpha=4,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         task_type='vision',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -99,7 +99,7 @@ def get_lora_model_text(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=8,  # Rank of the low-rank decomposition
+        r=16,  # Rank of the low-rank decomposition
         lora_alpha=32,  # Scaling factor
         task_type='text',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
@@ -184,9 +184,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        # self.model = get_lora_model(self.model)
-        self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual = get_lora_model_vision(self.model.visual)
+        self.model = get_lora_model(self.model)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
@@ -214,18 +214,18 @@ class CLIPDualEncoderModel(LightningModule):
         #         param.requires_grad = False
 
 
-        for param in self.model.transformer.parameters():
-            param.requires_grad = False
-
-        for param in self.model.token_embedding.parameters():
-            param.requires_grad = False
-
-        # 冻结 positional_embedding 参数
-        self.model.positional_embedding.requires_grad = False
-
-        # 冻结 ln_final 参数
-        for param in self.model.ln_final.parameters():
-            param.requires_grad = False
+        # for param in self.model.transformer.parameters():
+        #     param.requires_grad = False
+        #
+        # for param in self.model.token_embedding.parameters():
+        #     param.requires_grad = False
+        #
+        # # 冻结 positional_embedding 参数
+        # self.model.positional_embedding.requires_grad = False
+        #
+        # # 冻结 ln_final 参数
+        # for param in self.model.ln_final.parameters():
+        #     param.requires_grad = False
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
