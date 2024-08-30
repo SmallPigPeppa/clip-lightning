@@ -72,7 +72,7 @@ def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
     print(target_modules)
-    target_modules = filter_layers(target_modules, [9, 10, 11])
+    target_modules = filter_layers(target_modules, [0, 1, 2, 3, 4, 5, 6])
     print(target_modules)
 
     # Initialize LoRA configuration with target modules
