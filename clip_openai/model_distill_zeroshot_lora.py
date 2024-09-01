@@ -78,8 +78,8 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=4,  # Rank of the low-rank decomposition
+        lora_alpha=8,  # Scaling factor
         # task_type='FEATURE_EXTRACTION',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
@@ -209,17 +209,17 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
-        # # 假设 conv1 是模型中已存在的一个 Conv2d 层
-        # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
-        # lora_config = LoraConfig(
-        #     inference_mode=False,
-        #     r=16,  # Rank of the low-rank decomposition
-        #     lora_alpha=32,  # Scaling factor
-        #     lora_dropout=0.1,  # Dropout rate for LoRA
-        #     target_modules=['conv1'],
-        # )
-        #
-        # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+        # 假设 conv1 是模型中已存在的一个 Conv2d 层
+        conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
+        lora_config = LoraConfig(
+            inference_mode=False,
+            r=4,  # Rank of the low-rank decomposition
+            lora_alpha=8,  # Scaling factor
+            lora_dropout=0.1,  # Dropout rate for LoRA
+            target_modules=['conv1'],
+        )
+
+        self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
         #
         # t_modules=[]
@@ -303,11 +303,11 @@ class CLIPDualEncoderModel(LightningModule):
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
 
-        for param in self.model.token_embedding.parameters():
-            param.requires_grad = False
-
-        # 冻结 positional_embedding 参数
-        self.model.positional_embedding.requires_grad = False
+        # for param in self.model.token_embedding.parameters():
+        #     param.requires_grad = False
+        #
+        # # 冻结 positional_embedding 参数
+        # self.model.positional_embedding.requires_grad = False
 
         # # 冻结 ln_final 参数
         # for param in self.model.ln_final.parameters():
