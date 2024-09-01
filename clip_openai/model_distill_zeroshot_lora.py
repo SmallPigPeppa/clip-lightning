@@ -248,7 +248,7 @@ class CLIPDualEncoderModel(LightningModule):
         # 冻结参数
         for name, param in self.model.visual.named_parameters():
             # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze or any(f"resblocks.{i}." in name for i in range(10)):
+            if name in exact_layers_to_freeze or any(f"resblocks.{i}." in name for i in range(9)):
                 param.requires_grad = False
 
         # for param in self.model.transformer.parameters():
@@ -513,21 +513,21 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def on_before_optimizer_step(self, optimizer) -> None:
-        print("**************on_before_opt enter1*********")
-        for name, param in self.model.visual.named_parameters():
-            if param.grad is not None:
-                print(name)
-            # if param.requires_grad :
-            #     print(name)
-
-        print("***************on_before_opt exit1*********")
-
-        print("**************on_before_opt enter2*********")
-        for name, param in self.model.visual.named_parameters():
-            # if param.grad is not None:
-            #     print(name)
-            if param.requires_grad :
-                print(name)
-
-        print("***************on_before_opt exit2*********")
+    # def on_before_optimizer_step(self, optimizer) -> None:
+    #     print("**************on_before_opt enter1*********")
+    #     for name, param in self.model.visual.named_parameters():
+    #         if param.grad is not None:
+    #             print(name)
+    #         # if param.requires_grad :
+    #         #     print(name)
+    #
+    #     print("***************on_before_opt exit1*********")
+    #
+    #     print("**************on_before_opt enter2*********")
+    #     for name, param in self.model.visual.named_parameters():
+    #         # if param.grad is not None:
+    #         #     print(name)
+    #         if param.requires_grad :
+    #             print(name)
+    #
+    #     print("***************on_before_opt exit2*********")
