@@ -157,7 +157,9 @@ class YourLightningModule(pl.LightningModule):
         print(self.fisher)
         # Optionally, save fisher information after each epoch
         os.makedirs(self.hparams.fisher_dir, exist_ok=True)
-        fisher_save_path = os.path.join(self.hparams.fisher_dir, f"{self.hparams.model_name}_fisher_epoch_{self.current_epoch}.pth")
+        model_name_safe = self.hparams.model_name.replace("/", "_")
+        fisher_save_path = os.path.join(self.hparams.fisher_dir,
+                                        f"{model_name_safe}_fisher_epoch_{self.current_epoch}.pth")
 
         # Save the Fisher information
         torch.save(self.fisher, fisher_save_path)
