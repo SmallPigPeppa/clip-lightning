@@ -81,7 +81,7 @@ def get_lora_model_vision(model):
         r=16,  # Rank of the low-rank decomposition
         lora_alpha=32,  # Scaling factor
         task_type='vision',  # Task type
-        lora_dropout=0.1,  # Dropout rate for LoRA
+        lora_dropout=0.,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
     )
 
@@ -197,35 +197,35 @@ class CLIPDualEncoderModel(LightningModule):
 
 
 
-        # 定义需要冻结的完整参数名
-        exact_layers_to_freeze = [
-            "base_model.model.class_embedding",
-            "base_model.model.positional_embedding",
-            "base_model.model.proj",
-            "base_model.model.conv1.weight",
-            "base_model.model.ln_pre.weight",
-            "base_model.model.ln_pre.bias"
-        ]
+        # # 定义需要冻结的完整参数名
+        # exact_layers_to_freeze = [
+        #     "base_model.model.class_embedding",
+        #     "base_model.model.positional_embedding",
+        #     "base_model.model.proj",
+        #     "base_model.model.conv1.weight",
+        #     "base_model.model.ln_pre.weight",
+        #     "base_model.model.ln_pre.bias"
+        # ]
+        #
+        # # 冻结参数
+        # for name, param in self.model.visual.named_parameters():
+        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+        #     if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
+        #         param.requires_grad = False
 
-        # 冻结参数
-        for name, param in self.model.visual.named_parameters():
-            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
-                param.requires_grad = False
 
-
-        for param in self.model.transformer.parameters():
-            param.requires_grad = False
-
-        for param in self.model.token_embedding.parameters():
-            param.requires_grad = False
-
-        # 冻结 positional_embedding 参数
-        self.model.positional_embedding.requires_grad = False
-
-        # 冻结 ln_final 参数
-        for param in self.model.ln_final.parameters():
-            param.requires_grad = False
+        # for param in self.model.transformer.parameters():
+        #     param.requires_grad = False
+        #
+        # for param in self.model.token_embedding.parameters():
+        #     param.requires_grad = False
+        #
+        # # 冻结 positional_embedding 参数
+        # self.model.positional_embedding.requires_grad = False
+        #
+        # # 冻结 ln_final 参数
+        # for param in self.model.ln_final.parameters():
+        #     param.requires_grad = False
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
