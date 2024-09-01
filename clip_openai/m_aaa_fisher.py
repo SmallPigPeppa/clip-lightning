@@ -153,6 +153,8 @@ class YourLightningModule(pl.LightningModule):
         # Normalize Fisher Information by the number of batches
         for n in self.fisher:
             self.fisher[n] /= len(self.train_dataloader())
+            # Calculate the mean of the Fisher information across all dimensions
+            self.fisher[n] = self.fisher[n].mean()
 
         print(self.fisher)
         # Optionally, save fisher information after each epoch
