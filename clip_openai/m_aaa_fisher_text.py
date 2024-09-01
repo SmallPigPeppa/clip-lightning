@@ -112,7 +112,8 @@ class YourLightningModule(pl.LightningModule):
         self.compute_weights()
         if self.zeroshot_weights is None:
             raise ValueError("Zero-shot weights not computed. Call `compute_weights` first.")
-        image_features = self.model.encode_image(images)
+        with torch.no_grad():
+            image_features = self.model.encode_image(images)
         logits = 100. * image_features @ self.zeroshot_weights
         return logits
 
@@ -165,7 +166,7 @@ class YourLightningModule(pl.LightningModule):
         os.makedirs(self.hparams.fisher_dir, exist_ok=True)
         model_name_safe = self.hparams.model_name.replace("/", "_")
         fisher_save_path = os.path.join(self.hparams.fisher_dir,
-                                        f"{model_name_safe}_fisher_epoch_{self.current_epoch}.pth")
+                                        f"{model_name_safe}_text_fisher_epoch_{self.current_epoch}.pth")
 
         # Save the Fisher information
         torch.save(self.fisher, fisher_save_path)
