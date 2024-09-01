@@ -81,7 +81,8 @@ OPENAI_IMAGENET_TEMPLATES = (
     lambda c: f'a tattoo of the {c}.',
 )
 
-MY_TEMPLATE =  (
+MY_TEMPLATE = (
+    lambda c: f'a photo of a {c}.',
     lambda c: f'a photo of a {c}.'
 )
 # a much smaller subset of above prompts
