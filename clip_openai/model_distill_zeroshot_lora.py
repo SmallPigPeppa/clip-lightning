@@ -252,14 +252,35 @@ class CLIPDualEncoderModel(LightningModule):
         # 定义需要冻结的完整参数名
 
 
-        exact_layers_to_freeze = [
-            'xxxxxxxxx',
-            # "base_model.model.class_embedding",
-            # "base_model.model.positional_embedding",
-            # "base_model.model.proj",
-            # "base_model.model.conv1.weight",
-            # "base_model.model.ln_pre.weight",
-            # "base_model.model.ln_pre.bias",
+        # exact_layers_to_freeze = [
+        #     'xxxxxxxxx',
+        #     # "base_model.model.class_embedding",
+        #     # "base_model.model.positional_embedding",
+        #     # "base_model.model.proj",
+        #     # "base_model.model.conv1.weight",
+        #     # "base_model.model.ln_pre.weight",
+        #     # "base_model.model.ln_pre.bias",
+        #     # "transformer.resblocks.9.attn.in_proj_weight",
+        #     # "transformer.resblocks.9.attn.in_proj_bias",
+        #     # "transformer.resblocks.9.attn.out_proj.weight",
+        #     # "transformer.resblocks.9.attn.out_proj.bias",
+        #     # "transformer.resblocks.9.ln_1.weight",
+        #     # "transformer.resblocks.9.ln_1.bias",
+        #     # "transformer.resblocks.9.mlp.c_fc.weight",
+        #     # "transformer.resblocks.9.mlp.c_fc.bias",
+        #     # "transformer.resblocks.9.mlp.c_proj.weight",
+        #     # "transformer.resblocks.9.mlp.c_proj.bias",
+        #     # "transformer.resblocks.9.ln_2.weight",
+        #     # "transformer.resblocks.9.ln_2.bias",
+        # ]
+
+        exact_layers_to_freeze=[
+            "class_embedding",
+            # "positional_embedding",
+            # "proj",
+            # "conv1.weight",
+            # "ln_pre.weight",
+            # "ln_pre.bias",
             # "transformer.resblocks.9.attn.in_proj_weight",
             # "transformer.resblocks.9.attn.in_proj_bias",
             # "transformer.resblocks.9.attn.out_proj.weight",
@@ -274,26 +295,10 @@ class CLIPDualEncoderModel(LightningModule):
             # "transformer.resblocks.9.ln_2.bias",
         ]
 
-        # exact_layers_to_freeze=[
-        #     "class_embedding",
-        #     "positional_embedding",
-        #     "proj",
-        #     "conv1.weight",
-        #     "ln_pre.weight",
-        #     "ln_pre.bias",
-        #     # "transformer.resblocks.9.attn.in_proj_weight",
-        #     # "transformer.resblocks.9.attn.in_proj_bias",
-        #     # "transformer.resblocks.9.attn.out_proj.weight",
-        #     # "transformer.resblocks.9.attn.out_proj.bias",
-        #     # "transformer.resblocks.9.ln_1.weight",
-        #     # "transformer.resblocks.9.ln_1.bias",
-        #     # "transformer.resblocks.9.mlp.c_fc.weight",
-        #     # "transformer.resblocks.9.mlp.c_fc.bias",
-        #     # "transformer.resblocks.9.mlp.c_proj.weight",
-        #     # "transformer.resblocks.9.mlp.c_proj.bias",
-        #     # "transformer.resblocks.9.ln_2.weight",
-        #     # "transformer.resblocks.9.ln_2.bias",
-        # ]
+        for name, param in self.model.visual.named_parameters():
+            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+            if name in exact_layers_to_freeze:
+                param.requires_grad = False
         # 冻结参数
         # for name, param in self.model.visual.named_parameters():
         #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
@@ -562,15 +567,15 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    # def on_before_optimizer_step(self, optimizer) -> None:
-    #     print("**************on_before_opt enter1*********")
-    #     for name, param in self.model.visual.named_parameters():
-    #         if param.grad is not None:
-    #             print(name)
-    #         # if param.requires_grad :
-    #         #     print(name)
-    #
-    #     print("***************on_before_opt exit1*********")
+    def on_before_optimizer_step(self, optimizer) -> None:
+        print("**************on_before_opt enter1*********")
+        for name, param in self.model.visual.named_parameters():
+            if param.grad is not None:
+                print(name)
+            # if param.requires_grad :
+            #     print(name)
+
+        print("***************on_before_opt exit1*********")
 
         # print("**************on_before_opt enter2*********")
         # for name, param in self.model.visual.named_parameters():
