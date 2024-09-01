@@ -85,8 +85,13 @@ class YourLightningModule(pl.LightningModule):
         num_classes = len(self.classnames)
 
         def _process_batch(batch_classnames):
-            texts = [template.format(c) if use_format else template(c) for c in batch_classnames for template in
-                     self.templates]
+            # Define the template function
+            def template(c):
+                return f'a photo of a {c}.'
+
+            # Use list comprehension to generate the texts
+            texts = [template(c) for c in batch_classnames] if use_format else batch_classnames
+
             # texts = self.tokenizer.encode(texts).to(self.device)
             # print(self.device)
             texts = [self.tokenize(t).to(self.device) for t in texts]
