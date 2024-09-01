@@ -201,7 +201,7 @@ if __name__ == '__main__':
     model = YourLightningModule(
         model_name='ViT-B/16',
         download_root='./',
-        num_classes_per_batch=50,
+        num_classes_per_batch=20,
         lr=0.,
         max_length=77,
         batch_size=128,
