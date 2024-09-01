@@ -30,6 +30,7 @@ class YourLightningModule(pl.LightningModule):
             **kwargs
     ):
         super().__init__(*args, **kwargs)
+        self.automatic_optimization = False
         self.save_hyperparameters()
         self.model = my_load(
             name=model_name,
@@ -114,14 +115,14 @@ class YourLightningModule(pl.LightningModule):
         self.compute_weights()
 
     def training_step(self, batch, batch_idx):
+        opt = self.optimizers()
+        opt.zero_grad()
         images, targets = batch
-
         # Compute logits and loss
         logits = self.forward(images)
         loss = cross_entropy(logits, targets)
 
-        # Compute gradients
-        self.manual_backward(loss)
+
 
         # Initialize or update Fisher information matrix
         if self.fisher is None:
@@ -133,6 +134,10 @@ class YourLightningModule(pl.LightningModule):
         for n, p in self.model.named_parameters():
             if p.grad is not None:
                 self.fisher[n] += p.grad.pow(2)
+
+        # Compute gradients
+        self.manual_backward(loss)
+        opt.step()
 
         # Log training loss
         acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
