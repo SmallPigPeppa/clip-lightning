@@ -195,7 +195,10 @@ class CLIPDualEncoderModel(LightningModule):
         print(self.model)
         # print(self.model.visual.named_parameters())
 
-        for name, param in self.model.named_parameters():
+        # for name, param in self.model.named_parameters():
+        #     print(name)
+
+        for name, param in self.model.visual.named_parameters():
             print(name)
 
         # 定义需要冻结的完整参数名
