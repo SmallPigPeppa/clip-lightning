@@ -190,7 +190,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # self.model = get_lora_model(self.model)
         self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual = get_lora_model_vision(self.model.visual)
+        # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
@@ -205,7 +205,9 @@ class CLIPDualEncoderModel(LightningModule):
             "base_model.model.proj",
             "base_model.model.conv1.weight",
             "base_model.model.ln_pre.weight",
-            "base_model.model.ln_pre.bias"
+            "base_model.model.ln_pre.bias",
+            "base_model.model.transformer.resblocks.0.attn",
+            "base_model.model.transformer.resblocks.0.attn",
         ]
 
         # 冻结参数
