@@ -81,6 +81,9 @@ OPENAI_IMAGENET_TEMPLATES = (
     lambda c: f'a tattoo of the {c}.',
 )
 
+MY_TEMPLATE =  (
+    lambda c: f'a photo of a {c}.'
+)
 # a much smaller subset of above prompts
 # from https://github.com/openai/CLIP/blob/main/notebooks/Prompt_Engineering_for_ImageNet.ipynb
 SIMPLE_IMAGENET_TEMPLATES = (

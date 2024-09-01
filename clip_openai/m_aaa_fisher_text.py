@@ -3,7 +3,9 @@ import lightning as pl
 import torch
 from model_openai import my_load
 from model_openai import SimpleTokenizer
-from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
+from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES
+
+from zero_shot.zero_shot_metadata import MY_TEMPLATE as OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
 from packaging import version
