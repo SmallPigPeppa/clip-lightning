@@ -56,7 +56,7 @@ class CLIPDualEncoderModel(LightningModule):
             # task_type=TaskType.SEQ_CLS,  # Task type
             lora_dropout=0.1,  # Dropout rate for LoRA
             # target_modules=target_modules,  # Specify the target modules
-            target_modules='all'
+            # target_modules='all'
         )
 
         # Apply LoRA to the model
