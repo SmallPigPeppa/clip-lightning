@@ -123,7 +123,6 @@ class YourLightningModule(pl.LightningModule):
         logits = self.forward(images)
         loss = cross_entropy(logits, targets)
 
-
         # Compute gradients
         self.manual_backward(loss)
 
@@ -196,6 +195,7 @@ if __name__ == '__main__':
         model_name='ViT-B/16',
         download_root='./',
         num_classes_per_batch=50,
+        lr=1e-9,
         max_length=77,
         batch_size=128,
         num_workers=8,
