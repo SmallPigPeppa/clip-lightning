@@ -212,7 +212,7 @@ if __name__ == '__main__':
         num_classes_per_batch=20,
         lr=0.,
         max_length=77,
-        batch_size=8,
+        batch_size=1,
         num_workers=8,
         root_dir='/ppio_net0/torch_ds',
         fisher_dir='./fisher_data',
