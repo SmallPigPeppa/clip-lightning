@@ -205,12 +205,13 @@ class CLIPDualEncoderModel(LightningModule):
 
 
         exact_layers_to_freeze = [
-            "base_model.model.class_embedding",
-            "base_model.model.positional_embedding",
-            "base_model.model.proj",
-            "base_model.model.conv1.weight",
-            "base_model.model.ln_pre.weight",
-            "base_model.model.ln_pre.bias",
+            'xxxxxxxxx',
+            # "base_model.model.class_embedding",
+            # "base_model.model.positional_embedding",
+            # "base_model.model.proj",
+            # "base_model.model.conv1.weight",
+            # "base_model.model.ln_pre.weight",
+            # "base_model.model.ln_pre.bias",
             # "transformer.resblocks.9.attn.in_proj_weight",
             # "transformer.resblocks.9.attn.in_proj_bias",
             # "transformer.resblocks.9.attn.out_proj.weight",
