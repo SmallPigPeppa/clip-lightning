@@ -215,7 +215,8 @@ if __name__ == '__main__':
         max_epochs=1,
         logger=wandb_logger,
         sync_batchnorm=True,
-        num_sanity_val_steps=0
+        num_sanity_val_steps=0,
+        strategy='ddp_find_unused_parameters_true'
 
     )
     trainer.fit(model)
