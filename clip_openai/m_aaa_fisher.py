@@ -195,9 +195,9 @@ if __name__ == '__main__':
     model = YourLightningModule(
         model_name='ViT-B/16',
         download_root='./',
-        num_classes_per_batch=20,
+        num_classes_per_batch=50,
         max_length=77,
-        batch_size=64,
+        batch_size=128,
         num_workers=8,
         root_dir='/ppio_net0/torch_ds',
         fisher_dir='./fisher_data',
