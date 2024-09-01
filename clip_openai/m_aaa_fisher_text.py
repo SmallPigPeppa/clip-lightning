@@ -54,12 +54,12 @@ class YourLightningModule(pl.LightningModule):
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
         #
-        # for param in self.model.token_embedding.parameters():
-        #     param.requires_grad = False
-        #
-        # # 冻结 positional_embedding 参数
-        # self.model.positional_embedding.requires_grad = False
-        #
+        for param in self.model.token_embedding.parameters():
+            param.requires_grad = False
+
+        # 冻结 positional_embedding 参数
+        self.model.positional_embedding.requires_grad = False
+
         # # 冻结 ln_final 参数
         # for param in self.model.ln_final.parameters():
         #     param.requires_grad = False
