@@ -192,6 +192,18 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.transformer = get_lora_model_text(self.model.transformer)
 
 
+
+        # Apply LoRA to the model
+
+
+        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+
+        t_modules=[]
+        for name, module in model.named_modules():
+            if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
+                t_modules.append(name)
+                print(name)
+
         lora_config = LoraConfig(
             inference_mode=False,
             r=16,  # Rank of the low-rank decomposition
@@ -205,10 +217,8 @@ class CLIPDualEncoderModel(LightningModule):
             # target_modules='all-linear'  # Specify the target modules
         )
 
-        # Apply LoRA to the model
-        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
 
-        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
 
 
         print('********************************************')
