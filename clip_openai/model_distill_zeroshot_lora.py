@@ -208,7 +208,7 @@ class CLIPDualEncoderModel(LightningModule):
             "base_model.model.ln_pre.bias",
             "resblocks.9.attn",
             "resblocks.9.ln_1",
-            # "resblocks.9.mlp",
+            "resblocks.9.mlp",
         ]
 
         # 冻结参数
@@ -220,11 +220,11 @@ class CLIPDualEncoderModel(LightningModule):
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
 
-        for param in self.model.token_embedding.parameters():
-            param.requires_grad = False
-
-        # 冻结 positional_embedding 参数
-        self.model.positional_embedding.requires_grad = False
+        # for param in self.model.token_embedding.parameters():
+        #     param.requires_grad = False
+        #
+        # # 冻结 positional_embedding 参数
+        # self.model.positional_embedding.requires_grad = False
 
         # # 冻结 ln_final 参数
         # for param in self.model.ln_final.parameters():
