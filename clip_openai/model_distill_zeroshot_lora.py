@@ -422,11 +422,11 @@ class CLIPDualEncoderModel(LightningModule):
         else:
             return clip_loss
 
-    def on_train_start(self):
-        # Zero-shot metric evaluation before training starts
-        zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        self.log_dict(zero_shot_metric, sync_dist=True)
+    # def on_train_start(self):
+    #     # Zero-shot metric evaluation before training starts
+    #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+    #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+    #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
@@ -514,9 +514,20 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def on_before_optimizer_step(self, optimizer) -> None:
-        print("**************on_before_opt enter*********")
+        print("**************on_before_opt enter1*********")
         for name, param in self.model.visual.named_parameters():
             if param.grad is not None:
                 print(name)
+            # if param.requires_grad :
+            #     print(name)
 
-        print("***************on_before_opt exit*********")
+        print("***************on_before_opt exit1*********")
+
+        print("**************on_before_opt enter2*********")
+        for name, param in self.model.visual.named_parameters():
+            # if param.grad is not None:
+            #     print(name)
+            if param.requires_grad :
+                print(name)
+
+        print("***************on_before_opt exit2*********")
