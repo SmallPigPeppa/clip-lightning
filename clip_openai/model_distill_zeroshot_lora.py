@@ -198,21 +198,52 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
-        t_modules=[]
-        for name, module in self.model.visual.named_modules():
-            if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
-                t_modules.append(name)
-                print(name)
+        # 假设 conv1 是模型中已存在的一个 Conv2d 层
+        conv1 = self.model.visual.conv1
 
+        # 获取 conv1 的参数
+        in_channels = conv1.in_channels
+        out_channels = conv1.out_channels
+        kernel_size = conv1.kernel_size
+        stride = conv1.stride
+        padding = conv1.padding
+        bias = conv1.bias is not None
+
+        # 配置 LoRA
         lora_config = LoraConfig(
             inference_mode=False,
-            r=16,  # 低秩分解的秩
-            lora_alpha=32,  # 缩放因子
-            lora_dropout=0.1,  # LoRA 的 Dropout 比率
-            target_modules=None  # 目标模块 'weight' 可能是 conv1 的核心参数
+            r=16,
+            lora_alpha=32,
+            lora_dropout=0.1
         )
 
-        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
+        # 初始化一个新的带 LoRA 的 Conv2d 层
+        lora_conv2d = get_peft_model(
+            nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias), lora_config)
+
+        # 拷贝权重和偏置参数
+        lora_conv2d.weight.data = conv1.weight.data.clone()
+        if bias:
+            lora_conv2d.bias.data = conv1.bias.data.clone()
+
+        # 将新的带 LoRA 的层替换进模型
+        self.model.visual.conv1 = lora_conv2d
+        #
+        # t_modules=[]
+        # for name, module in self.model.visual.named_modules():
+        #     if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
+        #         t_modules.append(name)
+        #         print(name)
+        #
+        # lora_config = LoraConfig(
+        #     inference_mode=False,
+        #     r=16,  # 低秩分解的秩
+        #     lora_alpha=32,  # 缩放因子
+        #     lora_dropout=0.1,  # LoRA 的 Dropout 比率
+        #     target_modules=None  # 目标模块 'weight' 可能是 conv1 的核心参数
+        # )
+        #
+        # self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
 
 
         print('********************************************')
