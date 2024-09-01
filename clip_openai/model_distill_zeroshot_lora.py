@@ -202,6 +202,8 @@ class CLIPDualEncoderModel(LightningModule):
             print(name)
 
         # 定义需要冻结的完整参数名
+
+
         exact_layers_to_freeze = [
             "base_model.model.class_embedding",
             "base_model.model.positional_embedding",
@@ -209,11 +211,40 @@ class CLIPDualEncoderModel(LightningModule):
             "base_model.model.conv1.weight",
             "base_model.model.ln_pre.weight",
             "base_model.model.ln_pre.bias",
-            "resblocks.9.attn",
-            "resblocks.9.ln_1",
-            "resblocks.9.mlp",
+            "transformer.resblocks.9.attn.in_proj_weight",
+            "transformer.resblocks.9.attn.in_proj_bias",
+            "transformer.resblocks.9.attn.out_proj.weight",
+            "transformer.resblocks.9.attn.out_proj.bias",
+            # "transformer.resblocks.9.ln_1.weight",
+            # "transformer.resblocks.9.ln_1.bias",
+            # "transformer.resblocks.9.mlp.c_fc.weight",
+            # "transformer.resblocks.9.mlp.c_fc.bias",
+            # "transformer.resblocks.9.mlp.c_proj.weight",
+            # "transformer.resblocks.9.mlp.c_proj.bias",
+            # "transformer.resblocks.9.ln_2.weight",
+            # "transformer.resblocks.9.ln_2.bias",
         ]
 
+        # exact_layers_to_freeze=[
+        #     "class_embedding",
+        #     "positional_embedding",
+        #     "proj",
+        #     "conv1.weight",
+        #     "ln_pre.weight",
+        #     "ln_pre.bias",
+        #     "transformer.resblocks.9.attn.in_proj_weight",
+        #     "transformer.resblocks.9.attn.in_proj_bias",
+        #     "transformer.resblocks.9.attn.out_proj.weight",
+        #     "transformer.resblocks.9.attn.out_proj.bias",
+        #     "transformer.resblocks.9.ln_1.weight",
+        #     "transformer.resblocks.9.ln_1.bias",
+        #     "transformer.resblocks.9.mlp.c_fc.weight",
+        #     "transformer.resblocks.9.mlp.c_fc.bias",
+        #     "transformer.resblocks.9.mlp.c_proj.weight",
+        #     "transformer.resblocks.9.mlp.c_proj.bias",
+        #     "transformer.resblocks.9.ln_2.weight",
+        #     "transformer.resblocks.9.ln_2.bias",
+        # ]
         # 冻结参数
         for name, param in self.model.visual.named_parameters():
             # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
