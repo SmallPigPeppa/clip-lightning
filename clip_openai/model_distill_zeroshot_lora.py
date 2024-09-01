@@ -198,7 +198,7 @@ class CLIPDualEncoderModel(LightningModule):
             lora_alpha=32,  # Scaling factor
             # task_type='FEATURE_EXTRACTION',  # Task type
             lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules='conv1',
+            target_modules='all',
             # bias='none'  # Specify the target modules
 
             # target_modules = ["q", "v"],
@@ -206,7 +206,7 @@ class CLIPDualEncoderModel(LightningModule):
         )
 
         # Apply LoRA to the model
-        self.model.visual = get_peft_model(self.model.visual, lora_config)
+        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
 
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
