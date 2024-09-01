@@ -108,20 +108,21 @@ class YourLightningModule(pl.LightningModule):
             for batch in tqdm(self.batch_classes(self.classnames, self.num_classes_per_batch),
                               desc="Computing Zero-shot Weights", unit="batch"):
                 batched_embeds.append(_process_batch(batch))
-            self.zeroshot_weights = torch.cat(batched_embeds, dim=1)
+            zeroshot_weights = torch.cat(batched_embeds, dim=1)
         else:
-            self.zeroshot_weights = _process_batch(self.classnames)
+            zeroshot_weights = _process_batch(self.classnames)
+        return zeroshot_weights
 
     def batch_classes(self, classnames, num_classes_per_batch):
         return [classnames[i:i + num_classes_per_batch] for i in range(0, len(classnames), num_classes_per_batch)]
 
     def forward(self, images):
-        self.compute_weights()
-        if self.zeroshot_weights is None:
-            raise ValueError("Zero-shot weights not computed. Call `compute_weights` first.")
+        zeroshot_weights = self.compute_weights()
+        # if self.zeroshot_weights is None:
+        #     raise ValueError("Zero-shot weights not computed. Call `compute_weights` first.")
         with torch.no_grad():
             image_features = self.model.encode_image(images)
-        logits = 100. * image_features @ self.zeroshot_weights
+        logits = 100. * image_features @ zeroshot_weights
         return logits
 
     def on_train_epoch_start(self):
@@ -211,7 +212,7 @@ if __name__ == '__main__':
         num_classes_per_batch=20,
         lr=0.,
         max_length=77,
-        batch_size=16,
+        batch_size=8,
         num_workers=8,
         root_dir='/ppio_net0/torch_ds',
         fisher_dir='./fisher_data',
