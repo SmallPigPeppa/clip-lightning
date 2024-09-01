@@ -190,32 +190,32 @@ class CLIPDualEncoderModel(LightningModule):
 
         # self.model = get_lora_model(self.model)
         self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual = get_lora_model_vision(self.model.visual)
+        # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
 
         for name, param in self.model.named_parameters():
             print(name)
-        #
-        # # 定义需要冻结的完整参数名
-        # exact_layers_to_freeze = [
-        #     "base_model.model.class_embedding",
-        #     "base_model.model.positional_embedding",
-        #     "base_model.model.proj",
-        #     "base_model.model.conv1.weight",
-        #     "base_model.model.ln_pre.weight",
-        #     "base_model.model.ln_pre.bias",
-        #     "base_model.model.transformer.resblocks.9.attn",
-        #     "base_model.model.transformer.resblocks.9.ln_1",
-        #     "base_model.model.transformer.resblocks.9.mlp",
-        # ]
-        #
-        # # 冻结参数
-        # for name, param in self.model.visual.named_parameters():
-        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-        #     if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
-        #         param.requires_grad = False
+
+        # 定义需要冻结的完整参数名
+        exact_layers_to_freeze = [
+            "base_model.model.class_embedding",
+            "base_model.model.positional_embedding",
+            "base_model.model.proj",
+            "base_model.model.conv1.weight",
+            "base_model.model.ln_pre.weight",
+            "base_model.model.ln_pre.bias",
+            "base_model.model.transformer.resblocks.9.attn",
+            "base_model.model.transformer.resblocks.9.ln_1",
+            "base_model.model.transformer.resblocks.9.mlp",
+        ]
+
+        # 冻结参数
+        for name, param in self.model.visual.named_parameters():
+            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+            if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
+                param.requires_grad = False
 
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
