@@ -78,8 +78,8 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=4,  # Rank of the low-rank decomposition
-        lora_alpha=8,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         # task_type='FEATURE_EXTRACTION',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
@@ -191,6 +191,24 @@ class CLIPDualEncoderModel(LightningModule):
         # self.model = get_lora_model(self.model)
         self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+
+        lora_config = LoraConfig(
+            inference_mode=False,
+            r=16,  # Rank of the low-rank decomposition
+            lora_alpha=32,  # Scaling factor
+            # task_type='FEATURE_EXTRACTION',  # Task type
+            lora_dropout=0.1,  # Dropout rate for LoRA
+            target_modules='conv1',
+            # bias='none'  # Specify the target modules
+
+            # target_modules = ["q", "v"],
+            # target_modules='all-linear'  # Specify the target modules
+        )
+
+        # Apply LoRA to the model
+        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
+
+
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
@@ -514,15 +532,15 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    # def on_before_optimizer_step(self, optimizer) -> None:
-    #     print("**************on_before_opt enter1*********")
-    #     for name, param in self.model.visual.named_parameters():
-    #         if param.grad is not None:
-    #             print(name)
-    #         # if param.requires_grad :
-    #         #     print(name)
-    #
-    #     print("***************on_before_opt exit1*********")
+    def on_before_optimizer_step(self, optimizer) -> None:
+        print("**************on_before_opt enter1*********")
+        for name, param in self.model.visual.named_parameters():
+            if param.grad is not None:
+                print(name)
+            # if param.requires_grad :
+            #     print(name)
+
+        print("***************on_before_opt exit1*********")
 
         # print("**************on_before_opt enter2*********")
         # for name, param in self.model.visual.named_parameters():
