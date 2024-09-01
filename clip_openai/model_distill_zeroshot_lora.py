@@ -512,3 +512,11 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
+
+    def on_before_optimizer_step(self, optimizer) -> None:
+        print("**************on_before_opt enter*********")
+        for name, param in self.model.visual.named_parameters():
+            if param.grad is not None:
+                print(name)
+
+        print("***************on_before_opt exit*********")
