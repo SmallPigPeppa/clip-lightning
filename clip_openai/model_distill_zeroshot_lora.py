@@ -78,7 +78,7 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=1,  # Rank of the low-rank decomposition
+        r=8,  # Rank of the low-rank decomposition
         lora_alpha=2,  # Scaling factor
         # task_type='FEATURE_EXTRACTION',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
