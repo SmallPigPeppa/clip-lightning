@@ -206,9 +206,9 @@ class CLIPDualEncoderModel(LightningModule):
             "base_model.model.conv1.weight",
             "base_model.model.ln_pre.weight",
             "base_model.model.ln_pre.bias",
-            "base_model.model.transformer.resblocks.9.attn",
-            "base_model.model.transformer.resblocks.9.ln_1",
-            "base_model.model.transformer.resblocks.9.mlp",
+            "resblocks.9.attn",
+            # "resblocks.9.ln_1",
+            # "resblocks.9.mlp",
         ]
 
         # 冻结参数
