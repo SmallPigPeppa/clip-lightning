@@ -22,6 +22,7 @@ class YourLightningModule(pl.LightningModule):
             download_root: str = None,
             num_classes_per_batch: int = 10,
             max_length: int = 77,
+            lr: float = 1e-9,
             batch_size: int = 32,
             num_workers: int = 8,
             root_dir: str = './data',
@@ -126,7 +127,6 @@ class YourLightningModule(pl.LightningModule):
         # Compute gradients
         self.manual_backward(loss)
 
-
         # Initialize or update Fisher information matrix
         if self.fisher is None:
             self.fisher = {
@@ -167,7 +167,7 @@ class YourLightningModule(pl.LightningModule):
         print(f"Fisher information saved to {fisher_save_path}")
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=0.01)
+        return torch.optim.AdamW(self.parameters(), lr=self.hparams.lr)
 
     def train_dataloader(self):
         # Define your data loader here
