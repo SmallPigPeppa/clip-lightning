@@ -190,7 +190,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # self.model = get_lora_model(self.model)
         self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual = get_lora_model_vision(self.model.visual)
+        # self.model.visual = get_lora_model_vision(self.model.visual)
         print('********************************************')
         print(self.model)
         # print(self.model.visual.named_parameters())
