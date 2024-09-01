@@ -199,7 +199,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
         t_modules=[]
-        for name, module in model.named_modules():
+        for name, module in self.model.visual.named_modules():
             if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv2d, Conv1D)):
                 t_modules.append(name)
                 print(name)
