@@ -82,7 +82,8 @@ def get_lora_model_vision(model):
         lora_alpha=32,  # Scaling factor
         task_type='vision',  # Task type
         lora_dropout=0.,  # Dropout rate for LoRA
-        target_modules=target_modules  # Specify the target modules
+        # target_modules=target_modules  # Specify the target modules
+        target_modules='all-linear'  # Specify the target modules
     )
 
     # Apply LoRA to the model
@@ -194,9 +195,6 @@ class CLIPDualEncoderModel(LightningModule):
         for name, param in self.model.named_parameters():
             print(name)
 
-
-
-
         # # 定义需要冻结的完整参数名
         # exact_layers_to_freeze = [
         #     "base_model.model.class_embedding",
@@ -213,7 +211,6 @@ class CLIPDualEncoderModel(LightningModule):
         #     if name in exact_layers_to_freeze or any(f"resblocks.{i}" in name for i in range(9)):
         #         param.requires_grad = False
 
-
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
         #
@@ -226,6 +223,7 @@ class CLIPDualEncoderModel(LightningModule):
         # # 冻结 ln_final 参数
         # for param in self.model.ln_final.parameters():
         #     param.requires_grad = False
+
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
@@ -248,8 +246,6 @@ class CLIPDualEncoderModel(LightningModule):
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
-
-
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
