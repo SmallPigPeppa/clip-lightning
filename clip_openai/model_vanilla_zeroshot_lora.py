@@ -53,9 +53,10 @@ class CLIPDualEncoderModel(LightningModule):
         lora_config = LoraConfig(
             r=16,  # Rank of the low-rank decomposition
             lora_alpha=32,  # Scaling factor
-            task_type=TaskType.SEQ_CLS,  # Task type
+            # task_type=TaskType.SEQ_CLS,  # Task type
             lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules='all' # Specify the target modules
+            # target_modules=target_modules,  # Specify the target modules
+            target_modules='all'
         )
 
         # Apply LoRA to the model
