@@ -146,7 +146,7 @@ class YourLightningModule(pl.LightningModule):
             "train/top5_accuracy": acc5,
             "train/loss": loss
         }
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, on_epoch=True)
         return loss
 
     def on_train_epoch_end(self):
