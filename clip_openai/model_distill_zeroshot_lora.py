@@ -209,17 +209,17 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
-        # 假设 conv1 是模型中已存在的一个 Conv2d 层
-        conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
-        lora_config = LoraConfig(
-            inference_mode=False,
-            r=16,  # Rank of the low-rank decomposition
-            lora_alpha=32,  # Scaling factor
-            lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules=['conv1'],
-        )
-
-        self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+        # # 假设 conv1 是模型中已存在的一个 Conv2d 层
+        # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
+        # lora_config = LoraConfig(
+        #     inference_mode=False,
+        #     r=16,  # Rank of the low-rank decomposition
+        #     lora_alpha=32,  # Scaling factor
+        #     lora_dropout=0.1,  # Dropout rate for LoRA
+        #     target_modules=['conv1'],
+        # )
+        #
+        # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
         #
         # t_modules=[]
