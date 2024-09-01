@@ -190,7 +190,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # self.model = get_lora_model(self.model)
         self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+
 
         lora_config = LoraConfig(
             inference_mode=False,
@@ -206,7 +206,9 @@ class CLIPDualEncoderModel(LightningModule):
         )
 
         # Apply LoRA to the model
-        self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
+        self.model.visual = get_peft_model(self.model.visual, lora_config)
+
+        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
 
         print('********************************************')
