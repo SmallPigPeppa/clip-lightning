@@ -82,8 +82,8 @@ def get_lora_model_vision(model):
         lora_alpha=32,  # Scaling factor
         task_type='vision',  # Task type
         lora_dropout=0.,  # Dropout rate for LoRA
-        # target_modules=target_modules  # Specify the target modules
-        target_modules='all-linear'  # Specify the target modules
+        target_modules=target_modules  # Specify the target modules
+        # target_modules='all-linear'  # Specify the target modules
     )
 
     # Apply LoRA to the model
