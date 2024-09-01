@@ -149,6 +149,7 @@ class YourLightningModule(pl.LightningModule):
         for n in self.fisher:
             self.fisher[n] /= len(self.train_dataloader())
 
+        print(self.fisher)
         # Optionally, save fisher information after each epoch
         os.makedirs(self.hparams.fisher_dir, exist_ok=True)
         fisher_save_path = os.path.join(self.hparams.fisher_dir, f"fisher_epoch_{self.current_epoch}.pth")
