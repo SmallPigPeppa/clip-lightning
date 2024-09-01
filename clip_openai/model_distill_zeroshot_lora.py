@@ -209,7 +209,7 @@ class CLIPDualEncoderModel(LightningModule):
             r=16,  # 低秩分解的秩
             lora_alpha=32,  # 缩放因子
             lora_dropout=0.1,  # LoRA 的 Dropout 比率
-            target_modules=['weight']  # 目标模块 'weight' 可能是 conv1 的核心参数
+            target_modules=None  # 目标模块 'weight' 可能是 conv1 的核心参数
         )
 
         self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
