@@ -206,17 +206,11 @@ class CLIPDualEncoderModel(LightningModule):
 
         lora_config = LoraConfig(
             inference_mode=False,
-            r=16,  # Rank of the low-rank decomposition
-            lora_alpha=32,  # Scaling factor
-            # task_type='FEATURE_EXTRACTION',  # Task type
-            lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules='all',
-            # bias='none'  # Specify the target modules
-
-            # target_modules = ["q", "v"],
-            # target_modules='all-linear'  # Specify the target modules
+            r=16,  # 低秩分解的秩
+            lora_alpha=32,  # 缩放因子
+            lora_dropout=0.1,  # LoRA 的 Dropout 比率
+            target_modules=['weight']  # 目标模块 'weight' 可能是 conv1 的核心参数
         )
-
 
         self.model.visual.conv1 = get_peft_model(self.model.visual.conv1, lora_config)
 
