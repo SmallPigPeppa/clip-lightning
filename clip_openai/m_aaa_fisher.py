@@ -144,7 +144,7 @@ class YourLightningModule(pl.LightningModule):
         self.log_dict(metrics, sync_dist=True)
         return loss
 
-    def training_epoch_end(self, outputs):
+    def on_train_epoch_end(self):
         # Normalize Fisher Information by the number of batches
         for n in self.fisher:
             self.fisher[n] /= len(self.train_dataloader())
