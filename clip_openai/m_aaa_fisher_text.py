@@ -80,7 +80,7 @@ class YourLightningModule(pl.LightningModule):
         return result
 
     def compute_weights(self):
-        use_format = isinstance(self.templates[0], str)
+        use_format = True
         num_templates = len(self.templates)
         num_classes = len(self.classnames)
 
