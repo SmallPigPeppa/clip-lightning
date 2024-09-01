@@ -161,6 +161,17 @@ class DistillPredictor(nn.Module):
     #     return x
 
 
+
+class NewModel(nn.Module):
+    def __init__(self, original_conv1):
+        super(NewModel, self).__init__()
+        # 直接使用 deep copy 复制 conv1 层
+        self.conv1 = copy.deepcopy(original_conv1)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        return x
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -199,35 +210,17 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
         # 假设 conv1 是模型中已存在的一个 Conv2d 层
-        conv1 = self.model.visual.conv1
-
-        # 获取 conv1 的参数
-        in_channels = conv1.in_channels
-        out_channels = conv1.out_channels
-        kernel_size = conv1.kernel_size
-        stride = conv1.stride
-        padding = conv1.padding
-        bias = conv1.bias is not None
-
-        # 配置 LoRA
+        conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
         lora_config = LoraConfig(
             inference_mode=False,
-            r=16,
-            lora_alpha=32,
-            lora_dropout=0.1
+            r=16,  # Rank of the low-rank decomposition
+            lora_alpha=32,  # Scaling factor
+            lora_dropout=0.1,  # Dropout rate for LoRA
+            target_modules=['conv1'],
         )
 
-        # 初始化一个新的带 LoRA 的 Conv2d 层
-        lora_conv2d = get_peft_model(
-            nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias), lora_config)
+        self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
-        # 拷贝权重和偏置参数
-        lora_conv2d.weight.data = conv1.weight.data.clone()
-        if bias:
-            lora_conv2d.bias.data = conv1.bias.data.clone()
-
-        # 将新的带 LoRA 的层替换进模型
-        self.model.visual.conv1 = lora_conv2d
         #
         # t_modules=[]
         # for name, module in self.model.visual.named_modules():
