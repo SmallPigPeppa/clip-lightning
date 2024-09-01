@@ -123,6 +123,9 @@ class YourLightningModule(pl.LightningModule):
         loss = cross_entropy(logits, targets)
 
 
+        # Compute gradients
+        self.manual_backward(loss)
+
 
         # Initialize or update Fisher information matrix
         if self.fisher is None:
@@ -135,8 +138,6 @@ class YourLightningModule(pl.LightningModule):
             if p.grad is not None:
                 self.fisher[n] += p.grad.pow(2)
 
-        # Compute gradients
-        self.manual_backward(loss)
         opt.step()
 
         # Log training loss
