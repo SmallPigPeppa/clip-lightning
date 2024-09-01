@@ -78,12 +78,12 @@ def get_lora_model_vision(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=4,  # Rank of the low-rank decomposition
+        lora_alpha=8,  # Scaling factor
         # task_type='FEATURE_EXTRACTION',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
-        bias='none'  # Specify the target modules
+        # bias='none'  # Specify the target modules
 
         # target_modules = ["q", "v"],
         # target_modules='all-linear'  # Specify the target modules
@@ -255,11 +255,11 @@ class CLIPDualEncoderModel(LightningModule):
         # for param in self.model.transformer.parameters():
         #     param.requires_grad = False
 
-        # for param in self.model.token_embedding.parameters():
-        #     param.requires_grad = False
+        for param in self.model.token_embedding.parameters():
+            param.requires_grad = False
 
-        # # 冻结 positional_embedding 参数
-        # self.model.positional_embedding.requires_grad = False
+        # 冻结 positional_embedding 参数
+        self.model.positional_embedding.requires_grad = False
 
         # # 冻结 ln_final 参数
         # for param in self.model.ln_final.parameters():
