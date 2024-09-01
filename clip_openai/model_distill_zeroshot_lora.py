@@ -79,10 +79,12 @@ def get_lora_model_vision(model):
     lora_config = LoraConfig(
         inference_mode=False,
         r=8,  # Rank of the low-rank decomposition
-        lora_alpha=2,  # Scaling factor
+        lora_alpha=16,  # Scaling factor
         # task_type='FEATURE_EXTRACTION',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
-        target_modules=target_modules  # Specify the target modules
+        target_modules=target_modules,
+        bias='all'  # Specify the target modules
+
         # target_modules = ["q", "v"],
         # target_modules='all-linear'  # Specify the target modules
     )
