@@ -190,7 +190,7 @@ class YourLightningModule(pl.LightningModule):
 
 if __name__ == '__main__':
     model = YourLightningModule(
-        model_name='RN50',
+        model_name='ViT-B/16',
         download_root='./',
         num_classes_per_batch=20,
         max_length=77,
