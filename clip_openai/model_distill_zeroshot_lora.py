@@ -514,15 +514,15 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def on_before_optimizer_step(self, optimizer) -> None:
-        print("**************on_before_opt enter1*********")
-        for name, param in self.model.visual.named_parameters():
-            if param.grad is not None:
-                print(name)
-            # if param.requires_grad :
-            #     print(name)
-
-        print("***************on_before_opt exit1*********")
+    # def on_before_optimizer_step(self, optimizer) -> None:
+    #     print("**************on_before_opt enter1*********")
+    #     for name, param in self.model.visual.named_parameters():
+    #         if param.grad is not None:
+    #             print(name)
+    #         # if param.requires_grad :
+    #         #     print(name)
+    #
+    #     print("***************on_before_opt exit1*********")
 
         # print("**************on_before_opt enter2*********")
         # for name, param in self.model.visual.named_parameters():
