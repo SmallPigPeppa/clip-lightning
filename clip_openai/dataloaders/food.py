@@ -20,6 +20,7 @@ class UPMCFood101Dataset(ImageRetrievalDataset):
             split = 'test'
 
         # 确定图像和CSV文件的路径
+        self.root_dir = os.path.join(self.root_dir, 'UPMC-Food101')
         images_dir = os.path.join(self.root_dir, 'images', split)
         csv_file = os.path.join(self.root_dir, 'texts', f'{split}_titles.csv')
 
