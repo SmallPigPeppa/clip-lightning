@@ -221,11 +221,11 @@ class CLIPDualEncoderModel(LightningModule):
         else:
             return clip_loss
 
-    # def on_train_start(self):
-    #     # Zero-shot metric evaluation before training starts
-    #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #     self.log_dict(zero_shot_metric, sync_dist=True)
+    def on_train_start(self):
+        # Zero-shot metric evaluation before training starts
+        zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+        zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+        self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
@@ -239,11 +239,11 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats.clear()
         self.val_text_feats.clear()
 
-        # # zero-shot metric
-        # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-        #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        #     self.log_dict(zero_shot_metric, sync_dist=True)
+        # zero-shot metric
+        if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
+            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+            self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
