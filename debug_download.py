@@ -21,3 +21,7 @@ for model_name in model_names:
 
 # 现在可以通过 models 字典访问每个加载的模型
 # 例如：models['vit_base_patch16_224']
+
+# from datasets import load_dataset
+#
+# ds = load_dataset("jinaai/fashion-captions-de")
