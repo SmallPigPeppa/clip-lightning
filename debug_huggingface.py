@@ -11,7 +11,11 @@ from datasets import load_dataset
 
 # from datasets import load_dataset
 
-import os
+# import os
+#
+# os.environ['CURL_CA_BUNDLE'] = ''
+# ds = load_dataset("pixparse/cc3m-wds")
 
-os.environ['CURL_CA_BUNDLE'] = ''
-ds = load_dataset("pixparse/cc3m-wds")
+from datasets import load_dataset
+
+ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
