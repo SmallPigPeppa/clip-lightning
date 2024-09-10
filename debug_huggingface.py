@@ -11,4 +11,7 @@ from datasets import load_dataset
 
 # from datasets import load_dataset
 
+import os
+
+os.environ['CURL_CA_BUNDLE'] = ''
 ds = load_dataset("pixparse/cc3m-wds")
