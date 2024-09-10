@@ -2,26 +2,11 @@
 from datasets import load_dataset
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-# ds = load_dataset("jinaai/fashion-captions-de")
-
-
-# ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M")
-
-
-# ds = load_dataset("lcolonn/patfig")
-
-# from datasets import load_dataset
-
-# import os
-#
-# os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("pixparse/cc3m-wds")
 
-# from datasets import load_dataset
-#
-# ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 
 
+ds = load_dataset("UCSC-VLAA/Recap-COCO-30K")
 ds = load_dataset("Tverous/flicker30k")
 ds = load_dataset("jinaai/fashion-captions-de")
 ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M")
