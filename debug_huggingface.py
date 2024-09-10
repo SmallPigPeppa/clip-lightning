@@ -1,6 +1,7 @@
 
 from datasets import load_dataset
-
+import os
+os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("jinaai/fashion-captions-de")
 
 
@@ -20,6 +21,5 @@ from datasets import load_dataset
 #
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 
-from datasets import load_dataset
 
 ds = load_dataset("Tverous/flicker30k")
