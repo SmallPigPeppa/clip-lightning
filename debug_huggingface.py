@@ -7,4 +7,8 @@ from datasets import load_dataset
 # ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M")
 
 
-ds = load_dataset("lcolonn/patfig")
+# ds = load_dataset("lcolonn/patfig")
+
+# from datasets import load_dataset
+
+ds = load_dataset("pixparse/cc3m-wds")
