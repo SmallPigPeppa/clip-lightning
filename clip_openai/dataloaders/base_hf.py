@@ -1,7 +1,9 @@
-from torch.utils.data import Dataset
 import random
 import torch
+from packaging import version
+from torch.utils.data import Dataset
 from datasets import load_dataset
+
 
 # Define dataset mappings as a constant outside the class
 DATASET_MAPPINGS = {
@@ -72,11 +74,19 @@ class ImageRetrievalDataset(Dataset):
         return len(self.hf_dataset)
 
     def tokenize(self, text):
-        result = self.tokenizer(
-            text, padding='max_length', truncation=True, max_length=self.max_length
-        )
-        return result
+        sot_token = self.tokenizer.encoder["<|startoftext|>"]
+        eot_token = self.tokenizer.encoder["<|endoftext|>"]
+        tokens = [sot_token] + self.tokenizer.encode(text) + [eot_token]
+        if version.parse(torch.__version__) < version.parse("1.8.0"):
+            result = torch.zeros(self.max_length, dtype=torch.long)
+        else:
+            result = torch.zeros(self.max_length, dtype=torch.int)
 
+        if len(tokens) <= self.max_length:
+            result[:len(tokens)] = torch.tensor(tokens)
+        else:
+            result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
+        return result
     def __getitem__(self, index):
         sample = self.hf_dataset[index]
 
