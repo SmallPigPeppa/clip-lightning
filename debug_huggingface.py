@@ -15,4 +15,14 @@ os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 # ds = load_dataset("AterMors/wikiart_recaption")
 ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
+
+
+
+ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
+print(ds[0])
+ds = load_dataset("AterMors/wikiart_recaption",split="train")
+print(ds[0])
+ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M",split="train")
+print(ds[0])
+ds = load_dataset("jmhessel/newyorker_caption_contest",split="train")
 print(ds[0])
