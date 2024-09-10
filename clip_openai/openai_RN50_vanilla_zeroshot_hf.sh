@@ -17,7 +17,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --model.temperature 0.1 \
     --model.lr 1e-5 \
     --model.lr_warmup_epochs 5 \
-    --model.weight_decay 0. \
+    --model.weight_decay 0.1 \
     --model.download_root ./ \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
