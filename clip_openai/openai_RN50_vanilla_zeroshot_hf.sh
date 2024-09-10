@@ -7,7 +7,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --data.current_task 0 \
     --data.max_length 77 \
     --data.batch_size 128 \
-    --data.batch_size_zs 128 \
+    --data.batch_size_zs 32 \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name ${DATASET_NAME} \
