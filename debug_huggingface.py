@@ -16,6 +16,10 @@ from datasets import load_dataset
 # os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("pixparse/cc3m-wds")
 
+# from datasets import load_dataset
+#
+# ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
+
 from datasets import load_dataset
 
-ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
+ds = load_dataset("Tverous/flicker30k")
