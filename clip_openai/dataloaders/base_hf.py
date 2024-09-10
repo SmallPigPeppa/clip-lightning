@@ -40,7 +40,12 @@ DATASET_MAPPINGS = {
 
 class ImageRetrievalDataset(Dataset):
     def __init__(
-            self, dataset_name, root_dir, tokenizer, max_length: int = 200, transforms=None, split='train'
+            self,
+            dataset_name,
+            root_dir,
+            tokenizer,
+            max_length: int = 200,
+            transforms=None, split='train'
     ) -> None:
         super().__init__()
         self.dataset_name = dataset_name
