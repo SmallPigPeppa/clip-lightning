@@ -87,26 +87,26 @@ class ImageRetrievalDataset(Dataset):
         else:
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
+    # def __getitem__(self, index):
+    #     sample = self.hf_dataset[index]
+    #
+    #     # Extract image and text using the keys from the dictionary
+    #     image = sample[self.keys['image']]
+    #     text = sample[self.keys['text']]
+
     def __getitem__(self, index):
+        # image = Image.open(self.images[index])
+        # caption = self.captions[index]
         sample = self.hf_dataset[index]
 
         # Extract image and text using the keys from the dictionary
         image = sample[self.keys['image']]
-        text = sample[self.keys['text']]
-
-        # Handle tokenization and random selection if text is a list
-        if isinstance(text, list):
-            text = random.choice(text)
-        item = self.tokenize(text)
-
-        # Convert the tokenized text to tensor
-        for key in item.keys():
-            item[key] = torch.tensor(item[key])
-
-        # Apply image transformations if provided
+        caption = sample[self.keys['text']]
+        if isinstance(caption, list):
+            caption = random.choice(caption)
+        caption = self.tokenize(caption)
         if self.transforms:
             image = self.transforms(image)
 
-        item['image'] = image
-        return item
+        return {"image": image, "caption": caption}
 
