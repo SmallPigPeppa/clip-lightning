@@ -27,4 +27,4 @@ model4 = timm.create_model(
     model_name, pretrained=pretrained,num_classes=0, global_pool="avg"
 )
 print(model4)
-print(model4.hparams)
+# print(model4.hparams)
