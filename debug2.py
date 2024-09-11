@@ -1,5 +1,9 @@
 import timm
+import os
 
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['SSL_CERT_FILE'] = ''
+os.environ['SSL_CERT_DIR'] = ''
 model_name = 'resnet50'
 pretrained = True
 model = timm.create_model(
