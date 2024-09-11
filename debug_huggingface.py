@@ -22,7 +22,6 @@ import os
 
 # Disable SSL verification globally
 ssl._create_default_https_context = ssl._create_unverified_context
-
 # Optionally, set environment variables to disable SSL certificate verification
 os.environ["TRANSFORMERS_VERBOSITY"] = "error"  # To suppress warnings
 ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
