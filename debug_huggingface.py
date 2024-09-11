@@ -14,7 +14,7 @@ os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("lcolonn/patfig")
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 # ds = load_dataset("AterMors/wikiart_recaption")
-ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
+# ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 
 from transformers import AutoModel, AutoTokenizer
 import ssl
