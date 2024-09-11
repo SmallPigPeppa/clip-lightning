@@ -15,7 +15,8 @@ python cli_vanilla_zeroshot_hf.py fit \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 2e-6 \
+    --model.visual_lr 1e-5 \
+    --model.text_lr 2e-6 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
