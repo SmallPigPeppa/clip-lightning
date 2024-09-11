@@ -14,6 +14,7 @@ class CUB200Dataset(ImageRetrievalDataset):
     def fetch_dataset(self, split):
         # 加载图像路径和ID
         images_path = {}
+        self.root_dir = os.path.join(self.root_dir, 'cub200')
         with open(os.path.join(self.root_dir, 'CUB_200_2011', 'images.txt')) as f:
             for line in f:
                 image_id, path = line.strip().split()
@@ -42,4 +43,3 @@ class CUB200Dataset(ImageRetrievalDataset):
                 images_captions.append(captions)
 
         return selected_images_paths, images_captions
-
