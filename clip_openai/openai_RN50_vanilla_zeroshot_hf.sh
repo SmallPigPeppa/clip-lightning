@@ -19,7 +19,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
-    --data.batch_size 128 \
+    --data.batch_size 2 \
     --data.batch_size_zs 32 \
     --data.num_workers 8 \
     --data.config config.yaml \
