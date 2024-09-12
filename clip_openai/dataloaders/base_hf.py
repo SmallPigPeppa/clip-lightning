@@ -47,6 +47,16 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'image_description'},
         'splits': None
     },
+    'nouns': {
+        'hf_name': 'm1guelpf/nouns',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': None
+    },
+    'pokemon': {
+        'hf_name': 'TheFusion21/PokemonCards',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': None
+    },
 }
 
 
