@@ -20,11 +20,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    'face': {
-        'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
-        'keys': {'image': 'url', 'text': 'caption'},
-        'splits': {'train': 0.002, 'val': 0.0005}
-    },
+    # 'face': {
+    #     'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
+    #     'keys': {'image': 'url', 'text': 'caption'},
+    #     'splits': {'train': 0.002, 'val': 0.0005}
+    # },
     'newyorker': {
         'hf_name': 'jmhessel/newyorker_caption_contest',
         'keys': {'image': 'image', 'text': 'image_description'},
@@ -45,21 +45,21 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
     },
-    'midjourney': {
-        'hf_name': 'CortexLM/midjourney-v6',
-        'keys': {'image': 'image_url', 'text': 'prompt'},
-        'splits': {'train': 0.5, 'val': 0.5}
-    },
+    # 'midjourney': {
+    #     'hf_name': 'CortexLM/midjourney-v6',
+    #     'keys': {'image': 'image_url', 'text': 'prompt'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.2, 'val': 0.8}
     },
-    'pokemon': {
-        'hf_name': 'TheFusion21/PokemonCards',
-        'keys': {'image': 'image_url', 'text': 'caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
-    },
+    # 'pokemon': {
+    #     'hf_name': 'TheFusion21/PokemonCards',
+    #     'keys': {'image': 'image_url', 'text': 'caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
         'keys': {'image': 'image', 'text': 'text'},
