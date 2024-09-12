@@ -157,6 +157,7 @@ class ImageRetrievalDataset(Dataset):
                     raise
             else:
                 raise Exception(f"Failed to download image, status code: {response.status_code}")
+                print(f"URL: {sample[self.keys['image']]}")
         else:
             # already a PIL Image object
             image = sample[self.keys['image']]

@@ -29,11 +29,18 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # os.environ["TRANSFORMERS_VERBOSITY"] = "error"  # To suppress warnings
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 
-ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
-print(ds[0])
+# ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
+# print(ds[0])
 # ds = load_dataset("AterMors/wikiart_recaption",split="train")
 # print(ds[0])
 # ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M",split="train")
 # print(ds[0])
 # ds = load_dataset("jmhessel/newyorker_caption_contest",split="train")
 # print(ds[0])
+
+
+import requests
+from PIL import Image
+from io import BytesIO
+response = requests.get('https://images.pokemontcg.io/pl3/1_hires.png')
+image = Image.open(BytesIO(response.content))
