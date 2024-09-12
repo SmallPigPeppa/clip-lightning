@@ -131,9 +131,8 @@ class ImageRetrievalDataModule(LightningDataModule):
             np.random.shuffle(indices)
 
             # 根据索引划分数据集
-            train_indices = indices[:train_len]
-            val_indices = indices[train_len:train_len + val_len]
-            unused_indices = indices[train_len + val_len:]
+            train_indices = indices[:train_len].tolist()  # 转换为 Python 列表
+            val_indices = indices[train_len:train_len + val_len].tolist()
 
             # 创建子集
             train_dataset = Subset(full_dataset, train_indices)
