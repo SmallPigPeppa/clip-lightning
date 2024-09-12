@@ -84,7 +84,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        if isinstance(dataset_config['splits']['train'], (int, float)) :
+        if isinstance(dataset_config['splits']['train'], (int, float)):
             # 创建数据集实例（无分割信息）
             full_dataset = ImageRetrievalDataset(
                 dataset_name=self.dataset_name,
@@ -100,7 +100,14 @@ class ImageRetrievalDataModule(LightningDataModule):
             train_len = int(total_len * train_ratio)
             val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
 
-            train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+            # train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+
+            # 计算未使用部分的长度
+            unused_len = total_len - (train_len + val_len)
+            # 进行数据划分，包括一个未使用的数据子集
+            train_dataset, self.val_dataset, _ = random_split(
+                full_dataset, [train_len, val_len, unused_len]
+            )
 
             # 为验证集设置正确的变换
             self.val_dataset.dataset.transforms = val_transforms
