@@ -45,11 +45,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
     },
-    'midjourney': {
-        'hf_name': 'CortexLM/midjourney-v6',
-        'keys': {'image': 'image_url', 'text': 'prompt'},
-        'splits': {'train': 0.5, 'val': 0.5}
-    },
+    # 'midjourney': {
+    #     'hf_name': 'CortexLM/midjourney-v6',
+    #     'keys': {'image': 'image_url', 'text': 'prompt'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
@@ -70,11 +70,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption'},
         'splits': {'train': 0.5, 'val': 0.5}
     },
-    'vintage': {
-        'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
-        'keys': {'image': 'image_url', 'text': 'short_caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
-    },
+    # 'vintage': {
+    #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
+    #     'keys': {'image': 'image_url', 'text': 'short_caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
     'artbench': {
         'hf_name': 'alfredplpl/artbench-pd-256x256',
         'keys': {'image': 'image', 'text': 'caption'},
@@ -89,6 +89,36 @@ DATASET_MAPPINGS = {
         'hf_name': 'bigdata-pw/TheSimpsons',
         'keys': {'image': 'jpg', 'text': 'caption.txt'},
         'splits': {'train': 'train', 'val': 'validation'}
+    },
+    'lexica': {
+        'hf_name': 'vera365/lexica_dataset',
+        'keys': {'image': 'image', 'text': 'prompt'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    'styles': {
+        'hf_name': 'rezashkv/styles',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'plans': {
+        'hf_name': 'ShazShoaib/SingleFloorPlans',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'tomato': {
+        'hf_name': 'wellCh4n/tomato-leaf-disease-image',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'kream': {
+        'hf_name': 'hahminlew/kream-product-blip-captions',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'sketch-scene': {
+        'hf_name': 'zoheb/sketch-scene',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
     },
 }
 
