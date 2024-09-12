@@ -7,7 +7,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
-    --data.batch_size 256 \
+    --data.batch_size 128 \
     --data.batch_size_zs 32 \
     --data.num_workers 8 \
     --data.config config.yaml \
@@ -16,7 +16,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \
-    --model.lr 2e-5 \
+    --model.lr 1e-5 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
