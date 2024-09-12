@@ -85,7 +85,7 @@ class ImageRetrievalDataset(Dataset):
         # self.split = dataset_info['splits'].get(split, split)  # Default to the provided split if not found
 
         # 检查是否有预定义的分割
-        if dataset_info['splits'] is None:
+        if isinstance(dataset_info['splits']['train'], (int, float)) :
             # 如果没有预定义分割，我们默认使用 'train'
             self.split = 'train'
         else:
