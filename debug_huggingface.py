@@ -15,9 +15,9 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 # ds = load_dataset("AterMors/wikiart_recaption")
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
-ds = load_dataset("MohamedRashad/midjourney-detailed-prompts")
-ds = load_dataset("m1guelpf/nouns")
-ds = load_dataset("TheFusion21/PokemonCards")
+# ds = load_dataset("MohamedRashad/midjourney-detailed-prompts")
+# ds = load_dataset("m1guelpf/nouns")
+# ds = load_dataset("TheFusion21/PokemonCards")
 
 # from transformers import AutoModel, AutoTokenizer
 # import ssl
@@ -29,8 +29,8 @@ ds = load_dataset("TheFusion21/PokemonCards")
 # os.environ["TRANSFORMERS_VERBOSITY"] = "error"  # To suppress warnings
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 
-# ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
-# print(ds[0])
+ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
+print(ds[0])
 # ds = load_dataset("AterMors/wikiart_recaption",split="train")
 # print(ds[0])
 # ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M",split="train")

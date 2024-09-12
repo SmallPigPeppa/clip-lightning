@@ -3,6 +3,9 @@ import torch
 from packaging import version
 from torch.utils.data import Dataset
 from datasets import load_dataset
+import requests
+from PIL import Image
+from io import BytesIO
 
 
 # Define dataset mappings as a constant outside the class
@@ -19,8 +22,8 @@ DATASET_MAPPINGS = {
     },
     'face': {
         'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
-        'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'keys': {'image': 'url', 'text': 'caption'},
+        'splits': {'train': 0.002, 'val': 0.0005}
     },
     'newyorker': {
         'hf_name': 'jmhessel/newyorker_caption_contest',
@@ -54,7 +57,7 @@ DATASET_MAPPINGS = {
     },
     'pokemon': {
         'hf_name': 'TheFusion21/PokemonCards',
-        'keys': {'image': 'image', 'text': 'caption'},
+        'keys': {'image': 'image_url', 'text': 'caption'},
         'splits': {'train': 0.5, 'val': 0.5}
     },
 }
@@ -127,8 +130,18 @@ class ImageRetrievalDataset(Dataset):
         # caption = self.captions[index]
         sample = self.hf_dataset[index]
 
-        # Extract image and text using the keys from the dictionary
-        image = sample[self.keys['image']]
+        # # Extract image and text using the keys from the dictionary
+        # image = sample[self.keys['image']]
+        # Check if 'url' is in the key for image data to determine if it's a URL
+        if 'url' in self.keys['image']:
+            # Load image from URL
+            response = requests.get(sample[self.keys['image']])
+            image = Image.open(BytesIO(response.content))
+        else:
+            # already a PIL Image object
+            image = sample[self.keys['image']]
+
+
         caption = sample[self.keys['text']]
         if isinstance(caption, list):
             caption = random.choice(caption)
