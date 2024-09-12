@@ -214,13 +214,12 @@ class ImageRetrievalDataset(Dataset):
                 sample = self.hf_dataset[0]
                 image_url = sample[self.keys['image']]
                 image_path = self.download_image(image_url)  # Attempt to download image from the 0th element
-                if image_path is None:
-                    # Handle the case where the backup image also fails to download
-                    raise Exception("Backup image download also failed.")
                 # Update text from the 0th element since image download was successful
                 text = sample[self.keys['text']]
 
-        if 'url' not in self.keys['image']:  # Direct image loading without download
+            image = Image.open(image_path)
+
+        else:  # Direct image loading without download
             image = sample[self.keys['image']]
 
 
