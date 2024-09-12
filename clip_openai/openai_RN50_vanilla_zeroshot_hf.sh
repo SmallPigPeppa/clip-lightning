@@ -30,6 +30,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
+    --model.zero_shot_eval_interval 40 \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
