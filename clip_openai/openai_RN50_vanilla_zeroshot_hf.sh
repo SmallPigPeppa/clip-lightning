@@ -24,7 +24,7 @@ python cli_vanilla_zeroshot_hf.py fit \
     --data.num_workers 8 \
     --data.config config.yaml \
     --data.dataset_name ${DATASET_NAME} \
-    --data.root_dir /ppio_net0/torch_ds \
+    --data.root_dir /ppio_net0/torch_ds/cache \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 1024 \
     --model.temperature 0.1 \

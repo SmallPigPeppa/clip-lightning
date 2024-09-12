@@ -6,6 +6,7 @@ from datasets import load_dataset
 import requests
 from PIL import Image
 from io import BytesIO
+import os
 
 
 # Define dataset mappings as a constant outside the class
@@ -125,30 +126,66 @@ class ImageRetrievalDataset(Dataset):
     #     image = sample[self.keys['image']]
     #     text = sample[self.keys['text']]
 
-    def __getitem__(self, index):
-        # image = Image.open(self.images[index])
-        # caption = self.captions[index]
-        sample = self.hf_dataset[index]
+    # def __getitem__(self, index):
+    #     # image = Image.open(self.images[index])
+    #     # caption = self.captions[index]
+    #     sample = self.hf_dataset[index]
+    #
+    #     # # Extract image and text using the keys from the dictionary
+    #     # image = sample[self.keys['image']]
+    #     # Check if 'url' is in the key for image data to determine if it's a URL
+    #     if 'url' in self.keys['image']:
+    #         # Load image from URL
+    #         print(sample[self.keys['image']])
+    #         response = requests.get(sample[self.keys['image']])
+    #         image = Image.open(BytesIO(response.content))
+    #     else:
+    #         # already a PIL Image object
+    #         image = sample[self.keys['image']]
+    #
+    #
+    #     caption = sample[self.keys['text']]
+    #     if isinstance(caption, list):
+    #         caption = random.choice(caption)
+    #     caption = self.tokenize(caption)
+    #     if self.transforms:
+    #         image = self.transforms(image)
+    #
+    #     return {"image": image, "caption": caption}
 
-        # # Extract image and text using the keys from the dictionary
-        # image = sample[self.keys['image']]
+    def download_image(self, url):
+        # Construct a local file path based on the URL
+        file_path = os.path.join(self.root_dir, *url.split('/')[2:])
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # Download the image if it doesn't exist locally
+        if not os.path.exists(file_path):
+            response = requests.get(url)
+            if response.status_code == 200:
+                with open(file_path, 'wb') as f:
+                    f.write(response.content)
+            else:
+                print(f"Failed to download {url}")
+        return file_path
+
+    def __getitem__(self, index):
+        sample = self.hf_dataset[index]
+        image_url = sample[self.keys['image']]
+        text = sample[self.keys['text']]
+
         # Check if 'url' is in the key for image data to determine if it's a URL
         if 'url' in self.keys['image']:
-            # Load image from URL
-            print(sample[self.keys['image']])
-            response = requests.get(sample[self.keys['image']])
-            image = Image.open(BytesIO(response.content))
+            image_path = self.download_image(image_url)
+            image = Image.open(image_path)
         else:
-            # already a PIL Image object
             image = sample[self.keys['image']]
 
+        if isinstance(text, list):
+            text = random.choice(text)
+        text = self.tokenize(text)
 
-        caption = sample[self.keys['text']]
-        if isinstance(caption, list):
-            caption = random.choice(caption)
-        caption = self.tokenize(caption)
         if self.transforms:
             image = self.transforms(image)
 
-        return {"image": image, "caption": caption}
+        return {"image": image, "caption": text}
 
