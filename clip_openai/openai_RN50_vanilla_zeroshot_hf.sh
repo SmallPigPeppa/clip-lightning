@@ -15,6 +15,7 @@ DATASET_NAME=midjourney
 #DATASET_NAME=pokemon
 #DATASET_NAME=shahnegar
 DATASET_NAME=vintage
+DATASET_NAME=peanuts
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \

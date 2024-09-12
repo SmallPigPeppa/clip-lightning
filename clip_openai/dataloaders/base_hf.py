@@ -85,6 +85,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'en_text'},
         'splits': {'train': 'train', 'val': 'validation'}
     },
+    'simpsons': {
+        'hf_name': 'bigdata-pw/TheSimpsons',
+        'keys': {'image': 'jpg', 'text': 'caption.txt'},
+        'splits': {'train': 'train', 'val': 'validation'}
+    },
 }
 
 
