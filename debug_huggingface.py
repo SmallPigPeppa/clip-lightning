@@ -1,9 +1,8 @@
-
 from datasets import load_dataset
 import os
+
 os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("pixparse/cc3m-wds")
-
 
 
 # ds = load_dataset("UCSC-VLAA/Recap-COCO-30K")
@@ -15,16 +14,17 @@ os.environ['CURL_CA_BUNDLE'] = ''
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
 # ds = load_dataset("AterMors/wikiart_recaption")
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
+ds = load_dataset("MohamedRashad/midjourney-detailed-prompts")
 
-from transformers import AutoModel, AutoTokenizer
-import ssl
-import os
-
-# Disable SSL verification globally
-ssl._create_default_https_context = ssl._create_unverified_context
-# Optionally, set environment variables to disable SSL certificate verification
-os.environ["TRANSFORMERS_VERBOSITY"] = "error"  # To suppress warnings
-ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
+# from transformers import AutoModel, AutoTokenizer
+# import ssl
+# import os
+#
+# # Disable SSL verification globally
+# ssl._create_default_https_context = ssl._create_unverified_context
+# # Optionally, set environment variables to disable SSL certificate verification
+# os.environ["TRANSFORMERS_VERBOSITY"] = "error"  # To suppress warnings
+# ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg",split="train")
 # print(ds[0])

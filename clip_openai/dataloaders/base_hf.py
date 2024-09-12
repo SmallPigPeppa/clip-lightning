@@ -42,6 +42,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
     },
+    'midjourney': {
+        'hf_name': 'MohamedRashad/midjourney-detailed-prompts',
+        'keys': {'image': 'image', 'text': 'image_description'},
+        'splits': None
+    },
 }
 
 
