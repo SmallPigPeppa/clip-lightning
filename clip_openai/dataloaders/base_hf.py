@@ -133,10 +133,30 @@ class ImageRetrievalDataset(Dataset):
         # # Extract image and text using the keys from the dictionary
         # image = sample[self.keys['image']]
         # Check if 'url' is in the key for image data to determine if it's a URL
+        # if 'url' in self.keys['image']:
+        #     # Load image from URL
+        #     response = requests.get(sample[self.keys['image']])
+        #     image = Image.open(BytesIO(response.content))
+        # else:
+        #     # already a PIL Image object
+        #     image = sample[self.keys['image']]
+
+        # Check if 'url' is in the key for image data to determine if it's a URL
         if 'url' in self.keys['image']:
             # Load image from URL
             response = requests.get(sample[self.keys['image']])
-            image = Image.open(BytesIO(response.content))
+
+            # Check if the request was successful
+            if response.status_code == 200:
+                try:
+                    image = Image.open(BytesIO(response.content))
+                    image.load()  # Force loading the image to catch any errors in loading
+                except IOError as e:
+                    # Log the error and the URL for debugging
+                    print(f"Error loading image: {e}\nURL: {sample[self.keys['image']]}")
+                    raise
+            else:
+                raise Exception(f"Failed to download image, status code: {response.status_code}")
         else:
             # already a PIL Image object
             image = sample[self.keys['image']]
