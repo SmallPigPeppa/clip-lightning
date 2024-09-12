@@ -154,8 +154,9 @@ class ImageRetrievalDataset(Dataset):
     #     return {"image": image, "caption": caption}
 
     def download_image(self, url):
-        # Construct a local file path based on the URL
-        file_path = os.path.join(self.root_dir, *url.split('/')[2:])
+        # Modify the directory structure to include '/cache'
+        cache_dir = os.path.join(self.root_dir, 'cache')
+        file_path = os.path.join(cache_dir, *url.split('/')[2:])
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         # Download the image if it doesn't exist locally
