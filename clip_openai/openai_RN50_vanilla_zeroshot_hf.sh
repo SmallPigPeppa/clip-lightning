@@ -3,7 +3,9 @@
 MODEL_NAME=ViT-B/16
 #DATASET_NAME=fashion
 #DATASET_NAME=patfig
-DATASET_NAME=pet
+#DATASET_NAME=pet
+DATASET_NAME=wikiart
+
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
