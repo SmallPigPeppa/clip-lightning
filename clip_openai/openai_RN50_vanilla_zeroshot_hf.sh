@@ -12,8 +12,8 @@ MODEL_NAME=ViT-B/16
 #DATASET_NAME=nouns
 #DATASET_NAME=emoji
 #DATASET_NAME=face
-#DATASET_NAME=pokemon
-DATASET_NAME=shahnegar
+DATASET_NAME=pokemon
+#DATASET_NAME=shahnegar
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
