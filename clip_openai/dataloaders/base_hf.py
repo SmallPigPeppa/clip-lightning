@@ -45,11 +45,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
     },
-    # 'midjourney': {
-    #     'hf_name': 'CortexLM/midjourney-v6',
-    #     'keys': {'image': 'image_url', 'text': 'prompt'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
+    'midjourney': {
+        'hf_name': 'CortexLM/midjourney-v6',
+        'keys': {'image': 'image_url', 'text': 'prompt'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
