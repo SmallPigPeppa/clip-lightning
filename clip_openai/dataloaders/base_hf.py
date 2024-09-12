@@ -223,8 +223,6 @@ class ImageRetrievalDataset(Dataset):
         if 'url' not in self.keys['image']:  # Direct image loading without download
             image = sample[self.keys['image']]
 
-        if image_path:  # Image loaded successfully, directly from path
-            image = Image.open(image_path)
 
         if isinstance(text, list):
             text = random.choice(text)
