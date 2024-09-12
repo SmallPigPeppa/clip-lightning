@@ -63,12 +63,12 @@ DATASET_MAPPINGS = {
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'peanuts': {
         'hf_name': 'afmck/peanuts-flan-t5-xl',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     # 'vintage': {
     #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
@@ -78,7 +78,7 @@ DATASET_MAPPINGS = {
     'artbench': {
         'hf_name': 'alfredplpl/artbench-pd-256x256',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'hausavg': {
         'hf_name': 'HausaNLP/HausaVG',
@@ -98,27 +98,27 @@ DATASET_MAPPINGS = {
     'styles': {
         'hf_name': 'rezashkv/styles',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'plans': {
         'hf_name': 'ShazShoaib/SingleFloorPlans',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'tomato': {
         'hf_name': 'wellCh4n/tomato-leaf-disease-image',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'kream': {
         'hf_name': 'hahminlew/kream-product-blip-captions',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'sketch': {
         'hf_name': 'zoheb/sketch-scene',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
 }
 
