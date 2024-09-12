@@ -166,7 +166,9 @@ class ImageRetrievalDataset(Dataset):
                 with open(file_path, 'wb') as f:
                     f.write(response.content)
             else:
+                # Print error and return None if the download fails
                 print(f"Failed to download {url}")
+                return None  # Return None to indicate failure
         return file_path
 
     def __getitem__(self, index):
@@ -177,9 +179,22 @@ class ImageRetrievalDataset(Dataset):
         # Check if 'url' is in the key for image data to determine if it's a URL
         if 'url' in self.keys['image']:
             image_path = self.download_image(image_url)
-            image = Image.open(image_path)
-        else:
+            if image_path is None:
+                # If image_path is None, access the 0th element
+                sample = self.hf_dataset[0]
+                image_url = sample[self.keys['image']]
+                image_path = self.download_image(image_url)  # Attempt to download image from the 0th element
+                if image_path is None:
+                    # Handle the case where the backup image also fails to download
+                    raise Exception("Backup image download also failed.")
+                # Update text from the 0th element since image download was successful
+                text = sample[self.keys['text']]
+
+        if 'url' not in self.keys['image']:  # Direct image loading without download
             image = sample[self.keys['image']]
+
+        if image_path:  # Image loaded successfully, directly from path
+            image = Image.open(image_path)
 
         if isinstance(text, list):
             text = random.choice(text)
@@ -189,4 +204,3 @@ class ImageRetrievalDataset(Dataset):
             image = self.transforms(image)
 
         return {"image": image, "caption": text}
-
