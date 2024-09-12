@@ -1,3 +1,4 @@
+import torch
 from typing import Optional
 from torchvision import transforms
 from torch.utils.data import random_split, DataLoader, Subset
@@ -93,24 +94,47 @@ class ImageRetrievalDataModule(LightningDataModule):
                 max_length=self.max_length,
                 transforms=train_transforms  # 使用训练集变换初始化
             )
-            # 如果划分方式为数字比例
+            # # 如果划分方式为数字比例
+            # train_ratio = dataset_config['splits']['train']
+            # val_ratio = dataset_config['splits']['val']
+            # total_len = len(full_dataset)
+            # train_len = int(total_len * train_ratio)
+            # val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
+            #
+            # # train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+            #
+            # # 计算未使用部分的长度
+            # unused_len = total_len - (train_len + val_len)
+            # # 进行数据划分，包括一个未使用的数据子集
+            # train_dataset, self.val_dataset, _ = random_split(
+            #     full_dataset, [train_len, val_len, unused_len]
+            # )
+            # # 为验证集设置正确的变换
+            # self.val_dataset.dataset.transforms = val_transforms
+
+
+
+
+            # 从配置中读取训练集和验证集的比例
             train_ratio = dataset_config['splits']['train']
             val_ratio = dataset_config['splits']['val']
             total_len = len(full_dataset)
             train_len = int(total_len * train_ratio)
             val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
 
-            # train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+            # 使用 torch.randperm 生成一个随机索引数组
+            indices = torch.randperm(total_len)
 
-            # 计算未使用部分的长度
-            unused_len = total_len - (train_len + val_len)
-            # 进行数据划分，包括一个未使用的数据子集
-            train_dataset, self.val_dataset, _ = random_split(
-                full_dataset, [train_len, val_len, unused_len]
-            )
+            # 根据比例划分索引
+            train_indices = indices[:train_len]
+            val_indices = indices[train_len:train_len + val_len]
 
+            # 使用 Subset 从 full_dataset 中提取相应的子集
+            train_dataset = Subset(full_dataset, train_indices)
+            self.val_dataset = Subset(full_dataset, val_indices)
             # 为验证集设置正确的变换
             self.val_dataset.dataset.transforms = val_transforms
+
 
         else:
             # 使用预定义的分割

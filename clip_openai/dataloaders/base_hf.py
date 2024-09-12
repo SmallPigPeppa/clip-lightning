@@ -8,7 +8,6 @@ from PIL import Image
 from io import BytesIO
 import os
 
-
 # Define dataset mappings as a constant outside the class
 DATASET_MAPPINGS = {
     'emoji': {
@@ -61,6 +60,31 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image_url', 'text': 'caption'},
         'splits': {'train': 0.5, 'val': 0.5}
     },
+    'shahnegar': {
+        'hf_name': 'sadrasabouri/ShahNegar',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'peanuts': {
+        'hf_name': 'afmck/peanuts-flan-t5-xl',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'vintage': {
+        'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
+        'keys': {'image': 'image_url', 'text': 'short_caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'artbench': {
+        'hf_name': 'alfredplpl/artbench-pd-256x256',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'hausavg': {
+        'hf_name': 'HausaNLP/HausaVG',
+        'keys': {'image': 'image', 'text': 'en_text'},
+        'splits': {'train': 'train', 'val': 'validation'}
+    },
 }
 
 
@@ -89,7 +113,7 @@ class ImageRetrievalDataset(Dataset):
         # self.split = dataset_info['splits'].get(split, split)  # Default to the provided split if not found
 
         # 检查是否有预定义的分割
-        if isinstance(dataset_info['splits']['train'], (int, float)) :
+        if isinstance(dataset_info['splits']['train'], (int, float)):
             # 如果没有预定义分割，我们默认使用 'train'
             self.split = 'train'
         else:
@@ -119,6 +143,7 @@ class ImageRetrievalDataset(Dataset):
         else:
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
+
     # def __getitem__(self, index):
     #     sample = self.hf_dataset[index]
     #
