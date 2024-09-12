@@ -16,6 +16,7 @@ MODEL_NAME=ViT-B/16
 DATASET_NAME=shahnegar
 #DATASET_NAME=vintage
 #DATASET_NAME=peanuts
+DATASET_NAME=artbench
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
