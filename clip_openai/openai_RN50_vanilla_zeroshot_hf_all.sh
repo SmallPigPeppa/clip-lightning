@@ -7,7 +7,7 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("shahnegar" "peanuts" "artbench" "hausavg" "simpsons" "lexica" "styles" "plans" "tomato" "kream" "sketch")
+DATASETS=("emoji","wikiart","patfig","fashion","pet","nouns","shahnegar" "peanuts" "artbench" "hausavg" "simpsons" "lexica" "styles" "plans" "tomato" "kream" "sketch")
 
 # 其他参数
 CONFIG_FILE=config.yaml
