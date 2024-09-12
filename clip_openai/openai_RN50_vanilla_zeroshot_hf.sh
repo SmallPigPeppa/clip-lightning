@@ -9,6 +9,7 @@ MODEL_NAME=ViT-B/16
 #DATASET_NAME=pet
 #DATASET_NAME=wikiart
 DATASET_NAME=midjourney
+DATASET_NAME=nouns
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
