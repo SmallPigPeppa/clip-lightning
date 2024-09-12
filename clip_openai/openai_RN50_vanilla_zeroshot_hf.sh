@@ -11,8 +11,8 @@ MODEL_NAME=ViT-B/16
 #DATASET_NAME=midjourney
 #DATASET_NAME=nouns
 #DATASET_NAME=emoji
-#DATASET_NAME=face
-DATASET_NAME=pokemon
+DATASET_NAME=face
+#DATASET_NAME=pokemon
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
