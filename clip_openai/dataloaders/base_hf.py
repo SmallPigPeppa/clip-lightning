@@ -66,8 +66,16 @@ class ImageRetrievalDataset(Dataset):
         if dataset_info is None:
             raise ValueError(f"Dataset {dataset_name} is not supported.")
 
-        # Handle split mapping
-        self.split = dataset_info['splits'].get(split, split)  # Default to the provided split if not found
+        # # Handle split mapping
+        # self.split = dataset_info['splits'].get(split, split)  # Default to the provided split if not found
+
+        # 检查是否有预定义的分割
+        if dataset_info['splits'] is None:
+            # 如果没有预定义分割，我们默认使用 'train'
+            self.split = 'train'
+        else:
+            # 如果有预定义分割，则尝试获取指定分割，如果不存在，则使用原始分割
+            self.split = dataset_info['splits'].get(split, split)
 
         # Load the dataset with the correct split
         self.hf_dataset = load_dataset(dataset_info['hf_name'], split=self.split)
