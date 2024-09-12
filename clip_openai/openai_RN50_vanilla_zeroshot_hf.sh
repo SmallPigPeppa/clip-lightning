@@ -1,7 +1,8 @@
 #MODEL_NAME=ViT-L/14
 #MODEL_NAME=RN50
 MODEL_NAME=ViT-B/16
-DATASET_NAME=fashion
+#DATASET_NAME=fashion
+DATASET_NAME=patfig
 python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
