@@ -94,7 +94,7 @@ class ImageRetrievalDataModule(LightningDataModule):
                 transforms=train_transforms  # 使用训练集变换初始化
             )
             # 随机划分数据集
-            train_len = int(0.8 * len(full_dataset))
+            train_len = int(0.5 * len(full_dataset))
             val_len = len(full_dataset) - train_len
             train_data, val_data = random_split(full_dataset, [train_len, val_len])
 
