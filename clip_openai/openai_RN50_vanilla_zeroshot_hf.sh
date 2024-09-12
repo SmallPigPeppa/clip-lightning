@@ -8,11 +8,11 @@ MODEL_NAME=ViT-B/16
 #DATASET_NAME=patfig
 #DATASET_NAME=pet
 #DATASET_NAME=wikiart
-#DATASET_NAME=midjourney
+DATASET_NAME=midjourney
 #DATASET_NAME=nouns
 #DATASET_NAME=emoji
 #DATASET_NAME=face
-DATASET_NAME=pokemon
+#DATASET_NAME=pokemon
 #DATASET_NAME=shahnegar
 
 export HF_HOME=/ppio_net0/huggingface
