@@ -10,17 +10,17 @@ DATASET_MAPPINGS = {
     'emoji': {
         'hf_name': 'Norod78/microsoft-fluentui-emoji-512-whitebg',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': None
+        'splits': {'train': 0.5, 'val': 0.5}
     },
     'wikiart': {
         'hf_name': 'AterMors/wikiart_recaption',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': None
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'face': {
         'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': None
+        'splits': {'train': 0.5, 'val': 0.5}
     },
     'newyorker': {
         'hf_name': 'jmhessel/newyorker_caption_contest',
@@ -45,17 +45,17 @@ DATASET_MAPPINGS = {
     'midjourney': {
         'hf_name': 'MohamedRashad/midjourney-detailed-prompts',
         'keys': {'image': 'image', 'text': 'image_description'},
-        'splits': None
+        'splits': {'train': 0.5, 'val': 0.5}
     },
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': None
+        'splits': {'train': 0.2, 'val': 0.8}
     },
     'pokemon': {
         'hf_name': 'TheFusion21/PokemonCards',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': None
+        'splits': {'train': 0.5, 'val': 0.5}
     },
 }
 

@@ -84,7 +84,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         train_transforms = image_transform_v2(config_path=self.config, is_train=True)
         val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
-        if dataset_config['splits'] is None:
+        if isinstance(dataset_config['splits']['train'], (int, float)) :
             # 创建数据集实例（无分割信息）
             full_dataset = ImageRetrievalDataset(
                 dataset_name=self.dataset_name,
@@ -93,16 +93,18 @@ class ImageRetrievalDataModule(LightningDataModule):
                 max_length=self.max_length,
                 transforms=train_transforms  # 使用训练集变换初始化
             )
-            # 随机划分数据集
-            train_len = int(0.5 * len(full_dataset))
-            val_len = len(full_dataset) - train_len
-            train_data, val_data = random_split(full_dataset, [train_len, val_len])
+            # 如果划分方式为数字比例
+            train_ratio = dataset_config['splits']['train']
+            val_ratio = dataset_config['splits']['val']
+            total_len = len(full_dataset)
+            train_len = int(total_len * train_ratio)
+            val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
 
-            # 为验证集数据设置正确的变换
-            # 假设ImageRetrievalDataset支持动态更改transforms
-            train_dataset = train_data
-            self.val_dataset = val_data
-            self.val_dataset.dataset.transforms = val_transforms  # 更新验证集的transforms
+            train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+
+            # 为验证集设置正确的变换
+            self.val_dataset.dataset.transforms = val_transforms
+
         else:
             # 使用预定义的分割
             train_dataset = ImageRetrievalDataset(
