@@ -165,8 +165,11 @@ class ImageRetrievalDataset(Dataset):
             if response.status_code == 200:
                 with open(file_path, 'wb') as f:
                     f.write(response.content)
+                print(f"Downloaded and saved: {file_path}")  # Success message
             else:
                 print(f"Failed to download {url}")
+        else:
+            print(f"File already exists: {file_path}")  # File already exists message
         return file_path
 
     def __getitem__(self, index):
