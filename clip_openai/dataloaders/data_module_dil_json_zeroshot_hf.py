@@ -12,6 +12,7 @@ from .imagenet import build_dataset
 import argparse
 import os
 from .base_hf import ImageRetrievalDataset
+from .base_hf import DATASET_MAPPINGS
 
 
 # DATASET_LOOKUP = {
@@ -61,22 +62,65 @@ class ImageRetrievalDataModule(LightningDataModule):
             self,
             stage: Optional[str] = None,
     ) -> None:
-        train_dataset = ImageRetrievalDataset(
-            dataset_name=self.dataset_name,
-            root_dir=self.root_dir,
-            tokenizer=self.tokenizer,
-            max_length=self.max_length,
-            split="train",
-            transforms=image_transform_v2(config_path=self.config, is_train=True)
-        )
-        self.val_dataset = ImageRetrievalDataset(
-            dataset_name=self.dataset_name,
-            root_dir=self.root_dir,
-            tokenizer=self.tokenizer,
-            max_length=self.max_length,
-            split="val",
-            transforms=image_transform_v2(config_path=self.config, is_train=False)
-        )
+        # train_dataset = ImageRetrievalDataset(
+        #     dataset_name=self.dataset_name,
+        #     root_dir=self.root_dir,
+        #     tokenizer=self.tokenizer,
+        #     max_length=self.max_length,
+        #     split="train",
+        #     transforms=image_transform_v2(config_path=self.config, is_train=True)
+        # )
+        # self.val_dataset = ImageRetrievalDataset(
+        #     dataset_name=self.dataset_name,
+        #     root_dir=self.root_dir,
+        #     tokenizer=self.tokenizer,
+        #     max_length=self.max_length,
+        #     split="val",
+        #     transforms=image_transform_v2(config_path=self.config, is_train=False)
+        # )
+        dataset_config = DATASET_MAPPINGS[self.dataset_name]
+
+        # 获取数据增强的配置
+        train_transforms = image_transform_v2(config_path=self.config, is_train=True)
+        val_transforms = image_transform_v2(config_path=self.config, is_train=False)
+
+        if dataset_config['splits'] is None:
+            # 创建数据集实例（无分割信息）
+            full_dataset = ImageRetrievalDataset(
+                dataset_name=self.dataset_name,
+                root_dir=self.root_dir,
+                tokenizer=self.tokenizer,
+                max_length=self.max_length,
+                transforms=train_transforms  # 使用训练集变换初始化
+            )
+            # 随机划分数据集
+            train_len = int(0.8 * len(full_dataset))
+            val_len = len(full_dataset) - train_len
+            train_data, val_data = random_split(full_dataset, [train_len, val_len])
+
+            # 为验证集数据设置正确的变换
+            # 假设ImageRetrievalDataset支持动态更改transforms
+            train_dataset = train_data
+            self.val_dataset = val_data
+            self.val_dataset.dataset.transforms = val_transforms  # 更新验证集的transforms
+        else:
+            # 使用预定义的分割
+            train_dataset = ImageRetrievalDataset(
+                dataset_name=self.dataset_name,
+                root_dir=self.root_dir,
+                tokenizer=self.tokenizer,
+                max_length=self.max_length,
+                split='train',
+                transforms=train_transforms
+            )
+            self.val_dataset = ImageRetrievalDataset(
+                dataset_name=self.dataset_name,
+                root_dir=self.root_dir,
+                tokenizer=self.tokenizer,
+                max_length=self.max_length,
+                split='val',
+                transforms=val_transforms
+            )
 
         # 划分训练集为多个任务
         task_size = len(train_dataset) // self.num_tasks

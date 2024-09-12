@@ -37,6 +37,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 'train', 'val': 'test'}
     },
+    'pet': {
+        'hf_name': 'visual-layer/oxford-iiit-pet-vl-enriched',
+        'keys': {'image': 'image', 'text': 'caption_enriched'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
 }
 
 

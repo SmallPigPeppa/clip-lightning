@@ -2,9 +2,9 @@
 #MODEL_NAME=RN50
 MODEL_NAME=ViT-B/16
 #DATASET_NAME=fashion
-DATASET_NAME=patfig
-#export HF_DATASETS_CACHE="/path/to/another/directory/datasets"
-#export HF_HOME=/ppio_net0/huggingface
+#DATASET_NAME=patfig
+DATASET_NAME=pet
+export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
