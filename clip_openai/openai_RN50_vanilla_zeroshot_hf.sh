@@ -1,10 +1,14 @@
 #MODEL_NAME=ViT-L/14
 #MODEL_NAME=RN50
 MODEL_NAME=ViT-B/16
+
+
+
 #DATASET_NAME=fashion
 #DATASET_NAME=patfig
 #DATASET_NAME=pet
-DATASET_NAME=wikiart
+#DATASET_NAME=wikiart
+DATASET_NAME=midjourney
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
