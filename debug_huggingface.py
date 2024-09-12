@@ -16,6 +16,7 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # ds = load_dataset("AterMors/wikiart_recaption")
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 ds = load_dataset("MohamedRashad/midjourney-detailed-prompts")
+ds = load_dataset("m1guelpf/nouns")
 
 # from transformers import AutoModel, AutoTokenizer
 # import ssl
