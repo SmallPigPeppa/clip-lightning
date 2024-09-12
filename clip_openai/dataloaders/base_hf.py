@@ -55,11 +55,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.2, 'val': 0.8}
     },
-    # 'pokemon': {
-    #     'hf_name': 'TheFusion21/PokemonCards',
-    #     'keys': {'image': 'image_url', 'text': 'caption'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
+    'pokemon': {
+        'hf_name': 'TheFusion21/PokemonCards',
+        'keys': {'image': 'image_url', 'text': 'caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
         'keys': {'image': 'image', 'text': 'text'},
