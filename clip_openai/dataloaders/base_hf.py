@@ -115,7 +115,7 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.5, 'val': 0.5}
     },
-    'sketch-scene': {
+    'sketch': {
         'hf_name': 'zoheb/sketch-scene',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.5, 'val': 0.5}

@@ -17,6 +17,7 @@ DATASET_NAME=shahnegar
 #DATASET_NAME=vintage
 #DATASET_NAME=peanuts
 DATASET_NAME=artbench
+DATASET_NAME=hausavg
 
 export HF_HOME=/ppio_net0/huggingface
 python cli_vanilla_zeroshot_hf.py fit \
