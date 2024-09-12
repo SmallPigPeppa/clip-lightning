@@ -13,7 +13,7 @@ DATASET_MAPPINGS = {
         'splits': None
     },
     'wikiart': {
-        'hf_name': 'sAterMors/wikiart_recaption',
+        'hf_name': 'AterMors/wikiart_recaption',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': None
     },
