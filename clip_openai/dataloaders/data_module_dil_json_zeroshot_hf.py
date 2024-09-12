@@ -1,4 +1,4 @@
-import torch
+
 from typing import Optional
 from torchvision import transforms
 from torch.utils.data import random_split, DataLoader, Subset
@@ -14,6 +14,10 @@ import argparse
 import os
 from .base_hf import ImageRetrievalDataset
 from .base_hf import DATASET_MAPPINGS
+
+
+import torch
+import numpy as np
 
 
 # DATASET_LOOKUP = {
@@ -94,21 +98,47 @@ class ImageRetrievalDataModule(LightningDataModule):
                 max_length=self.max_length,
                 transforms=train_transforms  # 使用训练集变换初始化
             )
+            # # 如果划分方式为数字比例
+            # train_ratio = dataset_config['splits']['train']
+            # val_ratio = dataset_config['splits']['val']
+            # total_len = len(full_dataset)
+            # train_len = int(total_len * train_ratio)
+            # val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
+            #
+            # # train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
+            #
+            # # 计算未使用部分的长度
+            # unused_len = total_len - (train_len + val_len)
+            # # 进行数据划分，包括一个未使用的数据子集
+            # train_dataset, self.val_dataset, _ = random_split(
+            #     full_dataset, [train_len, val_len, unused_len]
+            # )
+            # # 为验证集设置正确的变换
+            # self.val_dataset.dataset.transforms = val_transforms
+
             # 如果划分方式为数字比例
             train_ratio = dataset_config['splits']['train']
             val_ratio = dataset_config['splits']['val']
             total_len = len(full_dataset)
+
+            # 计算划分长度
             train_len = int(total_len * train_ratio)
             val_len = int(total_len * val_ratio)  # 确保验证集按自身比例计算
 
-            # train_dataset, self.val_dataset = random_split(full_dataset, [train_len, val_len])
 
-            # 计算未使用部分的长度
-            unused_len = total_len - (train_len + val_len)
-            # 进行数据划分，包括一个未使用的数据子集
-            train_dataset, self.val_dataset, _ = random_split(
-                full_dataset, [train_len, val_len, unused_len]
-            )
+            # 创建一个随机索引列表
+            indices = np.arange(total_len)
+            np.random.shuffle(indices)
+
+            # 根据索引划分数据集
+            train_indices = indices[:train_len]
+            val_indices = indices[train_len:train_len + val_len]
+            unused_indices = indices[train_len + val_len:]
+
+            # 创建子集
+            train_dataset = Subset(full_dataset, train_indices)
+            self.val_dataset = Subset(full_dataset, val_indices)
+
             # 为验证集设置正确的变换
             self.val_dataset.dataset.transforms = val_transforms
 
