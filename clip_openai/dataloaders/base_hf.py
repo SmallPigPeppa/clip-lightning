@@ -43,7 +43,7 @@ DATASET_MAPPINGS = {
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.2, 'val': 0.8}
+        'splits': {'train': 0.5, 'val': 0.5}
     },
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
