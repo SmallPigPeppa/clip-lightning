@@ -9,15 +9,16 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # ds = load_dataset("UCSC-VLAA/Recap-COCO-30K")
 # ds = load_dataset("Tverous/flicker30k")
 # ds = load_dataset("phiyodr/coco2017")
-# ds = load_dataset("jinaai/fashion-captions-de")
 # ds = load_dataset("OpenFace-CQUPT/FaceCaption-15M")
-# ds = load_dataset("lcolonn/patfig")
 # ds = load_dataset("jmhessel/newyorker_caption_contest", "explanation")
+# ds = load_dataset("TheFusion21/PokemonCards")
+# ds = load_dataset("jinaai/fashion-captions-de")
+# ds = load_dataset("lcolonn/patfig")
 # ds = load_dataset("AterMors/wikiart_recaption")
 # ds = load_dataset("Norod78/microsoft-fluentui-emoji-512-whitebg")
 # ds = load_dataset("MohamedRashad/midjourney-detailed-prompts")
 # ds = load_dataset("m1guelpf/nouns")
-# ds = load_dataset("TheFusion21/PokemonCards")
+
 
 # from transformers import AutoModel, AutoTokenizer
 # import ssl
@@ -39,8 +40,14 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # print(ds[0])
 
 
-import requests
-from PIL import Image
-from io import BytesIO
-response = requests.get('https://images.pokemontcg.io/pl3/1_hires.png')
-image = Image.open(BytesIO(response.content))
+
+from clip_openai.dataloaders.base_hf import DATASET_MAPPINGS
+for dataset_name, dataset_info in DATASET_MAPPINGS.items():
+    print(f"Downloading dataset: {dataset_name}")
+    try:
+        ds = load_dataset(dataset_info['hf_name'])
+        print(f"Successfully downloaded {dataset_name}")
+    except Exception as e:
+        print(f"Failed to download {dataset_name}: {e}")
+
+print("All downloads attempted.")

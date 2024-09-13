@@ -65,11 +65,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    'peanuts': {
-        'hf_name': 'afmck/peanuts-flan-t5-xl',
-        'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
+    # 'peanuts': {
+    #     'hf_name': 'afmck/peanuts-flan-t5-xl',
+    #     'keys': {'image': 'image', 'text': 'caption'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
     # 'vintage': {
     #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
     #     'keys': {'image': 'image_url', 'text': 'short_caption'},
@@ -100,16 +100,16 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    'plans': {
-        'hf_name': 'ShazShoaib/SingleFloorPlans',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'tomato': {
-        'hf_name': 'wellCh4n/tomato-leaf-disease-image',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
+    # 'plans': {
+    #     'hf_name': 'ShazShoaib/SingleFloorPlans',
+    #     'keys': {'image': 'image', 'text': 'text'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
+    # 'tomato': {
+    #     'hf_name': 'wellCh4n/tomato-leaf-disease-image',
+    #     'keys': {'image': 'image', 'text': 'text'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
     'kream': {
         'hf_name': 'hahminlew/kream-product-blip-captions',
         'keys': {'image': 'image', 'text': 'text'},
