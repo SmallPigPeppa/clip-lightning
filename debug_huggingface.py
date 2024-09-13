@@ -1,7 +1,6 @@
 from datasets import load_dataset
 import os
-
-# os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['CURL_CA_BUNDLE'] = ''
 # os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 # ds = load_dataset("pixparse/cc3m-wds")
 
