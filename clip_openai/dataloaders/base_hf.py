@@ -63,7 +63,7 @@ DATASET_MAPPINGS = {
     'simpsons': {
         'hf_name': 'bigdata-pw/TheSimpsons',
         'keys': {'image': 'jpg', 'text': 'caption.txt'},
-        'splits': {'train': 'train', 'val': 'validation'}
+        'splits': {'train': 0.8, 'val': 0.2}
     },
     'lexica': {
         'hf_name': 'vera365/lexica_dataset',
