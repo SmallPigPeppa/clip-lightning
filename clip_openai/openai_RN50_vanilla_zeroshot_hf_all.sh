@@ -8,7 +8,8 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("emoji" "wikiart" "patfig" "fashion" "pet" "nouns" "shahnegar" "peanuts" "artbench" "hausavg" "simpsons" "lexica" "styles" "plans" "tomato" "kream" "sketch")
-DATASETS=("styles" "kream")
+#DATASETS=("styles" "kream")
+DATASETS=("flickr30k" "coco2014")
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
