@@ -68,16 +68,14 @@ class ImageRetrievalDataModule(LightningDataModule):
             stage: Optional[str] = None,
     ) -> None:
         if self.dataset_name in DATASET_LOOKUP:
-            train_dataset = ImageRetrievalDataset(
-                dataset_name=self.dataset_name,
+            train_dataset = DATASET_LOOKUP[self.dataset_name](
                 root_dir=self.root_dir,
                 tokenizer=self.tokenizer,
                 max_length=self.max_length,
                 split="train",
                 transforms=image_transform_v2(config_path=self.config, is_train=True)
             )
-            self.val_dataset = ImageRetrievalDataset(
-                dataset_name=self.dataset_name,
+            self.val_dataset = DATASET_LOOKUP[self.dataset_name](
                 root_dir=self.root_dir,
                 tokenizer=self.tokenizer,
                 max_length=self.max_length,
