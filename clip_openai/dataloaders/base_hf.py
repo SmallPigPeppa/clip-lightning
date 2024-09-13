@@ -20,11 +20,6 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    # 'face': {
-    #     'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
-    #     'keys': {'image': 'url', 'text': 'caption'},
-    #     'splits': {'train': 0.002, 'val': 0.0005}
-    # },
     'newyorker': {
         'hf_name': 'jmhessel/newyorker_caption_contest',
         'keys': {'image': 'image', 'text': 'image_description'},
@@ -45,36 +40,16 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
     },
-    # 'midjourney': {
-    #     'hf_name': 'CortexLM/midjourney-v6',
-    #     'keys': {'image': 'image_url', 'text': 'prompt'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
     'nouns': {
         'hf_name': 'm1guelpf/nouns',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.2, 'val': 0.8}
     },
-    # 'pokemon': {
-    #     'hf_name': 'TheFusion21/PokemonCards',
-    #     'keys': {'image': 'image_url', 'text': 'caption'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    # 'peanuts': {
-    #     'hf_name': 'afmck/peanuts-flan-t5-xl',
-    #     'keys': {'image': 'image', 'text': 'caption'},
-    #     'splits': {'train': 0.8, 'val': 0.2}
-    # },
-    # 'vintage': {
-    #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
-    #     'keys': {'image': 'image_url', 'text': 'short_caption'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
     'artbench': {
         'hf_name': 'alfredplpl/artbench-pd-256x256',
         'keys': {'image': 'image', 'text': 'caption'},
@@ -98,6 +73,16 @@ DATASET_MAPPINGS = {
     'styles': {
         'hf_name': 'rezashkv/styles',
         'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'kream': {
+        'hf_name': 'hahminlew/kream-product-blip-captions',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'sketch': {
+        'hf_name': 'zoheb/sketch-scene',
+        'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
     # 'plans': {
@@ -110,16 +95,32 @@ DATASET_MAPPINGS = {
     #     'keys': {'image': 'image', 'text': 'text'},
     #     'splits': {'train': 0.8, 'val': 0.2}
     # },
-    'kream': {
-        'hf_name': 'hahminlew/kream-product-blip-captions',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'sketch': {
-        'hf_name': 'zoheb/sketch-scene',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
+    # 'peanuts': {
+    #     'hf_name': 'afmck/peanuts-flan-t5-xl',
+    #     'keys': {'image': 'image', 'text': 'caption'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
+    # 'vintage': {
+    #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
+    #     'keys': {'image': 'image_url', 'text': 'short_caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+    # 'face': {
+    #     'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
+    #     'keys': {'image': 'url', 'text': 'caption'},
+    #     'splits': {'train': 0.002, 'val': 0.0005}
+    # },
+    # 'pokemon': {
+    #     'hf_name': 'TheFusion21/PokemonCards',
+    #     'keys': {'image': 'image_url', 'text': 'caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+    # 'midjourney': {
+    #     'hf_name': 'CortexLM/midjourney-v6',
+    #     'keys': {'image': 'image_url', 'text': 'prompt'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+
 }
 
 
