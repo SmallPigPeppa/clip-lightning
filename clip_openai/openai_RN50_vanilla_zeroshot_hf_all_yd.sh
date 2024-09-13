@@ -11,7 +11,7 @@ DATASETS=("emoji" "wikiart" "patfig" "fashion" "pet" "nouns" "shahnegar" "peanut
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ROOT_DIR=/ppio_net0/torch_ds
+ROOT_DIR=home/ma-user/work/wenzhuoliu/torch_ds
 
 # 遍历每个数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
