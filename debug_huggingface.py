@@ -41,7 +41,119 @@ os.environ['HF_HOME'] = '/ppio_net0/huggingface'
 
 
 
-from clip_openai.dataloaders.base_hf import DATASET_MAPPINGS
+DATASET_MAPPINGS = {
+    'emoji': {
+        'hf_name': 'Norod78/microsoft-fluentui-emoji-512-whitebg',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.5, 'val': 0.5}
+    },
+    'wikiart': {
+        'hf_name': 'AterMors/wikiart_recaption',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    # 'face': {
+    #     'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
+    #     'keys': {'image': 'url', 'text': 'caption'},
+    #     'splits': {'train': 0.002, 'val': 0.0005}
+    # },
+    # 'newyorker': {
+    #     'hf_name': 'jmhessel/newyorker_caption_contest',
+    #     'keys': {'image': 'image', 'text': 'image_description'},
+    #     'splits': {'train': 'train', 'val': 'validation'}
+    # },
+    'patfig': {
+        'hf_name': 'lcolonn/patfig',
+        'keys': {'image': 'image', 'text': 'short_description'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    'fashion': {
+        'hf_name': 'jinaai/fashion-captions-de',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    'pet': {
+        'hf_name': 'visual-layer/oxford-iiit-pet-vl-enriched',
+        'keys': {'image': 'image', 'text': 'caption_enriched'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    # 'midjourney': {
+    #     'hf_name': 'CortexLM/midjourney-v6',
+    #     'keys': {'image': 'image_url', 'text': 'prompt'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+    'nouns': {
+        'hf_name': 'm1guelpf/nouns',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.2, 'val': 0.8}
+    },
+    # 'pokemon': {
+    #     'hf_name': 'TheFusion21/PokemonCards',
+    #     'keys': {'image': 'image_url', 'text': 'caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+    'shahnegar': {
+        'hf_name': 'sadrasabouri/ShahNegar',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    # 'peanuts': {
+    #     'hf_name': 'afmck/peanuts-flan-t5-xl',
+    #     'keys': {'image': 'image', 'text': 'caption'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
+    # 'vintage': {
+    #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
+    #     'keys': {'image': 'image_url', 'text': 'short_caption'},
+    #     'splits': {'train': 0.5, 'val': 0.5}
+    # },
+    'artbench': {
+        'hf_name': 'alfredplpl/artbench-pd-256x256',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    'hausavg': {
+        'hf_name': 'HausaNLP/HausaVG',
+        'keys': {'image': 'image', 'text': 'en_text'},
+        'splits': {'train': 'train', 'val': 'validation'}
+    },
+    'simpsons': {
+        'hf_name': 'bigdata-pw/TheSimpsons',
+        'keys': {'image': 'jpg', 'text': 'caption.txt'},
+        'splits': {'train': 'train', 'val': 'validation'}
+    },
+    'lexica': {
+        'hf_name': 'vera365/lexica_dataset',
+        'keys': {'image': 'image', 'text': 'prompt'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    'styles': {
+        'hf_name': 'rezashkv/styles',
+        'keys': {'image': 'image', 'text': 'caption'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    # 'plans': {
+    #     'hf_name': 'ShazShoaib/SingleFloorPlans',
+    #     'keys': {'image': 'image', 'text': 'text'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
+    # 'tomato': {
+    #     'hf_name': 'wellCh4n/tomato-leaf-disease-image',
+    #     'keys': {'image': 'image', 'text': 'text'},
+    #     'splits': {'train': 0.8, 'val': 0.2}
+    # },
+    'kream': {
+        'hf_name': 'hahminlew/kream-product-blip-captions',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    'sketch': {
+        'hf_name': 'zoheb/sketch-scene',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+}
+
 for dataset_name, dataset_info in DATASET_MAPPINGS.items():
     print(f"Downloading dataset: {dataset_name}")
     try:
