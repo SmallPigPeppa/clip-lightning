@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("emoji" "wikiart" "patfig" "fashion" "pet" "nouns" "shahnegar" "peanuts" "artbench" "hausavg" "simpsons" "lexica" "styles" "plans" "tomato" "kream" "sketch")
-DATASETS=("emoji")
+DATASETS=("patfig" "fashion" "pet")
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
