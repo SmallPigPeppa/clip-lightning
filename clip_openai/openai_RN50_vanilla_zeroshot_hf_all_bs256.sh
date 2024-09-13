@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("flickr30k" "coco2014" "emoji" "wikiart" "patfig" "pet" "nouns" "shahnegar" "peanuts" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014" "emoji" "wikiart" "patfig" "pet" "nouns" "shahnegar" "peanuts" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=("flickr30k" "coco2014" "emoji" "wikiart" "patfig" "pet" "nouns" "shahnegar" "peanuts" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
