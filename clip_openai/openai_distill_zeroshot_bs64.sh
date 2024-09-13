@@ -10,7 +10,7 @@ DATASETS=("flickr30k" "coco2014" "emoji" "wikiart" "patfig" "pet" "nouns" "shahn
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=2,3
 # 遍历每个数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
     echo "Running training for dataset: ${DATASET_NAME}"
