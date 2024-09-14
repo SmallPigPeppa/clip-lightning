@@ -33,7 +33,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
         --model.model_name ${MODEL_NAME} \
         --model.projection_dims 512 \
         --model.temperature 0.1 \
-        --model.lr 1.6e-4 \
+        --model.lr 5e-5 \
         --model.lr_warmup_epochs 5 \
         --model.weight_decay 0.1 \
         --model.download_root ./ \
