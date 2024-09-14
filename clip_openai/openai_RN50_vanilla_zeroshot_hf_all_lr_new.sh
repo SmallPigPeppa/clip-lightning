@@ -16,8 +16,8 @@ ROOT_DIR=/ppio_net0/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=5e-5
-  ["coco2014"]=5e-5
+  ["flickr30k"]=1e-4
+  ["coco2014"]=1e-4
   ["wikiart"]=1e-4
   ["patfig"]=1e-4
   ["pet"]=1e-4
