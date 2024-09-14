@@ -7,7 +7,7 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "kream" "sketch")
+#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("wikiart" "patfig" "pet" "artbench" "simpsons")
 
 # 其他参数
@@ -24,6 +24,7 @@ declare -A DATASET_LR_MAP=(
   ["artbench"]=1e-4
   ["simpsons"]=7e-5
   ["lexica"]=5e-5
+  ["styles"]=5e-5
   ["kream"]=5e-5
   ["sketch"]=5e-5
 )
@@ -66,18 +67,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-vanilla
 
-  echo "Completed training for dataset: ${DATASET_NAME}"
-done
 
-
-
-for DATASET_NAME in "${DATASETS[@]}"; do
-  # 获取当前数据集的学习率
-  LR=${DATASET_LR_MAP[${DATASET_NAME}]}
-
-  echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
-
-  python cli_distill_zeroshot.py fit \
+    python cli_distill_zeroshot.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -110,3 +101,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
+
+
