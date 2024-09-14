@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("wikiart" "patfig" "pet" "artbench" "simpsons")
+DATASETS=("patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 其他参数
 CONFIG_FILE=config.yaml
@@ -19,14 +19,13 @@ declare -A DATASET_LR_MAP=(
   ["flickr30k"]=5e-5
   ["coco2014"]=5e-5
   ["wikiart"]=1e-4
-  ["patfig"]=8e-5
-  ["pet"]=7e-5
-  ["artbench"]=8e-5
-  ["simpsons"]=7e-5
-  ["lexica"]=5e-5
-  ["styles"]=5e-5
-  ["kream"]=5e-5
-  ["sketch"]=5e-5
+  ["patfig"]=1e-4
+  ["pet"]=1e-4
+  ["simpsons"]=1e-4
+  ["lexica"]=1e-4
+  ["styles"]=1e-4
+  ["kream"]=1e-4
+  ["sketch"]=1e-4
 )
 
 # 遍历每个数据集
