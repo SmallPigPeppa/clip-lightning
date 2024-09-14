@@ -103,3 +103,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 done
 
 
+python /ppio_net0/code/openapi.py stop a34e5129e26f3e70
+
