@@ -26,9 +26,9 @@ declare -A DATASET_LR_MAP=(
   ["pet"]=1e-4
   ["simpsons"]=1e-4
   ["lexica"]=1e-4
-  ["styles"]=1.5e-4
+  ["styles"]=1e-4
   ["kream"]=1e-4
-  ["sketch"]=2e-4
+  ["sketch"]=1e-4
 )
 
 # 遍历每个数据集
@@ -103,4 +103,4 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop a34e5129e26f3e70
+#/ppio_net0/code/openapi.sh stop a34e5129e26f3e70
