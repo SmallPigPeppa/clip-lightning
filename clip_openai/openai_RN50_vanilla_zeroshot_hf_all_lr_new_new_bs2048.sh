@@ -8,10 +8,12 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("styles" "kream" "sketch")
 #DATASETS=("kream" "sketch" "styles")
 #DATASETS=("kream")
+
+DATASETS=("wikiart" "flickr30k" "coco2014" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 其他参数
 CONFIG_FILE=config.yaml
