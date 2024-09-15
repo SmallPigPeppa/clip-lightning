@@ -26,7 +26,7 @@ declare -A DATASET_LR_MAP=(
   ["simpsons"]=1e-4
   ["lexica"]=1e-4
   ["styles"]=2e-4
-  ["kream"]=2e-4
+  ["kream"]=1.5e-4
   ["sketch"]=2e-4
 )
 
