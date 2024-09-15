@@ -8,7 +8,9 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 #DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("styles" "kream" "sketch")
+DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+#DATASETS=("styles" "kream" "sketch")
+DATASETS=("kream" "sketch" "styles")
 
 # 其他参数
 CONFIG_FILE=config.yaml
@@ -23,9 +25,9 @@ declare -A DATASET_LR_MAP=(
   ["pet"]=1e-4
   ["simpsons"]=1e-4
   ["lexica"]=1e-4
-  ["styles"]=5e-4
-  ["kream"]=5e-4
-  ["sketch"]=5e-4
+  ["styles"]=2e-4
+  ["kream"]=2e-4
+  ["sketch"]=2e-4
 )
 
 # 遍历每个数据集
@@ -66,8 +68,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-vanilla
 
-
-    python cli_distill_zeroshot.py fit \
+  python cli_distill_zeroshot.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -101,6 +102,4 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-
 /ppio_net0/code/openapi.sh stop a34e5129e26f3e70
-
