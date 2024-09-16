@@ -15,6 +15,8 @@ MODEL_NAME=ViT-B/16
 
 DATASETS=("wikiart" "flickr30k" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
+DATASETS=("kream")
+
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
@@ -30,7 +32,7 @@ declare -A DATASET_LR_MAP=(
   ["lexica"]=1.5e-4
   ["styles"]=1.5e-4
   ["kream"]=1.5e-4
-  ["sketch"]=1.5e-4
+  ["sketch"]=1e-4
 )
 
 # 遍历每个数据集

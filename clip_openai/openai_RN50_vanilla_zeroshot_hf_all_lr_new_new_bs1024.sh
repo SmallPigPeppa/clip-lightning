@@ -11,7 +11,7 @@ MODEL_NAME=ViT-B/16
 #DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("styles" "kream" "sketch")
 #DATASETS=("kream" "sketch" "styles")
-DATASETS=("styles")
+DATASETS=("kream")
 
 # 其他参数
 CONFIG_FILE=config.yaml
