@@ -54,7 +54,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${LR} \
-    --model.lr_warmup_epochs 10 \
+    --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
@@ -85,7 +85,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${LR} \
-    --model.lr_warmup_epochs 10 \
+    --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
