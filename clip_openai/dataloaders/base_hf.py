@@ -73,7 +73,7 @@ DATASET_MAPPINGS = {
     'styles': {
         'hf_name': 'rezashkv/styles',
         'keys': {'image': 'image', 'text': 'caption'},
-        'splits': {'train': 0.2, 'val': 0.8}
+        'splits': {'train': 0.5, 'val': 0.5}
     },
     'kream': {
         'hf_name': 'hahminlew/kream-product-blip-captions',
