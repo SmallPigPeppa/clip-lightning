@@ -17,16 +17,16 @@ ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=3e-5
-  ["coco2014"]=3e-5
-  ["wikiart"]=3e-5
-  ["patfig"]=3e-5
-  ["pet"]=3e-5
-  ["simpsons"]=3e-5
-  ["lexica"]=3e-5
-  ["styles"]=3e-5
-  ["kream"]=3e-5
-  ["sketch"]=3e-5
+  ["flickr30k"]=5e-5
+  ["coco2014"]=5e-5
+  ["wikiart"]=5e-5
+  ["patfig"]=5e-5
+  ["pet"]=5e-5
+  ["simpsons"]=5e-5
+  ["lexica"]=5e-5
+  ["styles"]=5e-5
+  ["kream"]=5e-5
+  ["sketch"]=5e-5
 )
 
 # 遍历每个数据集
