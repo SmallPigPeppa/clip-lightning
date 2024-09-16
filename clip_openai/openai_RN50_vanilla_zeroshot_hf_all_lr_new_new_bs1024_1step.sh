@@ -61,6 +61,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.logger.project CLIP-1step \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-lora \
     --trainer.logger.log_model False \
+    --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
@@ -93,6 +94,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.logger.project CLIP-1step \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-dislora \
     --trainer.logger.log_model False \
+    --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
