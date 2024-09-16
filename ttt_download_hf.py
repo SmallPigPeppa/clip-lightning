@@ -3,10 +3,10 @@ import time
 import subprocess
 
 datasets = [
-    "AterMors/wikiart_recaption",
+    # "AterMors/wikiart_recaption",
     "lcolonn/patfig",
     "visual-layer/oxford-iiit-pet-vl-enriched",
-    "alfredplpl/artbench-pd-256x256",
+    # "alfredplpl/artbench-pd-256x256",
     "bigdata-pw/TheSimpsons",
     "vera365/lexica_dataset",
     "rezashkv/styles",

@@ -13,7 +13,7 @@ MODEL_NAME=ViT-B/16
 #DATASETS=("kream" "sketch" "styles")
 #DATASETS=("kream")
 
-DATASETS=("wikiart" "flickr30k" "coco2014" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=("wikiart" "flickr30k" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 其他参数
 CONFIG_FILE=config.yaml
@@ -54,13 +54,13 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${LR} \
-    --model.lr_warmup_epochs 5 \
+    --model.lr_warmup_epochs 10 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 30 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-hf-2048 \
@@ -85,13 +85,13 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${LR} \
-    --model.lr_warmup_epochs 5 \
+    --model.lr_warmup_epochs 10 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator npu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 30 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-hf-2048 \
