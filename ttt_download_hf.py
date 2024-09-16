@@ -11,7 +11,10 @@ datasets = [
     # "vera365/lexica_dataset",
     # "rezashkv/styles",
     # "hahminlew/kream-product-blip-captions",
-    # "zoheb/sketch-scene"
+    # "zoheb/sketch-scene",
+    "alfredplpl/artbench-pd-256x256",
+    "jinaai/fashion-captions-de"
+
 ]
 
 local_dir = "/home/ma-user/work/dataset/all/hf-datasets"
