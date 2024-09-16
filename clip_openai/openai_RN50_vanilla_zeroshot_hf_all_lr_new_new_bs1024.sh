@@ -58,7 +58,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 30 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-hf-lr-new \
@@ -89,7 +89,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
-    --trainer.max_epochs 40 \
+    --trainer.max_epochs 30 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-hf-lr-new \
