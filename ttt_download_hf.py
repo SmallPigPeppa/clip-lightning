@@ -7,11 +7,11 @@ datasets = [
     "lcolonn/patfig",
     "visual-layer/oxford-iiit-pet-vl-enriched",
     # "alfredplpl/artbench-pd-256x256",
-    "bigdata-pw/TheSimpsons",
-    "vera365/lexica_dataset",
-    "rezashkv/styles",
-    "hahminlew/kream-product-blip-captions",
-    "zoheb/sketch-scene"
+    # "bigdata-pw/TheSimpsons",
+    # "vera365/lexica_dataset",
+    # "rezashkv/styles",
+    # "hahminlew/kream-product-blip-captions",
+    # "zoheb/sketch-scene"
 ]
 
 local_dir = "/home/ma-user/work/dataset/all/hf-datasets"
@@ -38,4 +38,4 @@ while True:
             print(f"Error downloading {dataset}: {e}")
 
     print("All datasets downloaded. Sleeping for 10 seconds...")
-    time.sleep(10)
+    time.sleep(60)
