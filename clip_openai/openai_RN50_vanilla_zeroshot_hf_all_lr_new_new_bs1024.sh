@@ -7,11 +7,8 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "artbench" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-#DATASETS=("styles" "kream" "sketch")
-#DATASETS=("kream" "sketch" "styles")
-#DATASETS=("kream")
+
 
 # 其他参数
 CONFIG_FILE=config.yaml
@@ -132,7 +129,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-lora
 
 
-  python cli_distillV3_zeroshot_lora.py fit \
+  python cli_distill_zeroshot_lora_best.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
