@@ -213,13 +213,11 @@ class CLIPDualEncoderModel(LightningModule):
 
         # distill project
         distill_proj_hidden_dim = 2048
-        # self.distill_predictor = nn.Sequential(
-        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-        #     nn.BatchNorm1d(distill_proj_hidden_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        # )
-        self.distill_predictor = DistillPredictor(
+        self.distill_predictor1 = DistillPredictor(
+            projection_dims=self.hparams.projection_dims,
+            distill_proj_hidden_dim=distill_proj_hidden_dim
+        )
+        self.distill_predictor2 = DistillPredictor(
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
@@ -248,7 +246,12 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             parameters.append({
-                "params": self.distill_predictor.parameters(),
+                "params": self.distill_predictor1.parameters(),
+                "lr": self.hparams.lr,  # 可以根据需要调整学习率
+                "weight_decay": self.hparams.weight_decay
+            })
+            parameters.append({
+                "params": self.distill_predictor2.parameters(),
                 "lr": self.hparams.lr,  # 可以根据需要调整学习率
                 "weight_decay": self.hparams.weight_decay
             })
@@ -340,8 +343,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor1(image_embeddings)
+            p2 = self.distill_predictor2(text_embeddings)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
@@ -362,8 +365,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
+            p1 = self.distill_predictor1(image_embeddings)
+            p2 = self.distill_predictor2(text_embeddings)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
@@ -465,11 +468,11 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    # def on_before_optimizer_step(self, optimizer) -> None:
-    #     print("**************on_before_opt enter1*********")
-    #     for name, param in self.model.visual.named_parameters():
-    #         if param.grad is not None:
-    #             print(name)
-    #         # if param.requires_grad :
-    #         #     print(name)
-    #     print("***************on_before_opt exit1*********")
+    def on_before_optimizer_step(self, optimizer) -> None:
+        print("**************on_before_opt enter1*********")
+        for name, param in self.model.named_parameters():
+            if param.grad is not None:
+                print(name)
+            # if param.requires_grad :
+            #     print(name)
+        print("***************on_before_opt exit1*********")
