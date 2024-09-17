@@ -2,8 +2,8 @@
 
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
-export HF_ENDPOINT=https://hf-mirror.com
-export CURL_CA_BUNDLE=''
+#export HF_ENDPOINT=https://hf-mirror.com
+#export CURL_CA_BUNDLE=''
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -40,7 +40,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  python cli_vanilla_zeroshot_hf.py fit \
+  HF_ENDPOINT=https://hf-mirror.com python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
