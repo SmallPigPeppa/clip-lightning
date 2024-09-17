@@ -183,6 +183,12 @@ class CLIPDualEncoderModel(LightningModule):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
+
+        # 使用 all_gather 来同步所有 GPU 上的特征
+        image_embeddings = self.all_gather(image_embeddings)
+        text_embeddings = self.all_gather(text_embeddings)
+
+
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
 
