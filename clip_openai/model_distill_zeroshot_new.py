@@ -38,6 +38,7 @@ class CLIPDualEncoderModel(LightningModule):
             model_name: str = 'RN50',
             download_root: str = None,
             projection_dims: int = 1024,
+            projection_lr_scale: int = 4,
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
@@ -101,7 +102,7 @@ class CLIPDualEncoderModel(LightningModule):
         if self.distill:
             parameters.append({
                 "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.lr * 4.,  # 可以根据需要调整学习率
+                "lr": self.hparams.lr * self.hparams.projection_lr_scale,  # 可以根据需要调整学习率
                 "weight_decay": self.hparams.weight_decay
             })
         else:
