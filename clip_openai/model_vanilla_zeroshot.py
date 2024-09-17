@@ -34,9 +34,22 @@ class CLIPDualEncoderModel(LightningModule):
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
+        self.initialize_old_modules()
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
+
+    def initialize_old_modules(self):
+        # load task N-1 checkpoint
+        if self.hparams.old_checkpoint_path is not None:
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+            self.model.load_state_dict(checkpoint['model'], strict=True)
+            print("Model weights loaded successfully and old parts copied.")
+
+        self.model_old = copy.deepcopy(self.model)
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.model_old.parameters():
+            param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
