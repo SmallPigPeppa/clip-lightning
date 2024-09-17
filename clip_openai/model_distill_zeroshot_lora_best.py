@@ -197,7 +197,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # 定义需要冻结的完整参数名
         exact_layers_to_freeze=[
-            "class_embedding",
+            "token_embedding",
             "positional_embedding",
             "ln_final.weight",
             "ln_final.bias",
