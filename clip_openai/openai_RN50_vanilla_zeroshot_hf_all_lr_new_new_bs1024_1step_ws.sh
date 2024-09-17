@@ -3,6 +3,8 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
 
+export HF_ENDPOINT=https://hf-mirror.com
+
 # 模型名称
 MODEL_NAME=ViT-B/16
 
