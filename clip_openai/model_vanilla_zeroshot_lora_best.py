@@ -277,7 +277,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.transformer.merge_and_unload()
 
         print('************************')
-        print(self.model)
+        for name, param in self.model.named_parameters():
+            print(name)
+
         print('************************')
 
 
