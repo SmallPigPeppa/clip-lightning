@@ -253,8 +253,8 @@ class CLIPDualEncoderModel(LightningModule):
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
             for k in [1]:
-                # metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-                metrics[f"{name}_R@{k}"] = torch.tensor(np.mean(preds < k) * 100).to(self.device)
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+                # metrics[f"{name}_R@{k}"] = torch.tensor(np.mean(preds < k) * 100).to(self.device)
 
         return metrics
 
