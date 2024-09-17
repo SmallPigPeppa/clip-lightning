@@ -228,6 +228,17 @@ class CLIPDualEncoderModel(LightningModule):
             "weight_decay": self.hparams.weight_decay
         }]
 
+        if self.distill:
+            parameters.append({
+                "params": self.distill_predictor.parameters(),
+                "lr": self.hparams.lr,  # 可以根据需要调整学习率
+                "weight_decay": self.hparams.weight_decay
+            })
+        else:
+            # 如果不进行蒸馏，冻结参数
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
+
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
