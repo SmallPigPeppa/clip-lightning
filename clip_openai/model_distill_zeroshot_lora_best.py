@@ -54,6 +54,7 @@ def get_lora_model_vision(model):
         inference_mode=False,
         r=8,  # Rank of the low-rank decomposition
         lora_alpha=16,  # Scaling factor
+        task_type='vision',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
     )
