@@ -58,7 +58,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-new-lr \
+    --trainer.logger.project CLIP-1step-new \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-lora \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
@@ -91,7 +91,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-new-lr \
+    --trainer.logger.project CLIP-1step-new \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-dislora \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
@@ -99,7 +99,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-dislora
-    
+
 #  python cli_vanilla_zeroshot_hf.py fit \
 #    --data.num_tasks 1 \
 #    --data.current_task 0 \
@@ -123,7 +123,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #    --trainer.max_epochs 40 \
 #    --trainer.log_every_n_steps 1 \
 #    --trainer.logger WandbLogger \
-#    --trainer.logger.project CLIP-1step-new-lr \
+#    --trainer.logger.project CLIP-1step-new \
 #    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-vanilla \
 #    --trainer.logger.log_model False \
 #    --lr_monitor.logging_interval epoch \
@@ -154,7 +154,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #    --trainer.max_epochs 40 \
 #    --trainer.log_every_n_steps 1 \
 #    --trainer.logger WandbLogger \
-#    --trainer.logger.project CLIP-1step-new-lr \
+#    --trainer.logger.project CLIP-1step-new \
 #    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-distill \
 #    --trainer.logger.log_model False \
 #    --lr_monitor.logging_interval epoch \
@@ -165,4 +165,4 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 9c0e06e6211359bd
+/ppio_net0/code/openapi.sh stop a34e5129e26f3e70
