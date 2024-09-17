@@ -203,7 +203,7 @@ class CLIPDualEncoderModel(LightningModule):
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
 
-        print(all_image_features.shape)
+        # print(all_image_features.shape)
 
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
