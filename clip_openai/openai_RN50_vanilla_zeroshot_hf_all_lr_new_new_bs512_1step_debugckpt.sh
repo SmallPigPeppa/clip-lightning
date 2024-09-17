@@ -57,7 +57,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
-    --trainer.max_epochs 1 \
+    --trainer.max_epochs 20 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-debug \
@@ -67,7 +67,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-lora-best
+    --model_checkpoint.filename ${DATASET_NAME}-lora-best
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
