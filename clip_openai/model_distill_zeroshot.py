@@ -60,24 +60,18 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
 
     def initialize_old_modules(self):
+        # load task N-1 checkpoint
+        if self.hparams.old_checkpoint_path is not None:
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+            self.model.load_state_dict(checkpoint['model'], strict=True)
+            print("Model weights loaded successfully and old parts copied.")
+
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
             param.requires_grad = False
 
-        # distill project
         distill_proj_hidden_dim = 2048
-
-        # self.distill_predictor = nn.Sequential(
-        #     nn.Linear(self.hparams.projection_dims, distill_proj_hidden_dim),
-        #     nn.BatchNorm1d(distill_proj_hidden_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(distill_proj_hidden_dim, self.hparams.projection_dims),
-        # )
-        # if not self.distill:
-        #     for param in self.distill_predictor.parameters():
-        #         param.requires_grad = False
-
         self.distill_predictor = DistillPredictor(
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
@@ -322,3 +316,44 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
+
+    def on_save_checkpoint(self, checkpoint):
+        # 处理视觉模块中的 conv1 和 transformer
+        if self.trainer.current_epoch != self.trainer.max_epochs - 1:
+            pass
+        elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
+            conv1 = copy.deepcopy(self.model.visual.conv1)
+            self.model.visual.conv1 = conv1.merge_and_unload().conv1
+            self.model.visual.transformer.merge_and_unload()
+            self.model.transformer.merge_and_unload()
+
+            # 仅在主进程中输出
+            if self.trainer.is_global_zero:
+                print('************************')
+
+                # 创建一个新的 state_dict 用于保存权重
+                new_state_dict = {}
+
+                # 遍历当前模型的参数，处理名称
+                for name, param in self.model.named_parameters():
+                    # 如果参数名称中包含 'base_model.model'，则去掉
+                    new_name = name.replace("base_model.model.", "")
+                    new_state_dict[new_name] = param.data
+
+                # 保存处理后的权重到检查点
+                checkpoint['model'] = new_state_dict
+
+                print('Saved model parameters with modified names:')
+                for new_name in new_state_dict.keys():
+                    print(new_name)
+
+                print('************************')
+
+                # 比较新模型参数名与旧模型参数名
+                print('Parameter Comparison with Old Model:')
+                for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
+                                                                    self.model_old.named_parameters()):
+                    if new_name != old_name:
+                        print(f"New: {new_name} | Old: {old_name}")
+
+                print('************************')
