@@ -60,7 +60,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-512 \
+    --trainer.logger.project CLIP-debug \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-lora-best \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
