@@ -125,7 +125,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step \
+    --trainer.logger.project CLIP-1step-1024 \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
