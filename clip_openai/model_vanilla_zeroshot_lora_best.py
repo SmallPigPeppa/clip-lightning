@@ -29,8 +29,8 @@ def get_lora_model_vision(model):
     target_modules = find_target_modules(model)
     lora_config = LoraConfig(
         inference_mode=False,
-        r=4,  # Rank of the low-rank decomposition
-        lora_alpha=8,  # Scaling factor
+        r=16,  # Rank of the low-rank decomposition
+        lora_alpha=32,  # Scaling factor
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
     )
@@ -94,18 +94,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats = []
         self.val_text_feats = []
 
-        # Define the target modules where LoRA should be applied
-        target_modules = find_target_modules(self.model)
-
-        # Initialize LoRA configuration with target modules
-        lora_config = LoraConfig(
-            r=16,  # Rank of the low-rank decomposition
-            lora_alpha=32,  # Scaling factor
-            task_type=TaskType.SEQ_CLS,  # Task type
-            lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules=target_modules,  # Specify the target modules
-            # target_modules=['transformer','visual']
-        )
 
         # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
@@ -114,8 +102,8 @@ class CLIPDualEncoderModel(LightningModule):
         conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
         lora_config = LoraConfig(
             inference_mode=False,
-            r=4,  # Rank of the low-rank decomposition
-            lora_alpha=8,  # Scaling factor
+            r=16,  # Rank of the low-rank decomposition
+            lora_alpha=32,  # Scaling factor
             lora_dropout=0.1,  # Dropout rate for LoRA
             target_modules=['conv1'],
         )
