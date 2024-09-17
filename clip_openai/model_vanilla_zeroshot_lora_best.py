@@ -207,6 +207,7 @@ class CLIPDualEncoderModel(LightningModule):
         all_text_features = all_text_features.reshape(-1, all_text_features.size(-1))
 
         print(all_image_features.shape)
+
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
