@@ -190,7 +190,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-1step-512 \
-    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-distill \
+    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-distill-new \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
