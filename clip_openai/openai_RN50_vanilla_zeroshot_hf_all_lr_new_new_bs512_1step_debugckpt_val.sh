@@ -2,7 +2,7 @@
 
 # 设置 Hugging Face home 目录
 export HF_HOME=/ppio_net0/huggingface
-#export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0
 # 模型名称
 MODEL_NAME=ViT-B/16
 
@@ -55,7 +55,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt/flickr30k/dislora.ckpt \
+    --model.old_checkpoint_path ckpt/flickr30k/vanilla.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
