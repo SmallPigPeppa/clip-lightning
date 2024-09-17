@@ -11,7 +11,7 @@ from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
-
+import copy
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
