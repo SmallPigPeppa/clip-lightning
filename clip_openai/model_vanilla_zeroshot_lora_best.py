@@ -189,8 +189,16 @@ class CLIPDualEncoderModel(LightningModule):
         text_embeddings = self.all_gather(text_embeddings)
 
 
-        self.val_img_feats.append(image_embeddings)
-        self.val_text_feats.append(text_embeddings)
+        # self.val_img_feats.append(image_embeddings)
+        # self.val_text_feats.append(text_embeddings)
+        # 将 all_gather 后的数据调整为合适的维度
+        image_embeddings = image_embeddings.view(-1, image_embeddings.size(-1))  # (num_gpus * batch_size, feature_dim)
+        text_embeddings = text_embeddings.view(-1, text_embeddings.size(-1))  # (num_gpus * batch_size, feature_dim)
+
+        # 仅在主进程上保存特征
+        if self.trainer.is_global_zero:
+            self.val_img_feats.append(image_embeddings)
+            self.val_text_feats.append(text_embeddings)
 
         return clip_loss
 
@@ -201,8 +209,8 @@ class CLIPDualEncoderModel(LightningModule):
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        all_image_features = torch.cat(self.val_img_feats.view(-1, self.val_img_feats.size(-1)))
-        all_text_features = torch.cat(self.val_text_feats.view(-1, self.val_text_feats.size(-1)))
+        all_image_features = torch.cat(self.val_img_feats)
+        all_text_features = torch.cat(self.val_text_feats)
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
