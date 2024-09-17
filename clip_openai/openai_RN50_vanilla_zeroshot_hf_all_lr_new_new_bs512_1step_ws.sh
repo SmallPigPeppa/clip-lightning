@@ -57,12 +57,11 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator npu \
-    --trainer.devices 0,1,2,3 \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-512-ws \
+    --trainer.logger.project CLIP-1step-1024-ws \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
