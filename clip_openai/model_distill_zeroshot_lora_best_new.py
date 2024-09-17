@@ -26,6 +26,7 @@ def find_target_modules(model):
             target_modules.append(name)
     return target_modules
 
+
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
@@ -134,9 +135,6 @@ class CLIPDualEncoderModel(LightningModule):
         for name, param in self.model.named_parameters():
             print(name)
 
-
-
-
     def initialize_old_modules(self):
         # load task N-1 checkpoint
         if self.hparams.old_checkpoint_path is not None:
@@ -157,7 +155,6 @@ class CLIPDualEncoderModel(LightningModule):
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
-
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -180,7 +177,7 @@ class CLIPDualEncoderModel(LightningModule):
         if self.distill:
             parameters.append({
                 "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.lr,  # 可以根据需要调整学习率
+                "lr": self.hparams.lr * 4,  # 可以根据需要调整学习率
                 "weight_decay": self.hparams.weight_decay
             })
             # parameters.append({
@@ -310,7 +307,6 @@ class CLIPDualEncoderModel(LightningModule):
             return clip_loss + distill_loss
         else:
             return clip_loss
-
 
     # def on_train_start(self):
     #     # Zero-shot metric evaluation before training starts
@@ -444,7 +440,6 @@ class CLIPDualEncoderModel(LightningModule):
 
                 print('************************')
 
-
     # def on_before_optimizer_step(self, optimizer) -> None:
     #     print("**************on_before_opt enter1*********")
     #     for name, param in self.model.named_parameters():
@@ -453,4 +448,3 @@ class CLIPDualEncoderModel(LightningModule):
     #         # if param.requires_grad :
     #         #     print(name)
     #     print("***************on_before_opt exit1*********")
-
