@@ -17,7 +17,7 @@ ROOT_DIR=/ppio_net0/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=1e-5
+  ["flickr30k"]=2e-5
   ["coco2014"]=1e-5
   ["wikiart"]=1e-5
   ["patfig"]=1e-5
@@ -132,7 +132,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #    --model_checkpoint.dirpath ckpt \
 #    --model_checkpoint.save_weights_only True \
 #    --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-dislora
-#
+##
 #  python cli_vanilla_zeroshot_hf.py fit \
 #    --data.num_tasks 1 \
 #    --data.current_task 0 \
