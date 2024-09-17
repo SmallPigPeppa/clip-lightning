@@ -7,7 +7,8 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=("flickr30k")
 
 
 # 其他参数
