@@ -270,7 +270,7 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def save_model_weights(self, checkpoint):
+    def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
         conv1 = copy.deepcopy(self.model.visual.conv1)
         self.model.visual.conv1 = conv1.merge_and_unload().conv1
