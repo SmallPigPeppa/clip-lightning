@@ -9,7 +9,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 #DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k")
-DATASETS=("coco2014")
+#DATASETS=("coco2014")
 
 
 # 其他参数
@@ -100,7 +100,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-dislora
+    --model_checkpoint.filename ${DATASET_NAME}-dislora
 #    
 #  python cli_vanilla_zeroshot_hf.py fit \
 #    --data.num_tasks 1 \
