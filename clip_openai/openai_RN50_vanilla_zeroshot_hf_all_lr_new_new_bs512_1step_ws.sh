@@ -11,6 +11,7 @@ DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 DATASETS=("flickr30k")
 DATASETS=("wikiart")
 
+DATASETS=("wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 其他参数
 CONFIG_FILE=config.yaml
