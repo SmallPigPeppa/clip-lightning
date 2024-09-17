@@ -19,9 +19,9 @@ ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=2e-5
-  ["coco2014"]=2e-5
-  ["wikiart"]=2e-5
+  ["flickr30k"]=1e-5
+  ["coco2014"]=1e-5
+  ["wikiart"]=1e-5
   ["patfig"]=1e-5
   ["pet"]=1e-5
   ["simpsons"]=1e-5
@@ -67,7 +67,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${DATASET_NAME}-${MODEL_NAME}-vanilla
+    --model_checkpoint.filename ${DATASET_NAME}/vanilla
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
