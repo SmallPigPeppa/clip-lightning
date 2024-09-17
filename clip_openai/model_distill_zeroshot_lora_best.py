@@ -26,27 +26,6 @@ def find_target_modules(model):
             target_modules.append(name)
     return target_modules
 
-
-# def get_lora_model(model):
-#     # Define the target modules where LoRA should be applied
-#     target_modules = find_target_modules(model)
-#
-#     # Initialize LoRA configuration with target modules
-#     lora_config = LoraConfig(
-#         inference_mode=False,
-#         r=4,  # Rank of the low-rank decomposition
-#         lora_alpha=8,  # Scaling factor
-#         task_type=TaskType.SEQ_CLS,  # Task type
-#         lora_dropout=0.1,  # Dropout rate for LoRA
-#         target_modules=target_modules  # Specify the target modules
-#     )
-#
-#     # Apply LoRA to the model
-#     lora_model = get_peft_model(model, lora_config)
-#
-#     return lora_model
-
-
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
@@ -152,78 +131,33 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
         print('********************************************')
-        # print(self.model)
         for name, param in self.model.named_parameters():
             print(name)
 
-        # print('********************************************')
-        # # print(self.model)
-        # for name, param in self.model.visual.named_parameters():
-        #     print(name)
-        #
-        # # 定义需要冻结的完整参数名
-        # exact_layers_to_freeze=[
-        #     "class_embedding",
-        #     "positional_embedding",
-        #     # "proj",
-        #     # "conv1.weight",
-        #     "ln_pre.weight",
-        #     "ln_pre.bias",
-        #     # "transformer.resblocks.9.attn.in_proj_weight",
-        #     # "transformer.resblocks.9.attn.in_proj_bias",
-        #     # "transformer.resblocks.9.attn.out_proj.weight",
-        #     # "transformer.resblocks.9.attn.out_proj.bias",
-        #     # "transformer.resblocks.9.ln_1.weight",
-        #     # "transformer.resblocks.9.ln_1.bias",
-        #     # "transformer.resblocks.9.mlp.c_fc.weight",
-        #     # "transformer.resblocks.9.mlp.c_fc.bias",
-        #     # "transformer.resblocks.9.mlp.c_proj.weight",
-        #     # "transformer.resblocks.9.mlp.c_proj.bias",
-        #     # "transformer.resblocks.9.ln_2.weight",
-        #     # "transformer.resblocks.9.ln_2.bias",
-        # ]
-        #
-        # for name, param in self.model.visual.named_parameters():
-        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-        #     if name in exact_layers_to_freeze:
-        #         param.requires_grad = False
 
-        # # 定义需要冻结的完整参数名
-        # exact_layers_to_freeze = [
-        #     "positional_embedding",
-        #     "text_projection",
-        #     "logit_scale",
-        #     "token_embedding.weight",
-        #     "visual.class_embedding",
-        #     "visual.positional_embedding",
-        #     "visual.proj",
-        # ]
-        #
-        # for name, param in self.model.named_parameters():
-        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-        #     if name in exact_layers_to_freeze:
-        #         param.requires_grad = False
+
 
     def initialize_old_modules(self):
+        # load task N-1 checkpoint
+        if self.hparams.old_checkpoint_path is not None:
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+            self.model.load_state_dict(checkpoint['model'], strict=True)
+            print("Model weights loaded successfully and old parts copied.")
+
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
             param.requires_grad = False
 
-        # distill project
         distill_proj_hidden_dim = 2048
         self.distill_predictor = DistillPredictor(
             projection_dims=self.hparams.projection_dims,
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
-        # self.distill_predictor2 = DistillPredictor(
-        #     projection_dims=self.hparams.projection_dims,
-        #     distill_proj_hidden_dim=distill_proj_hidden_dim
-        # )
-        # self.distill_predictor = get_lora_model2(self.distill_predictor)
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
+
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -467,6 +401,48 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
+    def on_save_checkpoint(self, checkpoint):
+        # 处理视觉模块中的 conv1 和 transformer
+        if self.trainer.current_epoch != self.trainer.max_epochs - 1:
+            pass
+        elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
+            conv1 = copy.deepcopy(self.model.visual.conv1)
+            self.model.visual.conv1 = conv1.merge_and_unload().conv1
+            self.model.visual.transformer.merge_and_unload()
+            self.model.transformer.merge_and_unload()
+
+            # 仅在主进程中输出
+            if self.trainer.is_global_zero:
+                print('************************')
+
+                # 创建一个新的 state_dict 用于保存权重
+                new_state_dict = {}
+
+                # 遍历当前模型的参数，处理名称
+                for name, param in self.model.named_parameters():
+                    # 如果参数名称中包含 'base_model.model'，则去掉
+                    new_name = name.replace("base_model.model.", "")
+                    new_state_dict[new_name] = param.data
+
+                # 保存处理后的权重到检查点
+                checkpoint['model'] = new_state_dict
+
+                print('Saved model parameters with modified names:')
+                for new_name in new_state_dict.keys():
+                    print(new_name)
+
+                print('************************')
+
+                # 比较新模型参数名与旧模型参数名
+                print('Parameter Comparison with Old Model:')
+                for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
+                                                                    self.model_old.named_parameters()):
+                    if new_name != old_name:
+                        print(f"New: {new_name} | Old: {old_name}")
+
+                print('************************')
+
+
     # def on_before_optimizer_step(self, optimizer) -> None:
     #     print("**************on_before_opt enter1*********")
     #     for name, param in self.model.named_parameters():
@@ -475,3 +451,4 @@ class CLIPDualEncoderModel(LightningModule):
     #         # if param.requires_grad :
     #         #     print(name)
     #     print("***************on_before_opt exit1*********")
+
