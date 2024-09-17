@@ -55,7 +55,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt/flickr30k-1024/dislora-new-v1.ckpt \
+    --model.old_checkpoint_path ckpt/flickr30k-512/dislora-new-v2.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
