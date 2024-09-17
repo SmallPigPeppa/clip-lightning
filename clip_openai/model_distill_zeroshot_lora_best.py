@@ -157,6 +157,12 @@ class CLIPDualEncoderModel(LightningModule):
 
         print('********************************************')
         print(self.model)
+        for name, param in self.model.transformer.named_parameters():
+            print(name)
+
+
+        print('********************************************')
+        print(self.model)
         for name, param in self.model.visual.named_parameters():
             print(name)
 
@@ -183,6 +189,23 @@ class CLIPDualEncoderModel(LightningModule):
         ]
 
         for name, param in self.model.visual.named_parameters():
+            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+            if name in exact_layers_to_freeze:
+                param.requires_grad = False
+
+
+
+        # 定义需要冻结的完整参数名
+        exact_layers_to_freeze=[
+            "class_embedding",
+            "positional_embedding",
+            "ln_final.weight",
+            "ln_final.bias",
+            "text_projection",
+            "logit_scale"
+        ]
+
+        for name, param in self.model.named_parameters():
             # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
             if name in exact_layers_to_freeze:
                 param.requires_grad = False
