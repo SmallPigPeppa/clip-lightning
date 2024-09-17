@@ -116,12 +116,6 @@ class CLIPDualEncoderModel(LightningModule):
         # load task N-1 checkpoint
         if self.hparams.old_checkpoint_path is not None:
             checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
-            # import pdb;pdb.set_trace()
-            # filtered_state_dict = {k: v for k, v in checkpoint['model'].items() if not k.startswith(
-            #     (
-            #         'model_old',
-            #         'distill_predictor'
-            #     ))}
             self.model.load_state_dict(checkpoint['model'], strict=True)
             print("Model weights loaded successfully and old parts copied.")
 
