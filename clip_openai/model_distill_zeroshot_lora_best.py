@@ -188,21 +188,21 @@ class CLIPDualEncoderModel(LightningModule):
         #     if name in exact_layers_to_freeze:
         #         param.requires_grad = False
 
-        # 定义需要冻结的完整参数名
-        exact_layers_to_freeze = [
-            "positional_embedding",
-            "text_projection",
-            "logit_scale",
-            "token_embedding.weight",
-            "visual.class_embedding",
-            "visual.positional_embedding",
-            "visual.proj",
-        ]
-
-        for name, param in self.model.named_parameters():
-            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze:
-                param.requires_grad = False
+        # # 定义需要冻结的完整参数名
+        # exact_layers_to_freeze = [
+        #     "positional_embedding",
+        #     "text_projection",
+        #     "logit_scale",
+        #     "token_embedding.weight",
+        #     "visual.class_embedding",
+        #     "visual.positional_embedding",
+        #     "visual.proj",
+        # ]
+        #
+        # for name, param in self.model.named_parameters():
+        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+        #     if name in exact_layers_to_freeze:
+        #         param.requires_grad = False
 
     def initialize_old_modules(self):
         self.model_old = copy.deepcopy(self.model)
