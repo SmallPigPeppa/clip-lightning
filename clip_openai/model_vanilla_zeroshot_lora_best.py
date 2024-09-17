@@ -264,6 +264,22 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
+    def on_save_checkpoint(self, checkpoint):
+        # # 在保存检查点之前整合 LoRA 权重
+        # merged_model = self.lora_model.merge_and_unload()
+        # # 将合并后的模型权重保存到检查点中
+        # checkpoint['model'] = merged_model.state_dict()
+
+
+        conv1=copy.deepcopy(self.model.visual.conv1)
+        self.model.visual.conv1=conv1.merge_and_unload().conv1
+        self.model.visual.transformer.merge_and_unload()
+        self.model.transformer.merge_and_unload()
+
+        print('************************')
+        print(self.model)
+        print('************************')
+
 
     # def on_before_optimizer_step(self, optimizer) -> None:
     #     print("**************on_before_opt enter1*********")
