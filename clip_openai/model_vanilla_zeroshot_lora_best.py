@@ -284,7 +284,7 @@ class CLIPDualEncoderModel(LightningModule):
             print('Parameter Comparison:')
             for (name1, param1), (name2, param2) in zip(self.model.named_parameters(),
                                                         self.model_old.named_parameters()):
-                print(f"{name1}: {param1.data}  |  {name2}: {param2.data}")
+                print(f"{name1} |  {name2}")
 
             print('************************')
 
