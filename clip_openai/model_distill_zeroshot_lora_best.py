@@ -47,8 +47,6 @@ def get_lora_model(model):
     return lora_model
 
 
-
-
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
@@ -85,7 +83,6 @@ def get_lora_model_text(model):
     return lora_model
 
 
-
 class DistillPredictor(nn.Module):
     def __init__(self, projection_dims, distill_proj_hidden_dim):
         super(DistillPredictor, self).__init__()
@@ -111,6 +108,7 @@ class NewModel(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         return x
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -153,56 +151,52 @@ class CLIPDualEncoderModel(LightningModule):
         )
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
-
-
         print('********************************************')
         # print(self.model)
         for name, param in self.model.named_parameters():
             print(name)
 
-
-        print('********************************************')
-        # print(self.model)
-        for name, param in self.model.visual.named_parameters():
-            print(name)
-
-        # 定义需要冻结的完整参数名
-        exact_layers_to_freeze=[
-            "class_embedding",
-            "positional_embedding",
-            # "proj",
-            # "conv1.weight",
-            "ln_pre.weight",
-            "ln_pre.bias",
-            # "transformer.resblocks.9.attn.in_proj_weight",
-            # "transformer.resblocks.9.attn.in_proj_bias",
-            # "transformer.resblocks.9.attn.out_proj.weight",
-            # "transformer.resblocks.9.attn.out_proj.bias",
-            # "transformer.resblocks.9.ln_1.weight",
-            # "transformer.resblocks.9.ln_1.bias",
-            # "transformer.resblocks.9.mlp.c_fc.weight",
-            # "transformer.resblocks.9.mlp.c_fc.bias",
-            # "transformer.resblocks.9.mlp.c_proj.weight",
-            # "transformer.resblocks.9.mlp.c_proj.bias",
-            # "transformer.resblocks.9.ln_2.weight",
-            # "transformer.resblocks.9.ln_2.bias",
-        ]
-
-        for name, param in self.model.visual.named_parameters():
-            # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
-            if name in exact_layers_to_freeze:
-                param.requires_grad = False
-
-
+        # print('********************************************')
+        # # print(self.model)
+        # for name, param in self.model.visual.named_parameters():
+        #     print(name)
+        #
+        # # 定义需要冻结的完整参数名
+        # exact_layers_to_freeze=[
+        #     "class_embedding",
+        #     "positional_embedding",
+        #     # "proj",
+        #     # "conv1.weight",
+        #     "ln_pre.weight",
+        #     "ln_pre.bias",
+        #     # "transformer.resblocks.9.attn.in_proj_weight",
+        #     # "transformer.resblocks.9.attn.in_proj_bias",
+        #     # "transformer.resblocks.9.attn.out_proj.weight",
+        #     # "transformer.resblocks.9.attn.out_proj.bias",
+        #     # "transformer.resblocks.9.ln_1.weight",
+        #     # "transformer.resblocks.9.ln_1.bias",
+        #     # "transformer.resblocks.9.mlp.c_fc.weight",
+        #     # "transformer.resblocks.9.mlp.c_fc.bias",
+        #     # "transformer.resblocks.9.mlp.c_proj.weight",
+        #     # "transformer.resblocks.9.mlp.c_proj.bias",
+        #     # "transformer.resblocks.9.ln_2.weight",
+        #     # "transformer.resblocks.9.ln_2.bias",
+        # ]
+        #
+        # for name, param in self.model.visual.named_parameters():
+        #     # 如果参数名在完整匹配的列表中，或包含 "resblocks.0" 到 "resblocks.5"，则冻结
+        #     if name in exact_layers_to_freeze:
+        #         param.requires_grad = False
 
         # 定义需要冻结的完整参数名
-        exact_layers_to_freeze=[
-            "token_embedding",
+        exact_layers_to_freeze = [
             "positional_embedding",
-            "ln_final.weight",
-            "ln_final.bias",
             "text_projection",
-            "logit_scale"
+            "logit_scale",
+            "token_embedding.weight",
+            "visual.class_embedding",
+            "visual.positional_embedding",
+            "visual.proj",
         ]
 
         for name, param in self.model.named_parameters():
@@ -478,4 +472,3 @@ class CLIPDualEncoderModel(LightningModule):
     #         # if param.requires_grad :
     #         #     print(name)
     #     print("***************on_before_opt exit1*********")
-
