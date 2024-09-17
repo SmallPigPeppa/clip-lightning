@@ -100,7 +100,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${DATASET_NAME}-dislora
+    --model_checkpoint.filename ${DATASET_NAME}/dislora
 #    
 #  python cli_vanilla_zeroshot_hf.py fit \
 #    --data.num_tasks 1 \
