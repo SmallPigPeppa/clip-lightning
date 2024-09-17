@@ -27,24 +27,24 @@ def find_target_modules(model):
     return target_modules
 
 
-def get_lora_model(model):
-    # Define the target modules where LoRA should be applied
-    target_modules = find_target_modules(model)
-
-    # Initialize LoRA configuration with target modules
-    lora_config = LoraConfig(
-        inference_mode=False,
-        r=4,  # Rank of the low-rank decomposition
-        lora_alpha=8,  # Scaling factor
-        task_type=TaskType.SEQ_CLS,  # Task type
-        lora_dropout=0.1,  # Dropout rate for LoRA
-        target_modules=target_modules  # Specify the target modules
-    )
-
-    # Apply LoRA to the model
-    lora_model = get_peft_model(model, lora_config)
-
-    return lora_model
+# def get_lora_model(model):
+#     # Define the target modules where LoRA should be applied
+#     target_modules = find_target_modules(model)
+#
+#     # Initialize LoRA configuration with target modules
+#     lora_config = LoraConfig(
+#         inference_mode=False,
+#         r=4,  # Rank of the low-rank decomposition
+#         lora_alpha=8,  # Scaling factor
+#         task_type=TaskType.SEQ_CLS,  # Task type
+#         lora_dropout=0.1,  # Dropout rate for LoRA
+#         target_modules=target_modules  # Specify the target modules
+#     )
+#
+#     # Apply LoRA to the model
+#     lora_model = get_peft_model(model, lora_config)
+#
+#     return lora_model
 
 
 def get_lora_model_vision(model):
@@ -71,8 +71,8 @@ def get_lora_model_text(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=4,  # Rank of the low-rank decomposition
-        lora_alpha=8,  # Scaling factor
+        r=8,  # Rank of the low-rank decomposition
+        lora_alpha=16,  # Scaling factor
         task_type='text',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
@@ -145,8 +145,8 @@ class CLIPDualEncoderModel(LightningModule):
         conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
         lora_config = LoraConfig(
             inference_mode=False,
-            r=4,  # Rank of the low-rank decomposition
-            lora_alpha=8,  # Scaling factor
+            r=8,  # Rank of the low-rank decomposition
+            lora_alpha=16,  # Scaling factor
             lora_dropout=0.1,  # Dropout rate for LoRA
             target_modules=['conv1'],
         )
