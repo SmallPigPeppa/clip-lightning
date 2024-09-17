@@ -94,6 +94,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats = []
         self.val_text_feats = []
 
+        self.model_old = copy.deepcopy(self.model)
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.model_old.parameters():
+            param.requires_grad = False
 
         # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
@@ -109,10 +113,7 @@ class CLIPDualEncoderModel(LightningModule):
         )
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
-        self.model_old = copy.deepcopy(self.model)
-        # Set requires_grad to False for all parameters in the old modules
-        for param in self.model_old.parameters():
-            param.requires_grad = False
+
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -272,6 +273,7 @@ class CLIPDualEncoderModel(LightningModule):
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
         conv1 = copy.deepcopy(self.model.visual.conv1)
+        visual_transformer=copy.deepcopy(self.model.visual.conv1)
         self.model.visual.conv1 = conv1.merge_and_unload().conv1
         self.model.visual.transformer.merge_and_unload()
         self.model.transformer.merge_and_unload()
