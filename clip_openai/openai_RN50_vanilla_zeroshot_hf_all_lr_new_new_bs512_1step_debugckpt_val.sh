@@ -2,7 +2,7 @@
 
 # 设置 Hugging Face home 目录
 export HF_HOME=/ppio_net0/huggingface
-export CUDA_VISIBLE_DEVICES=0
+#export CUDA_VISIBLE_DEVICES=0
 # 模型名称
 MODEL_NAME=ViT-B/16
 
