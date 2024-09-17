@@ -101,7 +101,7 @@ class CLIPDualEncoderModel(LightningModule):
         if self.distill:
             parameters.append({
                 "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.lr,  # 可以根据需要调整学习率
+                "lr": self.hparams.lr * 4.,  # 可以根据需要调整学习率
                 "weight_decay": self.hparams.weight_decay
             })
         else:
