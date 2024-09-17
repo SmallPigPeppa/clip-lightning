@@ -1,32 +1,32 @@
 #!/bin/bash
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
+export HF_HOME=/ppio_net0/huggingface
 
 # 模型名称
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("flickr30k" "coco2014" "artbench" "fashion" "pet" "simpsons" "lexica" )
+DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=("flickr30k")
 
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
+ROOT_DIR=/ppio_net0/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=8e-5
-  ["coco2014"]=8e-5
-  ["wikiart"]=8e-5
-  ["patfig"]=8e-5
-  ["pet"]=8e-5
-  ["simpsons"]=8e-5
-  ["lexica"]=8e-5
-  ["styles"]=8e-5
-  ["kream"]=8e-5
-  ["sketch"]=8e-5
+  ["flickr30k"]=1e-5
+  ["coco2014"]=1e-5
+  ["wikiart"]=1e-5
+  ["patfig"]=1e-5
+  ["pet"]=1e-5
+  ["simpsons"]=1e-5
+  ["lexica"]=1e-5
+  ["styles"]=1e-5
+  ["kream"]=1e-5
+  ["sketch"]=1e-5
 )
 
 # 遍历每个数据集
@@ -54,12 +54,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-ws \
+    --trainer.logger.project CLIP-1step-512 \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-lora \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
@@ -87,12 +87,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-ws \
+    --trainer.logger.project CLIP-1step-512 \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-dislora \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
@@ -119,12 +119,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-ws \
+    --trainer.logger.project CLIP-1step-512 \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-vanilla \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
@@ -150,12 +150,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-ws \
+    --trainer.logger.project CLIP-1step-512 \
     --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-distill \
     --trainer.logger.log_model False \
     --lr_monitor.logging_interval epoch \
