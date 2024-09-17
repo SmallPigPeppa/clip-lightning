@@ -58,6 +58,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator npu \
+    --trainer.devices 1 \
     --trainer.precision 16 \
     --trainer.max_epochs 40 \
     --trainer.log_every_n_steps 1 \
