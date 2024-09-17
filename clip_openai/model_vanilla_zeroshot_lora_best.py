@@ -201,8 +201,8 @@ class CLIPDualEncoderModel(LightningModule):
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        all_image_features = torch.cat(self.val_img_feats)
-        all_text_features = torch.cat(self.val_text_feats)
+        all_image_features = torch.cat(self.val_img_feats.view(-1, self.val_img_feats.size(-1)))
+        all_text_features = torch.cat(self.val_text_feats.view(-1, self.val_text_feats.size(-1)))
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
             text_features=all_text_features,
