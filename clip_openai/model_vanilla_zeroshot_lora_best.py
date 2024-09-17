@@ -92,14 +92,11 @@ class CLIPDualEncoderModel(LightningModule):
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
+        self.initialize_old_modules()
+
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
-
-        self.model_old = copy.deepcopy(self.model)
-        # Set requires_grad to False for all parameters in the old modules
-        for param in self.model_old.parameters():
-            param.requires_grad = False
 
         # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
@@ -114,6 +111,24 @@ class CLIPDualEncoderModel(LightningModule):
             target_modules=['conv1'],
         )
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+
+    def initialize_old_modules(self):
+        # load task N-1 checkpoint
+        if self.hparams.old_checkpoint_path is not None:
+            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+            import pdb;pdb.set_trace()
+            filtered_state_dict = {k: v for k, v in checkpoint['state_dict'].items() if not k.startswith(
+                (
+                    'model_old',
+                    'distill_predictor'
+                ))}
+            self.model.load_state_dict(filtered_state_dict, strict=True)
+            print("Model weights loaded successfully and old parts copied.")
+
+        self.model_old = copy.deepcopy(self.model)
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.model_old.parameters():
+            param.requires_grad = False
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -272,9 +287,9 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
-        if self.trainer.current_epoch != self.trainer.max_epochs-1:
+        if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
-        elif self.trainer.current_epoch == self.trainer.max_epochs-1:
+        elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
             conv1 = copy.deepcopy(self.model.visual.conv1)
             self.model.visual.conv1 = conv1.merge_and_unload().conv1
             self.model.visual.transformer.merge_and_unload()
