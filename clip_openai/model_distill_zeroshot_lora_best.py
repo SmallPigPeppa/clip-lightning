@@ -156,13 +156,13 @@ class CLIPDualEncoderModel(LightningModule):
 
 
         print('********************************************')
-        print(self.model)
-        for name, param in self.model.transformer.named_parameters():
+        # print(self.model)
+        for name, param in self.model.named_parameters():
             print(name)
 
 
         print('********************************************')
-        print(self.model)
+        # print(self.model)
         for name, param in self.model.visual.named_parameters():
             print(name)
 
