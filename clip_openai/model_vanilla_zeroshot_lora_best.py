@@ -184,9 +184,9 @@ class CLIPDualEncoderModel(LightningModule):
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
 
-        # 使用 all_gather 来同步所有 GPU 上的特征
-        image_embeddings = self.all_gather(image_embeddings)
-        text_embeddings = self.all_gather(text_embeddings)
+        # # 使用 all_gather 来同步所有 GPU 上的特征
+        # image_embeddings = self.all_gather(image_embeddings)
+        # text_embeddings = self.all_gather(text_embeddings)
 
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
@@ -202,9 +202,6 @@ class CLIPDualEncoderModel(LightningModule):
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
-
-        all_image_features = all_image_features.reshape(-1, all_image_features.size(-1))
-        all_text_features = all_text_features.reshape(-1, all_text_features.size(-1))
 
         print(all_image_features.shape)
 
