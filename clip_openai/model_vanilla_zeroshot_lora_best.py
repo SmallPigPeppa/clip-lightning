@@ -265,22 +265,22 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def on_save_checkpoint(self, checkpoint):
-        # # 在保存检查点之前整合 LoRA 权重
+        # 在保存检查点之前整合 LoRA 权重（如果需要）
         # merged_model = self.lora_model.merge_and_unload()
-        # # 将合并后的模型权重保存到检查点中
         # checkpoint['model'] = merged_model.state_dict()
 
-
-        conv1=copy.deepcopy(self.model.visual.conv1)
-        self.model.visual.conv1=conv1.merge_and_unload().conv1
+        # 处理视觉模块中的 conv1 和 transformer
+        conv1 = copy.deepcopy(self.model.visual.conv1)
+        self.model.visual.conv1 = conv1.merge_and_unload().conv1
         self.model.visual.transformer.merge_and_unload()
         self.model.transformer.merge_and_unload()
 
-        print('************************')
-        for name, param in self.model.named_parameters():
-            print(name)
-
-        print('************************')
+        # 仅在主进程中输出
+        if self.trainer.is_global_zero:
+            print('************************')
+            for name, param in self.model.named_parameters():
+                print(name)
+            print('************************')
 
 
     # def on_before_optimizer_step(self, optimizer) -> None:
