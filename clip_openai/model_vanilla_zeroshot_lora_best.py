@@ -188,10 +188,8 @@ class CLIPDualEncoderModel(LightningModule):
         image_embeddings = self.all_gather(image_embeddings)
         text_embeddings = self.all_gather(text_embeddings)
 
-
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
-
 
         return clip_loss
 
@@ -204,6 +202,9 @@ class CLIPDualEncoderModel(LightningModule):
     def on_validation_epoch_end(self):
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
+
+        all_image_features = all_image_features.reshape(-1, all_image_features.size(-1))
+        all_text_features = all_text_features.reshape(-1, all_text_features.size(-1))
 
         print(all_image_features.shape)
         val_metrics = self.get_clip_metrics_cpu(
@@ -237,7 +238,7 @@ class CLIPDualEncoderModel(LightningModule):
             preds = torch.where(ranking == ground_truth)[1]
             for k in [1]:
                 # metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100 # Convert recall to percentage
-                metrics[f"{name}_R@{k}"] = torch.tensor((preds < k).float().mean() * 100 ).to(self.device)
+                metrics[f"{name}_R@{k}"] = torch.tensor((preds < k).float().mean() * 100).to(self.device)
 
         return metrics
 
@@ -333,5 +334,3 @@ class CLIPDualEncoderModel(LightningModule):
                         print(f"New: {new_name} | Old: {old_name}")
 
                 print('************************')
-
-
