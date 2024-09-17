@@ -59,6 +59,7 @@ def get_lora_model_text(model):
 
     return lora_model
 
+
 class NewModel(nn.Module):
     def __init__(self, original_conv1):
         super(NewModel, self).__init__()
@@ -68,6 +69,7 @@ class NewModel(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         return x
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -112,8 +114,6 @@ class CLIPDualEncoderModel(LightningModule):
             target_modules=['conv1'],
         )
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
-
-
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -273,10 +273,11 @@ class CLIPDualEncoderModel(LightningModule):
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
         conv1 = copy.deepcopy(self.model.visual.conv1)
-        visual_transformer=copy.deepcopy(self.model.visual.conv1)
+        visual_transformer = copy.deepcopy(self.model.visual.transformer)
+        transformer = copy.deepcopy(self.model.transformer)
         self.model.visual.conv1 = conv1.merge_and_unload().conv1
-        self.model.visual.transformer.merge_and_unload()
-        self.model.transformer.merge_and_unload()
+        self.model.visual.transformer = visual_transformer.merge_and_unload().base_model.model
+        self.model.transformer = transformer.merge_and_unload().base_model.model
 
         # 仅在主进程中输出
         if self.trainer.is_global_zero:
@@ -308,4 +309,3 @@ class CLIPDualEncoderModel(LightningModule):
     #     #         print(name)
     #     #
     #     # print("***************on_before_opt exit2*********")
-
