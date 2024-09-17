@@ -323,10 +323,10 @@ class CLIPDualEncoderModel(LightningModule):
         if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            conv1 = copy.deepcopy(self.model.visual.conv1)
-            self.model.visual.conv1 = conv1.merge_and_unload().conv1
-            self.model.visual.transformer.merge_and_unload()
-            self.model.transformer.merge_and_unload()
+            # conv1 = copy.deepcopy(self.model.visual.conv1)
+            # self.model.visual.conv1 = conv1.merge_and_unload().conv1
+            # self.model.visual.transformer.merge_and_unload()
+            # self.model.transformer.merge_and_unload()
 
             # 仅在主进程中输出
             if self.trainer.is_global_zero:
