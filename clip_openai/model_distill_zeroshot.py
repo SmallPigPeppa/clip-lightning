@@ -120,8 +120,8 @@ class CLIPDualEncoderModel(LightningModule):
             optimizer,
             warmup_epochs=self.hparams.lr_warmup_epochs,
             max_epochs=self.trainer.max_epochs,
-            warmup_start_lr=0.01 * self.hparams.lr,
-            eta_min=0.01 * self.hparams.lr
+            warmup_start_lr=0.001 * self.hparams.lr,
+            eta_min=0.001 * self.hparams.lr
         )
 
         return {
