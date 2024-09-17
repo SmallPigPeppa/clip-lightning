@@ -52,8 +52,8 @@ def get_lora_model_vision(model):
     target_modules = find_target_modules(model)
     lora_config = LoraConfig(
         inference_mode=False,
-        r=4,  # Rank of the low-rank decomposition
-        lora_alpha=8,  # Scaling factor
+        r=8,  # Rank of the low-rank decomposition
+        lora_alpha=16,  # Scaling factor
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
     )
