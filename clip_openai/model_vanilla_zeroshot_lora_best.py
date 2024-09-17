@@ -272,9 +272,9 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
-        if self.trainer.current_epoch != self.trainer.max_epochs:
+        if self.trainer.current_epoch != self.trainer.max_epochs-1:
             pass
-        elif self.trainer.current_epoch == self.trainer.max_epochs:
+        elif self.trainer.current_epoch == self.trainer.max_epochs-1:
             conv1 = copy.deepcopy(self.model.visual.conv1)
             self.model.visual.conv1 = conv1.merge_and_unload().conv1
             self.model.visual.transformer.merge_and_unload()
