@@ -270,24 +270,40 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def on_save_checkpoint(self, checkpoint):
+    def save_model_weights(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
         conv1 = copy.deepcopy(self.model.visual.conv1)
-        visual_transformer = copy.deepcopy(self.model.visual.transformer)
-        transformer = copy.deepcopy(self.model.transformer)
         self.model.visual.conv1 = conv1.merge_and_unload().conv1
-        self.model.visual.transformer = visual_transformer.merge_and_unload().base_model.model
-        self.model.transformer = transformer.merge_and_unload().base_model.model
+        self.model.visual.transformer.merge_and_unload()
+        self.model.transformer.merge_and_unload()
 
         # 仅在主进程中输出
         if self.trainer.is_global_zero:
             print('************************')
 
-            # 输出参数对比
-            print('Parameter Comparison:')
-            for (name1, param1), (name2, param2) in zip(self.model.named_parameters(),
-                                                        self.model_old.named_parameters()):
-                print(f"{name1} |  {name2}")
+            # 创建一个新的 state_dict 用于保存权重
+            new_state_dict = {}
+
+            # 遍历当前模型的参数，处理名称
+            for name, param in self.model.named_parameters():
+                # 如果参数名称中包含 'base_model.model'，则去掉
+                new_name = name.replace("base_model.model.", "")
+                new_state_dict[new_name] = param.data
+
+            # 保存处理后的权重到检查点
+            checkpoint['model'] = new_state_dict
+
+            print('Saved model parameters with modified names:')
+            for new_name in new_state_dict.keys():
+                print(new_name)
+
+            print('************************')
+
+            # 比较新模型参数名与旧模型参数名
+            print('Parameter Comparison with Old Model:')
+            for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
+                                                                self.old_model.named_parameters()):
+                print(f"New: {new_name} | Old: {old_name}")
 
             print('************************')
 
