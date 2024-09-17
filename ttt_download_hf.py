@@ -17,7 +17,7 @@ datasets = [
 
 ]
 
-local_dir = "/home/ma-user/work/dataset/all/hf-datasets"
+local_dir = "/home/ma-user/work/dataset/all/hf-datasets-new"
 
 
 def download_dataset(dataset):
