@@ -302,7 +302,7 @@ class CLIPDualEncoderModel(LightningModule):
             # 比较新模型参数名与旧模型参数名
             print('Parameter Comparison with Old Model:')
             for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
-                                                                self.old_model.named_parameters()):
+                                                                self.model_old.named_parameters()):
                 print(f"New: {new_name} | Old: {old_name}")
 
             print('************************')
