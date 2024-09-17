@@ -71,8 +71,8 @@ def get_lora_model_text(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
+        r=64,  # Rank of the low-rank decomposition
+        lora_alpha=64,  # Scaling factor
         task_type='text',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules  # Specify the target modules
