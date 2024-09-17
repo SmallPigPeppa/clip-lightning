@@ -109,6 +109,11 @@ class CLIPDualEncoderModel(LightningModule):
         )
         self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
+        self.model_old = copy.deepcopy(self.model)
+        # Set requires_grad to False for all parameters in the old modules
+        for param in self.model_old.parameters():
+            param.requires_grad = False
+
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
@@ -278,7 +283,7 @@ class CLIPDualEncoderModel(LightningModule):
             # 输出参数对比
             print('Parameter Comparison:')
             for (name1, param1), (name2, param2) in zip(self.model.named_parameters(),
-                                                        self.old_model.named_parameters()):
+                                                        self.model_old.named_parameters()):
                 print(f"{name1}: {param1.data}  |  {name2}: {param2.data}")
 
             print('************************')
