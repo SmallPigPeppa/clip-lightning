@@ -57,7 +57,6 @@ python  cli_vanilla_zeroshot_lora_best.py validate \
     --model.download_root ./ \
     --model.zero_shot_eval_interval 40 \
     --trainer.accelerator gpu \
-    --trainer.devices 1 \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
