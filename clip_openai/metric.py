@@ -1,5 +1,5 @@
 import numpy
-
+from tqdm import tqdm
 
 
 def i2t(images, captions, caps_per_image=5):
@@ -16,7 +16,7 @@ def i2t(images, captions, caps_per_image=5):
 
     ranks = numpy.zeros(npts)
     top1 = numpy.zeros(npts)
-    for index in range(npts):
+    for index in tqdm(range(npts)):
 
         im = images[caps_per_image * index].reshape(1, images.shape[1])
         d = numpy.dot(im, captions.T).flatten()
@@ -57,7 +57,7 @@ def t2i(images, captions, caps_per_image=5):
 
     ranks = numpy.zeros(caps_per_image * npts)
     top1 = numpy.zeros(caps_per_image * npts)
-    for index in range(npts):
+    for index in tqdm(range(npts)):
 
         queries = captions[caps_per_image * index:caps_per_image * index + caps_per_image]
 
