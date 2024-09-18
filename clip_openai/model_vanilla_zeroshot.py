@@ -293,7 +293,12 @@ class CLIPDualEncoderModel(LightningModule):
             if name == "val/image_to_text":
                 # Matching image to any of its captions
                 ranking = torch.argsort(logit, descending=True)
-                preds = torch.where(ranking == ground_truth_image_to_text)[1]
+                # For each image, check if any of its M captions are in the top k
+                matching_indices = []
+                for i in range(N):
+                    matched = torch.any(ranking[i, :M] == torch.arange(i * M, (i + 1) * M), dim=1)
+                    matching_indices.append(matched)
+                preds = torch.cat(matching_indices).nonzero(as_tuple=True)[0]
             else:
                 # Matching text to corresponding image
                 ranking = torch.argsort(logit, descending=True)
