@@ -19,6 +19,8 @@ class COCO2014Dataset(ImageRetrievalDataset):
 
         if split == 'train':
             split_data = [item for item in all_data if item['split'] in ['train', 'restval']]
+        # if split == 'train':
+        #     split_data = [item for item in all_data if item['split'] == 'train']
         elif split == 'val':
             split_data = [item for item in all_data if item['split'] == 'test']
         else:
