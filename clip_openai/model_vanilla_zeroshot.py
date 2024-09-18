@@ -78,10 +78,11 @@ class CLIPDualEncoderModel(LightningModule):
         image_features = self.model.encode_image(inputs["image"])
 
         # Check the 'multi_caption' flag for the first item in the batch
-        if inputs["multi_caption"][0]:  # Assuming multi_caption is a list or tensor
+        if inputs["multi_caption"][0]:
             if random_select:
                 # Randomly select one caption for each item in the batch
                 selected_captions = [random.choice(captions) for captions in inputs["caption"]]
+                selected_captions = torch.cat(selected_captions, dim=0)
                 text_features = self.model.encode_text(selected_captions)
             else:
                 # Use all captions for each item in the batch if random_select is False
