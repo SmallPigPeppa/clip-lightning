@@ -247,7 +247,6 @@ class CLIPDualEncoderModel(LightningModule):
             M = 1  # No extra captions per image
 
         from metric import i2t, t2i
-        # tensor.detach().cpu().numpy()
         r1_i2t = i2t(
             images=image_features.detach().cpu().numpy(),
             captions=text_features.detach().cpu().numpy(),
