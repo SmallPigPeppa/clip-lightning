@@ -58,7 +58,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.zero_shot_eval_interval 40 \
     --model.old_checkpoint_path ckpt/${DATASET_NAME}-512/distill-new-v1.ckpt  \
     --trainer.accelerator gpu \
-    --trainer.devices 4 \
+    --trainer.devices 1 \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
