@@ -240,7 +240,7 @@ class CLIPDualEncoderModel(LightningModule):
             N, M, D = text_features.shape
             text_features = text_features.reshape(N * M, D)
             image_features = image_features.unsqueeze(1).repeat(1, M, 1)
-            image_features.reshape(N * M, D)
+            image_features = image_features.reshape(N * M, D)
 
         else:
             N, D = text_features.shape
