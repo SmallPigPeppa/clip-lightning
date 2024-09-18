@@ -42,6 +42,7 @@ MAX_EPOCHS=40
 BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
+PROJECT=CLIP-1step-1024-ws
 
 # 函数：运行训练
 run_training() {
@@ -72,7 +73,7 @@ run_training() {
     --trainer.max_epochs ${MAX_EPOCHS} \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
-    --trainer.logger.project CLIP-1step-1024-yd \
+    --trainer.logger.project ${PROJECT} \
     --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr-${lr} \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
