@@ -234,56 +234,29 @@ class CLIPDualEncoderModel(LightningModule):
     #
     #     return metrics
 
-    # def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
-    #     metrics = {}
-    #
-    #     # Handle case where text_features has shape (N, M, D) - multiple captions for each image
-    #     if len(text_features.shape) == 3:
-    #         N, M, D = text_features.shape
-    #         # Reshape text_features to (N * M, D) to compute logits for all image-caption pairs
-    #         text_features = text_features.view(-1, D)
-    #
-    #         # Calculate logits per image
-    #         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-    #         logits_per_image = logits_per_image.view(N, M, N)  # Reshape to (N, M, N) - (images, captions, images)
-    #
-    #         # Get the max logit across the multiple captions for each image
-    #         logits_per_image, _ = torch.max(logits_per_image, dim=1)  # Max across M captions
-    #
-    #     else:
-    #         # Standard case where text_features is (N, D)
-    #         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-    #
-    #     logits_per_text = logits_per_image.t().detach().cpu()
-    #
-    #     # Compute recall metrics
-    #     logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-    #     ground_truth = torch.arange(len(image_features)).view(-1, 1)
-    #
-    #     for name, logit in logits.items():
-    #         ranking = torch.argsort(logit, descending=True)
-    #         preds = torch.where(ranking == ground_truth)[1]
-    #         preds = preds.detach().cpu().numpy()
-    #
-    #         for k in [1]:
-    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-    #
-    #     return metrics
-
     def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
 
-        # 确定文本特征的维度
-        if text_features.dim() == 3:  # N, M, D
-            # 用于广播，计算每个图片与多个文本间的logits
-            image_features_exp = image_features.unsqueeze(1)  # N, 1, D
-            logits_per_image = logit_scale * (image_features_exp @ text_features.transpose(-2, -1)).squeeze(1)
-        else:  # N, D
-            logits_per_image = logit_scale * (image_features @ text_features.t())
+        # Handle case where text_features has shape (N, M, D) - multiple captions for each image
+        if len(text_features.shape) == 3:
+            N, M, D = text_features.shape
+            # Reshape text_features to (N * M, D) to compute logits for all image-caption pairs
+            text_features = text_features.view(-1, D)
 
-        logits_per_image = logits_per_image.detach().cpu()
+            # Calculate logits per image
+            logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+            logits_per_image = logits_per_image.view(N, M, N)  # Reshape to (N, M, N) - (images, captions, images)
+
+            # Get the max logit across the multiple captions for each image
+            logits_per_image, _ = torch.max(logits_per_image, dim=1)  # Max across M captions
+
+        else:
+            # Standard case where text_features is (N, D)
+            logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+
         logits_per_text = logits_per_image.t().detach().cpu()
 
+        # Compute recall metrics
         logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
         ground_truth = torch.arange(len(image_features)).view(-1, 1)
 
@@ -291,10 +264,37 @@ class CLIPDualEncoderModel(LightningModule):
             ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
-            for k in [1]:  # 可以根据需要调整这里的k值
+
+            for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
+    # def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    #     metrics = {}
+    #
+    #     # 确定文本特征的维度
+    #     if text_features.dim() == 3:  # N, M, D
+    #         # 用于广播，计算每个图片与多个文本间的logits
+    #         image_features_exp = image_features.unsqueeze(1)  # N, 1, D
+    #         logits_per_image = logit_scale * (image_features_exp @ text_features.transpose(-2, -1)).squeeze(1)
+    #     else:  # N, D
+    #         logits_per_image = logit_scale * (image_features @ text_features.t())
+    #
+    #     logits_per_image = logits_per_image.detach().cpu()
+    #     logits_per_text = logits_per_image.t().detach().cpu()
+    #
+    #     logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    #     ground_truth = torch.arange(len(image_features)).view(-1, 1)
+    #
+    #     for name, logit in logits.items():
+    #         ranking = torch.argsort(logit, descending=True)
+    #         preds = torch.where(ranking == ground_truth)[1]
+    #         preds = preds.detach().cpu().numpy()
+    #         for k in [1]:  # 可以根据需要调整这里的k值
+    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+    #
+    #     return metrics
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
