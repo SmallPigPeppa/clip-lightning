@@ -8,7 +8,7 @@ if __name__ == "__main__":
         config='./config.yaml',
         root_dir='/ppio_net0/torch_ds',
         max_length=77,
-        batch_size=1
+        batch_size=128
     )
     dm.setup(stage='validate')
 
