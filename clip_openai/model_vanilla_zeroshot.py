@@ -57,23 +57,40 @@ class CLIPDualEncoderModel(LightningModule):
     #     text_features = self.model.encode_text(inputs["caption"])
     #     return image_features, text_features
 
+    # def forward(self, inputs, random_select=True):
+    #     image_features = self.model.encode_image(inputs["image"])
+    #
+    #     if inputs.get("multi_caption", False):
+    #         if random_select:
+    #             # Randomly select one caption
+    #             selected_caption = random.choice(inputs["caption"])
+    #             text_features = self.model.encode_text(selected_caption)
+    #         else:
+    #             # Use all captions if random_select is False
+    #             text_features = [self.model.encode_text(caption) for caption in inputs["caption"]]
+    #     else:
+    #         # Single caption scenario
+    #         text_features = self.model.encode_text(inputs["caption"])
+    #
+    #     return image_features, text_features
+
     def forward(self, inputs, random_select=True):
         image_features = self.model.encode_image(inputs["image"])
 
-        if inputs.get("multi_caption", False):
+        # Check the 'multi_caption' flag for the first item in the batch
+        if inputs["multi_caption"][0]:  # Assuming multi_caption is a list or tensor
             if random_select:
-                # Randomly select one caption
-                selected_caption = random.choice(inputs["caption"])
-                text_features = self.model.encode_text(selected_caption)
+                # Randomly select one caption for each item in the batch
+                selected_captions = [random.choice(captions) for captions in inputs["caption"]]
+                text_features = self.model.encode_text(selected_captions)
             else:
-                # Use all captions if random_select is False
-                text_features = [self.model.encode_text(caption) for caption in inputs["caption"]]
+                # Use all captions for each item in the batch if random_select is False
+                text_features = [self.model.encode_text(captions) for captions in inputs["caption"]]
         else:
             # Single caption scenario
             text_features = self.model.encode_text(inputs["caption"])
 
         return image_features, text_features
-
 
     def configure_optimizers(self):
         parameters = [{
