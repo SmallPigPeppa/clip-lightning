@@ -105,7 +105,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #    --model_checkpoint.filename ${DATASET_NAME}-1024/distill
 
 
-  python cli_vanilla_zeroshot.py fit \
+  python cli_vanilla_zeroshot_hf.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
