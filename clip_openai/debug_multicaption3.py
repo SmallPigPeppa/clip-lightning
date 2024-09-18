@@ -3,6 +3,8 @@
 
 if __name__ == "__main__":
     from dataloaders.data_module_dil_json import ImageRetrievalDataModule
+
+    # Initialize the DataModule with relevant parameters
     dm = ImageRetrievalDataModule(
         dataset_name='coco2014',
         config='./config.yaml',
@@ -10,19 +12,26 @@ if __name__ == "__main__":
         max_length=77,
         batch_size=128
     )
+
+    # Set up the DataModule for the validation stage
     dm.setup(stage='validate')
 
-    b = dm.task_datasets[0]
-    print(len(b))
-    c = dm.val_dataset
-    print(len(c))
-    a = dm.train_dataloader()
-    inputs = next(iter(a))
-    print(len(inputs['caption']))
+    # Access the validation dataset directly
+    val_dataset = dm.val_dataset
 
-    a = dm.val_dataloader()
-    inputs = next(iter(a))
+    # List to store the lengths of all captions in the validation set
+    caption_lengths = []
 
-    print(len(inputs['caption']))
+    # Iterate through the validation dataset
+    for i in range(len(val_dataset)):
+        data_item = val_dataset[i]  # Get the data item at index i
+        caption = data_item['caption']  # Get the caption for the data item
+        if isinstance(caption, list):
+            for c in caption:
+                caption_lengths.append(len(c))  # Store the length of each caption if it's a list
+        else:
+            caption_lengths.append(len(caption))  # Store the length of the caption if it's a single caption
 
-
+    # Print out all the caption lengths
+    print(f"Total captions: {len(caption_lengths)}")
+    print("Caption lengths:", caption_lengths)
