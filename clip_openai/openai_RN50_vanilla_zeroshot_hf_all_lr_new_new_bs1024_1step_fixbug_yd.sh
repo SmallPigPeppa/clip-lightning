@@ -53,7 +53,6 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --data.root_dir ${ROOT_DIR} \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 512 \
-    --model.projection_lr_scale 10 \
     --model.temperature 0.1 \
     --model.lr ${LR} \
     --model.lr_warmup_epochs 5 \
