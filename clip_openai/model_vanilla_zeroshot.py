@@ -14,6 +14,7 @@ from tqdm import tqdm
 import copy
 import random
 
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -88,6 +89,9 @@ class CLIPDualEncoderModel(LightningModule):
             else:
                 # Use all captions for each item in the batch if random_select is False
                 text_features = [self.model.encode_text(captions) for captions in inputs["caption"]]
+                text_features = torch.stack(text_features)
+                text_features = text_features.permute(1, 0, 2)  # batsize,5,dim
+
         else:
             # Single caption scenario
             text_features = self.model.encode_text(inputs["caption"])
@@ -170,22 +174,16 @@ class CLIPDualEncoderModel(LightningModule):
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        import pdb;pdb.set_trace()
+        import pdb;
+        pdb.set_trace()
         all_image_features = torch.cat(self.val_img_feats)
-        # all_text_features = torch.cat(self.val_text_feats)
+        all_text_features = torch.cat(self.val_text_feats)
 
-        if isinstance(self.val_text_feats[0], torch.Tensor) and len(self.val_text_feats[0].shape) == 2:
-            # Use torch.cat to concatenate B, D tensors along the 0th dimension
-            all_text_features=torch.cat(self.val_text_feats, dim=0)
-        else:
-            # # First, stack each K-length list of B, D tensors along dimension 1 to get B, K, D
-            # concatenated_tensors = [torch.stack(k_list, dim=1) for k_list in self.val_text_feats]
-            # # Then, concatenate all B, K, D tensors along dimension 0 to get SB, K, D
-            # all_text_features=torch.cat(concatenated_tensors, dim=0)
-            val_text_feats_tensor = torch.tensor(self.val_text_feats).to(self.device)
-            val_text_feats_tensor = val_text_feats_tensor.permute(0, 2, 1, 3)  # (S, B, 5, 512)
-            all_text_features = val_text_feats_tensor.flatten(0, 1)  # 直接合并前两维，结果是 (SB, 5, 512)
-
+        # if isinstance(self.val_text_feats[0], torch.Tensor) and len(self.val_text_feats[0].shape) == 2:
+        #     # Use torch.cat to concatenate B, D tensors along the 0th dimension
+        #     all_text_features = torch.cat(self.val_text_feats, dim=0)
+        # else:
+        #     all_text_features = val_text_feats_tensor.flatten(0, 1)  # 直接合并前两维，结果是 (SB, 5, 512)
 
         val_metrics = self.get_clip_metrics_cpu(
             image_features=all_image_features,
