@@ -2,6 +2,8 @@
 
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
+ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
+PROJECT=CLIP-1step-1024-ws
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -36,13 +38,11 @@ declare -A METHOD_MAP=(
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
 BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
-PROJECT=CLIP-1step-1024-ws
 
 # 函数：运行训练
 run_training() {
