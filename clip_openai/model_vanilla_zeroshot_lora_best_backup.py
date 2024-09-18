@@ -14,7 +14,6 @@ from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 import copy
-import torch.distributed as dist
 
 
 def find_target_modules(model):
@@ -180,19 +179,19 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    # def validation_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
-    #
-    #     # # 使用 all_gather 来同步所有 GPU 上的特征
-    #     # image_embeddings = self.all_gather(image_embeddings)
-    #     # text_embeddings = self.all_gather(text_embeddings)
-    #
-    #     self.val_img_feats.append(image_embeddings)
-    #     self.val_text_feats.append(text_embeddings)
-    #
-    #     return clip_loss
+    def validation_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("val/clip_loss", clip_loss, sync_dist=True)
+
+        # # 使用 all_gather 来同步所有 GPU 上的特征
+        # image_embeddings = self.all_gather(image_embeddings)
+        # text_embeddings = self.all_gather(text_embeddings)
+
+        self.val_img_feats.append(image_embeddings)
+        self.val_text_feats.append(text_embeddings)
+
+        return clip_loss
 
     # def on_train_start(self):
     #     # Zero-shot metric evaluation before training starts
@@ -200,74 +199,30 @@ class CLIPDualEncoderModel(LightningModule):
     #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
-    # def on_validation_epoch_end(self):
-    #     all_image_features = torch.cat(self.val_img_feats)
-    #     all_text_features = torch.cat(self.val_text_feats)
-    #
-    #     print(all_image_features.shape)
-    #
-    #     val_metrics = self.get_clip_metrics_cpu(
-    #         image_features=all_image_features,
-    #         text_features=all_text_features,
-    #         logit_scale=self.model.logit_scale.exp(),
-    #     )
-    #     self.log_dict(val_metrics, sync_dist=True)
-    #     self.val_img_feats.clear()
-    #     self.val_text_feats.clear()
-    #
-    #     # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #     # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #     # self.log_dict(zero_shot_metric, sync_dist=True)
-    #
-    #     # zero-shot metric
-    #     if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-    #         zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #         zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #         self.log_dict(zero_shot_metric, sync_dist=True)
-
-    def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
-
-        # Gather image and text embeddings across all GPUs
-        gathered_image_feats = [torch.zeros_like(image_embeddings) for _ in range(dist.get_world_size())]
-        gathered_text_feats = [torch.zeros_like(text_embeddings) for _ in range(dist.get_world_size())]
-
-        dist.all_gather(gathered_image_feats, image_embeddings)
-        dist.all_gather(gathered_text_feats, text_embeddings)
-
-        # Concatenate gathered features
-        gathered_image_feats = torch.cat(gathered_image_feats, dim=0)
-        gathered_text_feats = torch.cat(gathered_text_feats, dim=0)
-
-        # Append only on the global rank 0 (main process) to avoid duplication
-        if self.trainer.is_global_zero:
-            self.val_img_feats.append(gathered_image_feats)
-            self.val_text_feats.append(gathered_text_feats)
-
-        return clip_loss
-
     def on_validation_epoch_end(self):
-        # Only compute metrics on global rank 0
-        if self.trainer.is_global_zero:
-            all_image_features = torch.cat(self.val_img_feats, dim=0)
-            all_text_features = torch.cat(self.val_text_feats, dim=0)
+        all_image_features = torch.cat(self.val_img_feats)
+        all_text_features = torch.cat(self.val_text_feats)
 
-            val_metrics = self.get_clip_metrics_cpu(
-                image_features=all_image_features,
-                text_features=all_text_features,
-                logit_scale=self.model.logit_scale.exp(),
-            )
-            self.log_dict(val_metrics, sync_dist=True)
-            self.val_img_feats.clear()
-            self.val_text_feats.clear()
+        print(all_image_features.shape)
 
-            # Zero-shot metric evaluation
-            if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-                zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-                zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-                self.log_dict(zero_shot_metric, sync_dist=True)
+        val_metrics = self.get_clip_metrics_cpu(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            logit_scale=self.model.logit_scale.exp(),
+        )
+        self.log_dict(val_metrics, sync_dist=True)
+        self.val_img_feats.clear()
+        self.val_text_feats.clear()
+
+        # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+        # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+        # self.log_dict(zero_shot_metric, sync_dist=True)
+
+        # zero-shot metric
+        if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
+            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+            self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
