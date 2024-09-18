@@ -11,7 +11,7 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("flickr30k")
-##DATASETS=("coco2014")
+DATASETS=("coco2014")
 
 
 # 其他参数

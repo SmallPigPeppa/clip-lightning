@@ -119,7 +119,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
         # lora: model.visual conv1
         conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
