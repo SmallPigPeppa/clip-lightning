@@ -174,8 +174,8 @@ class CLIPDualEncoderModel(LightningModule):
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        import pdb;
-        pdb.set_trace()
+        # import pdb;
+        # pdb.set_trace()
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
 
@@ -271,25 +271,37 @@ class CLIPDualEncoderModel(LightningModule):
     def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
 
-        # 确定文本特征的维度
-        if text_features.dim() == 3:  # N, M, D
-            # 用于广播，计算每个图片与多个文本间的logits
-            image_features_exp = image_features.unsqueeze(1)  # N, 1, D
-            logits_per_image = logit_scale * (image_features_exp @ text_features.transpose(-2, -1)).squeeze(1)
-        else:  # N, D
-            logits_per_image = logit_scale * (image_features @ text_features.t())
+        # Handle the case when text_features is N x M x D
+        if len(text_features.shape) == 3:
+            N, M, D = text_features.shape
+            text_features = text_features.reshape(N * M, D)
+        else:
+            N = text_features.shape[0]
+            M = 1  # No extra captions per image
 
-        logits_per_image = logits_per_image.detach().cpu()
+        # Compute logits
+        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
 
         logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(image_features)).view(-1, 1)
+
+        # Ground truth for image to text: Every image matches any of its M captions
+        ground_truth_image_to_text = torch.arange(N).repeat_interleave(M).view(-1, 1)
+        ground_truth_text_to_image = torch.arange(N).view(-1, 1)
 
         for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
+            if name == "val/image_to_text":
+                # Matching image to any of its captions
+                ranking = torch.argsort(logit, descending=True)
+                preds = torch.where(ranking == ground_truth_image_to_text)[1]
+            else:
+                # Matching text to corresponding image
+                ranking = torch.argsort(logit, descending=True)
+                preds = torch.where(ranking == ground_truth_text_to_image)[1]
+
             preds = preds.detach().cpu().numpy()
-            for k in [1]:  # 可以根据需要调整这里的k值
+
+            for k in [1]:  # Compute recall at 1, 5, and 10
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
