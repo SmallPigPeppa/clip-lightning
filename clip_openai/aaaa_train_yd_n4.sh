@@ -3,7 +3,7 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/wenzhuoliu/huggingface
 ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
-PROJECT=CLIP-1step-1024-ydn4
+PROJECT=CLIP-1step-512-yd
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -40,7 +40,7 @@ declare -A METHOD_MAP=(
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
-BATCH_SIZE=256
+BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
@@ -81,7 +81,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-1024-ydn4/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-512-yd/${method}-lr-${lr}
 }
 
 # 运行所有数据集
