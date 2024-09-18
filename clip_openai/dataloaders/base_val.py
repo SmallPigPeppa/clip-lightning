@@ -40,13 +40,36 @@ class ImageRetrievalDataset(Dataset):
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
 
+    # def __getitem__(self, index):
+    #     image = Image.open(self.images[index])
+    #     caption = self.captions[index]
+    #     if isinstance(caption, list):
+    #         caption = random.choice(caption)
+    #     caption = self.tokenize(caption)
+    #     if self.transforms:
+    #         image = self.transforms(image)
+    #
+    #     return {"image": image, "caption": caption}
+
     def __getitem__(self, index):
         image = Image.open(self.images[index])
         caption = self.captions[index]
+
         if isinstance(caption, list):
-            caption = random.choice(caption)
-        caption = self.tokenize(caption)
+            if len(caption) == 1:
+                caption = self.tokenize(caption[0])  # Only one element, return the original
+                multi_caption = False
+            else:
+                caption = [self.tokenize(c) for c in caption]  # Tokenize all captions if more than one
+                multi_caption = True
+        else:
+            caption = self.tokenize(caption)
+            multi_caption = False  # Not a list, so it's not multi-caption
+
         if self.transforms:
             image = self.transforms(image)
 
-        return {"image": image, "caption": caption}
+        return {"image": image, "caption": caption, "multi_caption": multi_caption}
+
+
+

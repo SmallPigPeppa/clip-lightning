@@ -53,29 +53,31 @@ class CLIPDualEncoderModel(LightningModule):
         for param in self.model_old.parameters():
             param.requires_grad = False
 
-    def forward(self, inputs):
-        image_features = self.model.encode_image(inputs["image"])
-        text_features = self.model.encode_text(inputs["caption"])
-        return image_features, text_features
-
-
-    # def forward(self, inputs, random_select=True):
+    # def forward(self, inputs):
     #     image_features = self.model.encode_image(inputs["image"])
-    #     # Check the 'multi_caption' flag
-    #     if inputs["multi_caption"][0]:
-    #         if random_select:
-    #             selected_caption = random.choice(inputs["caption"])
-    #             text_features = self.model.encode_text(selected_caption)
-    #         else:
-    #             text_features = [self.model.encode_text(captions) for captions in inputs["caption"]]
-    #             text_features = torch.stack(text_features)
-    #             text_features = text_features.permute(1, 0, 2)  # batsize,5,dim
-    #
-    #     else:
-    #         # Single caption scenario
-    #         text_features = self.model.encode_text(inputs["caption"])
-    #
+    #     text_features = self.model.encode_text(inputs["caption"])
     #     return image_features, text_features
+
+
+    def forward(self, inputs, random_select=True):
+        image_features = self.model.encode_image(inputs["image"])
+
+        # Check the 'multi_caption' flag for the first item in the batch
+        if inputs["multi_caption"][0]:
+            if random_select:
+                selected_caption = random.choice(inputs["caption"])
+                text_features = self.model.encode_text(selected_caption)
+            else:
+                # Use all captions for each item in the batch if random_select is False
+                text_features = [self.model.encode_text(captions) for captions in inputs["caption"]]
+                text_features = torch.stack(text_features)
+                text_features = text_features.permute(1, 0, 2)  # batsize,5,dim
+
+        else:
+            # Single caption scenario
+            text_features = self.model.encode_text(inputs["caption"])
+
+        return image_features, text_features
 
     def configure_optimizers(self):
         parameters = [{
@@ -127,9 +129,19 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
+    # def validation_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch, random_select=False)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
+    #     self.val_img_feats.append(image_embeddings)
+    #     self.val_text_feats.append(text_embeddings)
+    #
+    #     return clip_loss
+
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch, random_select=False)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        image_embeddings_one, text_embeddings_one = self.forward(batch, random_select=True)
+        clip_loss = self._compute_losses(image_embeddings_one, text_embeddings_one)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
         self.val_img_feats.append(image_embeddings)
         self.val_text_feats.append(text_embeddings)
@@ -143,6 +155,8 @@ class CLIPDualEncoderModel(LightningModule):
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
+        # import pdb;
+        # pdb.set_trace()
         all_image_features = torch.cat(self.val_img_feats)
         all_text_features = torch.cat(self.val_text_feats)
 
@@ -176,20 +190,52 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
+    # def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    #     metrics = {}
+    #     logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+    #     logits_per_text = logits_per_image.t().detach().cpu()
+    #
+    #     logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    #     ground_truth = torch.arange(len(text_features)).view(-1, 1)
+    #
+    #     for name, logit in logits.items():
+    #         ranking = torch.argsort(logit, descending=True)
+    #         preds = torch.where(ranking == ground_truth)[1]
+    #         preds = preds.detach().cpu().numpy()
+    #         for k in [1]:
+    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+    #
+    #     return metrics
+
     def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        logits_per_text = logits_per_image.t().detach().cpu()
 
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
+        # Handle the case when text_features is N x M x D
+        if len(text_features.shape) == 3:
+            N, M, D = text_features.shape
+            text_features = text_features.reshape(N * M, D)
+            image_features = image_features.unsqueeze(1).repeat(1, M, 1)
+            image_features = image_features.reshape(N * M, D)
 
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
-            preds = preds.detach().cpu().numpy()
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+        else:
+            N, D = text_features.shape
+            M = 1  # No extra captions per image
+
+        from metric import i2t, t2i
+        r1_i2t = i2t(
+            images=image_features.detach().cpu().numpy(),
+            captions=text_features.detach().cpu().numpy(),
+            caps_per_image=M
+        )
+
+        r1_t2i = t2i(
+            images=image_features.detach().cpu().numpy(),
+            captions=text_features.detach().cpu().numpy(),
+            caps_per_image=M
+        )
+
+        metrics["val/image_to_text_R@1"] = r1_i2t
+        metrics["val/text_to_image_R@1"] = r1_t2i
 
         return metrics
 
