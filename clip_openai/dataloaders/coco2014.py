@@ -29,7 +29,7 @@ class COCO2014Dataset(ImageRetrievalDataset):
 
         for item in split_data:
             img = os.path.join(self.root_dir, item['filepath'], item['filename'])
-            caps = [sentence['raw'] for sentence in item['sentences']]
+            caps = [sentence['raw'] for sentence in item['sentences'][:5]]  # 只取前 5 个 captions
             assert os.path.isfile(img)
             images.append(img)
             captions.append(caps)

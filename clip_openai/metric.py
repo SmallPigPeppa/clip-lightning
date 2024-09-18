@@ -8,7 +8,7 @@ def i2t(images, captions, caps_per_image=5):
     Images: (5N, K) matrix of images
     Captions: (5N, K) matrix of captions
     """
-    import pdb;pdb.set_trace()
+    # import pdb;pdb.set_trace()
     npts = images.shape[0] / caps_per_image
 
     index_list = []
