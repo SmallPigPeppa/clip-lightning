@@ -16,14 +16,14 @@ DATASETS=("flickr30k")
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=2e-5
-  ["wikiart"]=1e-5
-  ["patfig"]=1e-5
-  ["pet"]=1e-5
-  ["simpsons"]=1e-5
-  ["lexica"]=1e-5
-  ["styles"]=1e-5
-  ["kream"]=1e-5
-  ["sketch"]=1e-5
+  ["wikiart"]=2e-5
+  ["patfig"]=2e-5
+  ["pet"]=2e-5
+  ["simpsons"]=2e-5
+  ["lexica"]=2e-5
+  ["styles"]=2e-5
+  ["kream"]=2e-5
+  ["sketch"]=2e-5
 )
 
 # 脚本方法映射

@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
-ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
-PROJECT=CLIP-1step-1024-ws
+export HF_HOME=/ppio_net0/huggingface
+ROOT_DIR=/ppio_net0/torch_ds
+PROJECT=CLIP-1step-512
 
 # 模型名称
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("flickr30k")
 DATASETS=("coco2014")
+DATASETS=("wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -69,7 +69,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --trainer.accelerator npu \
+    --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
     --trainer.log_every_n_steps 1 \
@@ -81,7 +81,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-512/${method}-lr-${lr}
 }
 
 # 运行所有数据集
