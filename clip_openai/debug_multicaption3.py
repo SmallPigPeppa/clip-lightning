@@ -27,10 +27,9 @@ if __name__ == "__main__":
         data_item = val_dataset[i]  # Get the data item at index i
         caption = data_item['caption']  # Get the caption for the data item
         if isinstance(caption, list):
-            for c in caption:
-                caption_lengths.append(len(c))  # Store the length of each caption if it's a list
+            caption_lengths.append(len(caption))  # Store the length of each caption if it's a list
         else:
-            caption_lengths.append(len(caption))  # Store the length of the caption if it's a single caption
+            caption_lengths.append(1)  # Store the length of the caption if it's a single caption
 
     # Print out all the caption lengths
     print(f"Total captions: {len(caption_lengths)}")
