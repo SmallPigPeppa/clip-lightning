@@ -8,11 +8,13 @@ from .img_transforms import image_transform_v2
 from model_openai import SimpleTokenizer
 from .cub200 import CUB200Dataset
 from .food import UPMCFood101Dataset
+from .coco2014 import COCO2014Dataset
 
 DATASET_LOOKUP = {
     'flickr30k': Flickr30kDataset,
     'cub200': CUB200Dataset,
-    'food': UPMCFood101Dataset
+    'food': UPMCFood101Dataset,
+    'coco2014': COCO2014Dataset
 }
 
 
