@@ -12,6 +12,7 @@ from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TE
 from timm.utils import accuracy
 from tqdm import tqdm
 import copy
+import random
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -51,10 +52,28 @@ class CLIPDualEncoderModel(LightningModule):
         for param in self.model_old.parameters():
             param.requires_grad = False
 
-    def forward(self, inputs):
+    # def forward(self, inputs):
+    #     image_features = self.model.encode_image(inputs["image"])
+    #     text_features = self.model.encode_text(inputs["caption"])
+    #     return image_features, text_features
+
+    def forward(self, inputs, random_select=True):
         image_features = self.model.encode_image(inputs["image"])
-        text_features = self.model.encode_text(inputs["caption"])
+
+        if inputs.get("multi_caption", False):
+            if random_select:
+                # Randomly select one caption
+                selected_caption = random.choice(inputs["caption"])
+                text_features = self.model.encode_text(selected_caption)
+            else:
+                # Use all captions if random_select is False
+                text_features = [self.model.encode_text(caption) for caption in inputs["caption"]]
+        else:
+            # Single caption scenario
+            text_features = self.model.encode_text(inputs["caption"])
+
         return image_features, text_features
+
 
     def configure_optimizers(self):
         parameters = [{
@@ -107,7 +126,7 @@ class CLIPDualEncoderModel(LightningModule):
         return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
+        image_embeddings, text_embeddings = self.forward(batch, random_select=False)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
         self.val_img_feats.append(image_embeddings)
@@ -154,18 +173,54 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
+    # def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    #     metrics = {}
+    #     logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+    #     logits_per_text = logits_per_image.t().detach().cpu()
+    #
+    #     logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+    #     ground_truth = torch.arange(len(text_features)).view(-1, 1)
+    #
+    #     for name, logit in logits.items():
+    #         ranking = torch.argsort(logit, descending=True)
+    #         preds = torch.where(ranking == ground_truth)[1]
+    #         preds = preds.detach().cpu().numpy()
+    #         for k in [1]:
+    #             metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+    #
+    #     return metrics
+
     def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+
+        # Handle case where text_features has shape (N, M, D) - multiple captions for each image
+        if len(text_features.shape) == 3:
+            N, M, D = text_features.shape
+            # Reshape text_features to (N * M, D) to compute logits for all image-caption pairs
+            text_features = text_features.view(-1, D)
+
+            # Calculate logits per image
+            logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+            logits_per_image = logits_per_image.view(N, M, N)  # Reshape to (N, M, N) - (images, captions, images)
+
+            # Get the max logit across the multiple captions for each image
+            logits_per_image, _ = torch.max(logits_per_image, dim=1)  # Max across M captions
+
+        else:
+            # Standard case where text_features is (N, D)
+            logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+
         logits_per_text = logits_per_image.t().detach().cpu()
 
+        # Compute recall metrics
         logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
+        ground_truth = torch.arange(len(image_features)).view(-1, 1)
 
         for name, logit in logits.items():
             ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
+
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 

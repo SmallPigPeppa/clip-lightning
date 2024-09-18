@@ -36,7 +36,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  python cli_vanilla_zeroshot_lora_best.py validate \
+#  python cli_vanilla_zeroshot_lora_best.py validate \
+  python cli_vanilla_zeroshot_hf.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
