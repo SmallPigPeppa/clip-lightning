@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #     val_split=0.2,
     #     max_length=77
     # )
-    dm.setup(stage='fit')
+    dm.setup(stage='validate')
 
     b = dm.task_datasets[0]
     print(len(b))
@@ -39,6 +39,13 @@ if __name__ == "__main__":
     # print(len(d))
 
     a = dm.train_dataloader()
+    inputs = next(iter(a))
+
+    print(len(inputs['caption']))
+
+
+
+    a = dm.val_dataloader()
     inputs = next(iter(a))
 
     print(len(inputs['caption']))
