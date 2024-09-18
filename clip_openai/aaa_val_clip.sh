@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("flickr30k")
-DATASETS=("wikiart")
+DATASETS=("wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("coco2014")
 
 
@@ -37,7 +37,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  python aaa_cli_val.py validate \
+#  python aaa_cli_val.py validate \
+python  cli_vanilla_zeroshot_lora_best.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -62,7 +63,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-debug \
-    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-lora-best \
+    --trainer.logger.name ${DATASET_NAME}-${MODEL_NAME}-CLIP \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
