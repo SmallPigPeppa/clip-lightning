@@ -91,9 +91,13 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'distill_lora_new', 'vanilla'）
+
+  run_training "vanilla" ${DATASET_NAME} ${LR}
+  run_training "lora_best" ${DATASET_NAME} ${LR}
+  run_training "distill" ${DATASET_NAME} ${LR}
+  run_training "distill_new" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
   run_training "distill_lora_new" ${DATASET_NAME} ${LR}
-  run_training "vanilla" ${DATASET_NAME} ${LR}
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done

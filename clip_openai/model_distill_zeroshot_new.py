@@ -38,7 +38,7 @@ class CLIPDualEncoderModel(LightningModule):
             model_name: str = 'RN50',
             download_root: str = None,
             projection_dims: int = 1024,
-            projection_lr_scale: int = 4,
+            projection_lr_scale: int = 1,
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
