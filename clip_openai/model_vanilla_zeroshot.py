@@ -59,7 +59,6 @@ class CLIPDualEncoderModel(LightningModule):
         text_features = self.model.encode_text(inputs["caption"])
         return image_features, text_features
 
-
     # def forward(self, inputs, random_select=True):
     #     image_features = self.model.encode_image(inputs["image"])
     #     # Check the 'multi_caption' flag
@@ -144,10 +143,9 @@ class CLIPDualEncoderModel(LightningModule):
     #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
-
     def on_validation_epoch_end(self):
         # recall metric
-        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
+        if self.current_epoch == 0 or (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
@@ -157,9 +155,6 @@ class CLIPDualEncoderModel(LightningModule):
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
-
-
-
 
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
@@ -176,7 +171,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
-
 
         metrics = self.recall_score(
             image_features=all_image_features,
@@ -202,7 +196,6 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
-
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
