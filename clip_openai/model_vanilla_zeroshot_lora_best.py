@@ -199,7 +199,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_validation_epoch_end(self):
         val_loader = self.trainer.datamodule.val_dataloader()
-        recall_metric = self.get_zero_shot_metrics(val_loader)
+        recall_metric = self.get_recall_metrics(val_loader)
         self.log_dict(recall_metric, sync_dist=True)
 
         # zero-shot metric
