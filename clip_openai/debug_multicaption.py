@@ -41,7 +41,7 @@ if __name__ == "__main__":
     a = dm.train_dataloader()
     inputs = next(iter(a))
 
-    print(inputs)
+    print(len(inputs['caption']))
 
     model = my_load(name='RN50', download_root='./')
     # image_features = model.encode_image(inputs["image"])
