@@ -30,6 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
             current_task: int = 0,
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
+            recall_eval_interval: int = 5,
             *args,
             **kwargs,
     ) -> None:
@@ -131,8 +132,9 @@ class CLIPDualEncoderModel(LightningModule):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
-        self.val_img_feats.append(image_embeddings)
-        self.val_text_feats.append(text_embeddings)
+
+        # self.val_img_feats.append(image_embeddings)
+        # self.val_text_feats.append(text_embeddings)
 
         return clip_loss
 
@@ -142,18 +144,13 @@ class CLIPDualEncoderModel(LightningModule):
     #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
-    def on_validation_epoch_end(self):
-        all_image_features = torch.cat(self.val_img_feats)
-        all_text_features = torch.cat(self.val_text_feats)
 
-        val_metrics = self.get_clip_metrics_cpu(
-            image_features=all_image_features,
-            text_features=all_text_features,
-            logit_scale=self.model.logit_scale.exp(),
-        )
-        self.log_dict(val_metrics, sync_dist=True)
-        self.val_img_feats.clear()
-        self.val_text_feats.clear()
+    def on_validation_epoch_end(self):
+        # recall metric
+        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
+            val_loader = self.trainer.datamodule.val_dataloader()
+            recall_metric = self.get_recall_metrics(val_loader)
+            self.log_dict(recall_metric, sync_dist=True)
 
         # zero-shot metric
         if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
@@ -161,22 +158,35 @@ class CLIPDualEncoderModel(LightningModule):
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
 
-    def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t())
-        logits_per_text = logits_per_image.t()
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
 
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True).to(self.device)
-            preds = torch.where(ranking == ground_truth)[1]
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100  # Convert recall to percentage
+
+
+    def get_recall_metrics(self, dataloader):
+        val_img_feats = []
+        val_text_feats = []
+
+        with torch.no_grad():
+            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                images = inputs["image"].to(self.device)
+                targets = inputs["caption"].to(self.device)
+                image_features = self.model.encode_image(images)
+                text_features = self.model.encode_text(targets)
+                val_img_feats.append(image_features)
+                val_text_feats.append(text_features)
+
+        all_image_features = torch.cat(val_img_feats)
+        all_text_features = torch.cat(val_text_feats)
+
+
+        metrics = self.recall_score(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            logit_scale=self.model.logit_scale.exp(),
+        )
 
         return metrics
 
-    def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    def recall_score(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
@@ -192,6 +202,7 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
+
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()

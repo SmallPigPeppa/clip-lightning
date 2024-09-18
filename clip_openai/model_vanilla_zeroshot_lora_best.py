@@ -87,6 +87,7 @@ class CLIPDualEncoderModel(LightningModule):
             current_task: int = 0,
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
+            recall_eval_interval: int = 5,
             *args,
             **kwargs,
     ) -> None:
@@ -198,9 +199,11 @@ class CLIPDualEncoderModel(LightningModule):
 
 
     def on_validation_epoch_end(self):
-        val_loader = self.trainer.datamodule.val_dataloader()
-        recall_metric = self.get_recall_metrics(val_loader)
-        self.log_dict(recall_metric, sync_dist=True)
+        # recall metric
+        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
+            val_loader = self.trainer.datamodule.val_dataloader()
+            recall_metric = self.get_recall_metrics(val_loader)
+            self.log_dict(recall_metric, sync_dist=True)
 
         # zero-shot metric
         if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
@@ -251,6 +254,42 @@ class CLIPDualEncoderModel(LightningModule):
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
+        return metrics
+
+
+    def get_zero_shot_metrics(self, dataloader):
+        self.tokenizer = SimpleTokenizer()
+        self.zero_shot_classifier = ZeroShotClassifier(
+            model=self.model,
+            tokenizer=self.tokenizer,
+            classnames=IMAGENET_CLASSNAMES,
+            templates=OPENAI_IMAGENET_TEMPLATES,
+            num_classes_per_batch=self.hparams.batch_size_zs,
+        ).to(self.device)
+
+        self.zero_shot_classifier.compute_weights()
+
+        top1, top5, n = 0., 0., 0.
+
+        with torch.no_grad():
+            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
+                images = images.to(self.device)
+                targets = targets.to(self.device)
+                logits = self.zero_shot_classifier(images)
+                # Measure accuracy
+                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
+                top1 += acc1.item() * images.size(0)
+                top5 += acc5.item() * images.size(0)
+                n += images.size(0)
+
+        top1 = top1 / n
+        top5 = top5 / n
+        metrics = {
+            "zero_shot/top1_accuracy": top1,
+            "zero_shot/top5_accuracy": top5
+        }
+        # Release the zero-shot classifier model to free up GPU memory
+        del self.zero_shot_classifier
         return metrics
 
     def get_zero_shot_metrics(self, dataloader):
