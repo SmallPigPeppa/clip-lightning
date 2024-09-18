@@ -154,7 +154,7 @@ class CLIPDualEncoderModel(LightningModule):
     #     return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch, random_select=False)
+        image_embeddings, text_embeddings = self.forward(batch, random_select=True)
         image_embeddings_one, text_embeddings_one = self.forward(batch, random_select=True)
         clip_loss = self._compute_losses(image_embeddings_one, text_embeddings_one)
         self.log("val/clip_loss", clip_loss, sync_dist=True)

@@ -4,5 +4,9 @@ import json
 with open('/Users/lwz/torch_ds/coco/annotations/dataset_coco.json', 'r', encoding='utf-8') as file:
     data = json.load(file)
 
-# 打印文件内容
-print(json.dumps(data, indent=4, ensure_ascii=False))
+# 检查 images 中的 sentences 列表长度
+for image in data['images']:
+    if len(image['sentences']) != 5:
+        print(f"Image ID: {image['cocoid']}, Sentences Length: {len(image['sentences'])}")
+        for i in image['sentences']:
+            print(i['raw'])
