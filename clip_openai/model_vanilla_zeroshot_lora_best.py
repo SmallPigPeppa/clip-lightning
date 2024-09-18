@@ -200,7 +200,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_validation_epoch_end(self):
         # recall metric
-        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
+        if self.current_epoch == 0 or (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
