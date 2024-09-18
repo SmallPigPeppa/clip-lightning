@@ -21,16 +21,19 @@ if __name__ == "__main__":
 
     # List to store the lengths of all captions in the validation set
     caption_lengths = []
+    total_caption_length = 0
 
     # Iterate through the validation dataset
     for i in range(len(val_dataset)):
         data_item = val_dataset[i]  # Get the data item at index i
         caption = data_item['caption']  # Get the caption for the data item
         if isinstance(caption, list):
-            caption_lengths.append(len(caption))  # Store the length of each caption if it's a list
+            caption_lengths.append(len(caption))
+            total_caption_length += len(caption)  # Store the length of each caption if it's a list
         else:
-            caption_lengths.append(1)  # Store the length of the caption if it's a single caption
+            caption_lengths.append(1)
+            total_caption_length += 1  # Store the length of the caption if it's a single caption
 
     # Print out all the caption lengths
-    print(f"Total captions: {len(caption_lengths)}")
+    print(f"Total captions:", total_caption_length)
     print("Caption lengths:", caption_lengths)
