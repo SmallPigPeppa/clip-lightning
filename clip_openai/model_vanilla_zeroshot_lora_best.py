@@ -96,8 +96,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.val_img_feats = []
-        self.val_text_feats = []
+        # self.val_img_feats = []
+        # self.val_text_feats = []
 
         # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
@@ -180,19 +180,15 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    # def validation_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
-    #
-    #     # # 使用 all_gather 来同步所有 GPU 上的特征
-    #     # image_embeddings = self.all_gather(image_embeddings)
-    #     # text_embeddings = self.all_gather(text_embeddings)
-    #
-    #     self.val_img_feats.append(image_embeddings)
-    #     self.val_text_feats.append(text_embeddings)
-    #
-    #     return clip_loss
+    def validation_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("val/clip_loss", clip_loss, sync_dist=True)
+
+        # self.val_img_feats.append(image_embeddings)
+        # self.val_text_feats.append(text_embeddings)
+
+        return clip_loss
 
     # def on_train_start(self):
     #     # Zero-shot metric evaluation before training starts
@@ -200,92 +196,47 @@ class CLIPDualEncoderModel(LightningModule):
     #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
     #     self.log_dict(zero_shot_metric, sync_dist=True)
 
-    # def on_validation_epoch_end(self):
-    #     all_image_features = torch.cat(self.val_img_feats)
-    #     all_text_features = torch.cat(self.val_text_feats)
-    #
-    #     print(all_image_features.shape)
-    #
-    #     val_metrics = self.get_clip_metrics_cpu(
-    #         image_features=all_image_features,
-    #         text_features=all_text_features,
-    #         logit_scale=self.model.logit_scale.exp(),
-    #     )
-    #     self.log_dict(val_metrics, sync_dist=True)
-    #     self.val_img_feats.clear()
-    #     self.val_text_feats.clear()
-    #
-    #     # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #     # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #     # self.log_dict(zero_shot_metric, sync_dist=True)
-    #
-    #     # zero-shot metric
-    #     if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-    #         zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #         zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #         self.log_dict(zero_shot_metric, sync_dist=True)
-
-    def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
-
-        # Gather image and text embeddings across all GPUs
-        gathered_image_feats = [torch.zeros_like(image_embeddings) for _ in range(dist.get_world_size())]
-        gathered_text_feats = [torch.zeros_like(text_embeddings) for _ in range(dist.get_world_size())]
-
-        dist.all_gather(gathered_image_feats, image_embeddings)
-        dist.all_gather(gathered_text_feats, text_embeddings)
-
-        # Concatenate gathered features
-        gathered_image_feats = torch.cat(gathered_image_feats, dim=0)
-        gathered_text_feats = torch.cat(gathered_text_feats, dim=0)
-
-        # Append only on the global rank 0 (main process) to avoid duplication
-        if self.trainer.is_global_zero:
-            self.val_img_feats.append(gathered_image_feats)
-            self.val_text_feats.append(gathered_text_feats)
-
-        return clip_loss
 
     def on_validation_epoch_end(self):
-        # Only compute metrics on global rank 0
-        if self.trainer.is_global_zero:
-            all_image_features = torch.cat(self.val_img_feats, dim=0)
-            all_text_features = torch.cat(self.val_text_feats, dim=0)
+        val_loader = self.trainer.datamodule.val_dataloader()
+        recall_metric = self.get_zero_shot_metrics(val_loader)
+        self.log_dict(recall_metric, sync_dist=True)
 
-            val_metrics = self.get_clip_metrics_cpu(
-                image_features=all_image_features,
-                text_features=all_text_features,
-                logit_scale=self.model.logit_scale.exp(),
-            )
-            self.log_dict(val_metrics, sync_dist=True)
-            self.val_img_feats.clear()
-            self.val_text_feats.clear()
+        # zero-shot metric
+        if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
+            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+            self.log_dict(zero_shot_metric, sync_dist=True)
 
-            # Zero-shot metric evaluation
-            if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-                zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-                zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-                self.log_dict(zero_shot_metric, sync_dist=True)
 
-    def get_clip_metrics(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t())
-        logits_per_text = logits_per_image.t()
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1).to(self.device)
 
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True).to(self.device)
-            preds = torch.where(ranking == ground_truth)[1]
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = (preds < k).float().mean() * 100 # Convert recall to percentage
-                # metrics[f"{name}_R@{k}"] = torch.tensor((preds < k).float().mean() * 100).to(self.device)
+
+    def get_recall_metrics(self, dataloader):
+        val_img_feats = []
+        val_text_feats = []
+
+        with torch.no_grad():
+            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                images = inputs["image"].to(self.device)
+                targets = inputs["caption"].to(self.device)
+                image_features = self.model.encode_image(images)
+                text_features = self.model.encode_text(targets)
+                val_img_feats.append(image_features)
+                val_text_feats.append(text_features)
+
+        all_image_features = torch.cat(val_img_feats)
+        all_text_features = torch.cat(val_text_feats)
+
+
+        metrics = self.recall_score(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            logit_scale=self.model.logit_scale.exp(),
+        )
 
         return metrics
 
-    def get_clip_metrics_cpu(self, image_features, text_features, logit_scale=1.0):
+    def recall_score(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         logits_per_text = logits_per_image.t().detach().cpu()
@@ -299,7 +250,6 @@ class CLIPDualEncoderModel(LightningModule):
             preds = preds.detach().cpu().numpy()
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-                # metrics[f"{name}_R@{k}"] = torch.tensor(np.mean(preds < k) * 100).to(self.device)
 
         return metrics
 
@@ -337,6 +287,9 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
+
+
+
 
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
