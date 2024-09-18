@@ -51,8 +51,9 @@ class COCO2014Dataset(ImageRetrievalDataset):
         with open(json_path, 'r') as file:
             all_data = json.load(file)
 
-        # 字典用于存储图像路径和对应的多个 caption
-        image_caption_dict = {}
+        # 列表用于存储图像路径和对应的多个 caption
+        images = []
+        captions = []
 
         # 迭代所有的 annotations，处理图像路径和 captions
         for annotation in all_data['annotations']:
@@ -65,15 +66,17 @@ class COCO2014Dataset(ImageRetrievalDataset):
 
             # 检查图像路径是否存在
             if os.path.exists(image_path):
-                if image_path not in image_caption_dict:
-                    # 如果图像路径尚不存在字典中，初始化一个空列表
-                    image_caption_dict[image_path] = []
-
-                # 将 caption 添加到图像对应的列表中
-                image_caption_dict[image_path].append(caption)
+                if image_path not in images:
+                    # 如果图像路径还没在列表中，添加路径并初始化一个新的 captions 列表
+                    images.append(image_path)
+                    captions.append([caption])  # 初始化二维列表的每个元素为一个列表
+                else:
+                    # 如果图像已经在列表中，找到它的索引并将 caption 添加到对应的 caption 列表中
+                    index = images.index(image_path)
+                    captions[index].append(caption)
             else:
                 # 路径不存在时抛出 FileNotFoundError
                 raise FileNotFoundError(f"Image {image_path} not found.")
 
-        # 返回图像路径和对应的 caption 列表
-        return image_caption_dict
+        # 返回图像路径和对应的二维 captions 列表
+        return images, captions
