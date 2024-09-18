@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from .base import ImageRetrievalDataset
+from .base_av import ImageRetrievalDataset
 import json
 
 
