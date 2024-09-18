@@ -1,5 +1,5 @@
-from dataloaders import Flickr30kDataset
-from clip_openai.model_openai.simple_tokenizer import SimpleTokenizer
+# from dataloaders import Flickr30kDataset
+# from clip_openai.model_openai.simple_tokenizer import SimpleTokenizer
 
 if __name__ == "__main__":
     from dataloaders.data_module_dil_json import ImageRetrievalDataModule
@@ -8,7 +8,7 @@ if __name__ == "__main__":
         config='../config.yaml',
         root_dir='/Users/lwz/torch_ds',
         max_length=77,
-        batch_size=1
+        batch_size=128
     )
     dm.setup(stage='validate')
 

@@ -1,5 +1,5 @@
-from dataloaders import Flickr30kDataset
-from clip_openai.model_openai.simple_tokenizer import SimpleTokenizer
+# from dataloaders import Flickr30kDataset
+# from clip_openai.model_openai.simple_tokenizer import SimpleTokenizer
 
 if __name__ == "__main__":
     from dataloaders.data_module_dil_json import ImageRetrievalDataModule
