@@ -14,7 +14,6 @@ from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 import copy
-import torch.distributed as dist
 
 
 def find_target_modules(model):
@@ -99,18 +98,18 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
         # Apply LoRA to the model
-        self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
         # lora: model.visual conv1
-        conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
-        lora_config = LoraConfig(
-            inference_mode=False,
-            r=16,  # Rank of the low-rank decomposition
-            lora_alpha=32,  # Scaling factor
-            lora_dropout=0.1,  # Dropout rate for LoRA
-            target_modules=['conv1'],
-        )
-        self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+        # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
+        # lora_config = LoraConfig(
+        #     inference_mode=False,
+        #     r=16,  # Rank of the low-rank decomposition
+        #     lora_alpha=32,  # Scaling factor
+        #     lora_dropout=0.1,  # Dropout rate for LoRA
+        #     target_modules=['conv1'],
+        # )
+        # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
@@ -337,9 +336,9 @@ class CLIPDualEncoderModel(LightningModule):
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
             conv1 = copy.deepcopy(self.model.visual.conv1)
-            self.model.visual.conv1 = conv1.merge_and_unload().conv1
+            # self.model.visual.conv1 = conv1.merge_and_unload().conv1
             self.model.visual.transformer.merge_and_unload()
-            self.model.transformer.merge_and_unload()
+            # self.model.transformer.merge_and_unload()
 
             # 仅在主进程中输出
             if self.trainer.is_global_zero:

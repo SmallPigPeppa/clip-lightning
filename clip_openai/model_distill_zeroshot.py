@@ -55,8 +55,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.val_img_feats = []
-        self.val_text_feats = []
         self.distill = True
         self.initialize_old_modules()
 
@@ -210,8 +208,6 @@ class CLIPDualEncoderModel(LightningModule):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
-        # self.val_img_feats.append(image_embeddings)
-        # self.val_text_feats.append(text_embeddings)
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)

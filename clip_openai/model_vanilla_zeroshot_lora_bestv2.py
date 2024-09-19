@@ -14,7 +14,6 @@ from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 import copy
-import torch.distributed as dist
 
 
 def find_target_modules(model):
