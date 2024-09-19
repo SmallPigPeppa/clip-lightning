@@ -118,7 +118,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.distill = True
         self.initialize_old_modules()
 
-        self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
         # # lora: model.visual conv1
         # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
@@ -423,7 +423,7 @@ class CLIPDualEncoderModel(LightningModule):
             # self.model.visual.conv1 = conv1.merge_and_unload().conv1
 
             self.model.visual.transformer.merge_and_unload()
-            self.model.transformer.merge_and_unload()
+            # self.model.transformer.merge_and_unload()
 
             # 仅在主进程中输出
             if self.trainer.is_global_zero:
