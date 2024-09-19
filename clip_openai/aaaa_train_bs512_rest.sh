@@ -13,6 +13,7 @@ DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 DATASETS=("coco2014")
 DATASETS=("flickr30k")
 DATASETS=("wikiart")
+DATASETS=("patfig")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -90,9 +91,9 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR}
+#  run_training "vanilla" ${DATASET_NAME} ${LR}
+#  run_training "distill" ${DATASET_NAME} ${LR}
   run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
