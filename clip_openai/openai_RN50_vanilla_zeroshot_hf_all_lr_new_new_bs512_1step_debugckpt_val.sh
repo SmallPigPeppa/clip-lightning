@@ -55,6 +55,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
+    --model.recall_eval_interval 1 \
     --model.zero_shot_eval_interval 40 \
     --model.old_checkpoint_path ckpt/${DATASET_NAME}-512/lora_best-lr-2e-5-v4.ckpt  \
     --trainer.accelerator gpu \
