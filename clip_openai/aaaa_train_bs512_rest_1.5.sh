@@ -10,30 +10,30 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
-DATASETS=("flickr30k")
-DATASETS=("wikiart")
-DATASETS=("patfig")
-DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
+#DATASETS=("coco2014")
+#DATASETS=("flickr30k")
+#DATASETS=("wikiart")
+#DATASETS=("patfig")
+#DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=2e-5
-  ["coco2014"]=2e-5
-  ["wikiart"]=2e-5
-  ["patfig"]=2e-5
-  ["pet"]=2e-5
-  ["simpsons"]=2e-5
-  ["lexica"]=2e-5
-  ["styles"]=2e-5
-  ["kream"]=2e-5
-  ["sketch"]=2e-5
-  ["emoji"]=2e-5
-  ["fashion"]=2e-5
-  ["nouns"]=2e-5
-  ["shahnegar"]=2e-5
-  ["artbench"]=2e-5
-  ["hausavg"]=2e-5
+  ["flickr30k"]=1.5e-5
+  ["coco2014"]=1.5e-5
+  ["wikiart"]=1.5e-5
+  ["patfig"]=1.5e-5
+  ["pet"]=1.5e-5
+  ["simpsons"]=1.5e-5
+  ["lexica"]=1.5e-5
+  ["styles"]=1.5e-5
+  ["kream"]=1.5e-5
+  ["sketch"]=1.5e-5
+  ["emoji"]=1.5e-5
+  ["fashion"]=1.5e-5
+  ["nouns"]=1.5e-5
+  ["shahnegar"]=1.5e-5
+  ["artbench"]=1.5e-5
+  ["hausavg"]=1.5e-5
 )
 
 
