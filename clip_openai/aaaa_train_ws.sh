@@ -11,11 +11,11 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k")
-DATASETS=("coco2014")
+#DATASETS=("coco2014")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=2e-5
+  ["flickr30k"]=4e-5
   ["coco2014"]=2e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
@@ -94,9 +94,9 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "lora_best" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "distill_new" ${DATASET_NAME} ${LR}
+#  run_training "distill_new" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora_new" ${DATASET_NAME} ${LR}
+#  run_training "distill_lora_new" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
