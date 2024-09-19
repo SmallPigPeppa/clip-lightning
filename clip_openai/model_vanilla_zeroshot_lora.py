@@ -150,11 +150,9 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_train_start(self):
         # recall metric
-        self.model.eval()
         val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
         self.log_dict(recall_metric, sync_dist=True)
-        self.model.train()
 
         # # Zero-shot metric evaluation before training starts
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
@@ -162,7 +160,6 @@ class CLIPDualEncoderModel(LightningModule):
         # self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        self.model.eval()
         # recall metric
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
