@@ -229,19 +229,22 @@ class CLIPDualEncoderModel(LightningModule):
         else:
             return clip_loss
 
-    # def on_train_start(self):
-    #     # Zero-shot metric evaluation before training starts
-    #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-    #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-    #     self.log_dict(zero_shot_metric, sync_dist=True)
+    def on_train_start(self):
+        # recall metric
+        val_loader = self.trainer.datamodule.val_dataloader()
+        recall_metric = self.get_recall_metrics(val_loader)
+        self.log_dict(recall_metric, sync_dist=True)
+        # # Zero-shot metric evaluation before training starts
+        # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+        # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+        # self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
         # recall metric
-        if self.current_epoch == 0 or (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
+        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
-
         # zero-shot metric
         if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
