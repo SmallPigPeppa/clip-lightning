@@ -11,7 +11,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("coco2014")
-DATASETS=("wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+#DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -30,11 +30,9 @@ declare -A DATASET_LR_MAP=(
 # 脚本方法映射
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora_best"]="cli_vanilla_zeroshot_lora_best.py"
+  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
-  ["distill_new"]="cli_distill_zeroshot_new.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
-  ["distill_lora_new"]="cli_distill_zeroshot_lora_best_new.py"
 )
 
 # 其他参数
@@ -90,13 +88,11 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  # 按不同的方法运行（比如 'distill_lora', 'distill_lora_new', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "lora_best" ${DATASET_NAME} ${LR}
-  run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "distill_new" ${DATASET_NAME} ${LR}
+  # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
+#  run_training "vanilla" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+#  run_training "distill" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora_new" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
