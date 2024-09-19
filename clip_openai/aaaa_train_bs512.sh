@@ -30,7 +30,7 @@ declare -A DATASET_LR_MAP=(
 # 脚本方法映射
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora_best"]="cli_vanilla_zeroshot_lora_best.py"
+  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
 )
