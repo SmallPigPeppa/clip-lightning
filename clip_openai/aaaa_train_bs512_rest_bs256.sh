@@ -3,7 +3,7 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/ppio_net0/huggingface
 ROOT_DIR=/ppio_net0/torch_ds
-PROJECT=CLIP-1step-512
+PROJECT=CLIP-1step-256
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -49,7 +49,7 @@ declare -A METHOD_MAP=(
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
-BATCH_SIZE=128
+BATCH_SIZE=64
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
