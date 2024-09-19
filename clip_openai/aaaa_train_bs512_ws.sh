@@ -1,16 +1,17 @@
 #!/bin/bash
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/home/ma-user/work/wenzhuoliu/huggingface
-ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
-PROJECT=CLIP-1step-512-yd
+export HF_HOME=/home/ma-user/work/dataset/all/hf-datasets
+ROOT_DIR=/home/ma-user/work/dataset/all/torch_ds
+PROJECT=CLIP-1step-512-ws
 
 # 模型名称
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+#DATASETS=("coco2014")
+#DATASETS=("flickr30k" "coco2014")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -29,11 +30,9 @@ declare -A DATASET_LR_MAP=(
 # 脚本方法映射
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora_best"]="cli_vanilla_zeroshot_lora_best.py"
+  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
-  ["distill_new"]="cli_distill_zeroshot_new.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
-  ["distill_lora_new"]="cli_distill_zeroshot_lora_best_new.py"
 )
 
 # 其他参数
@@ -43,7 +42,6 @@ MAX_EPOCHS=40
 BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
-
 
 # 函数：运行训练
 run_training() {
@@ -70,6 +68,7 @@ run_training() {
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
     --trainer.accelerator npu \
+    --trainer.devices 0,1,2,3 \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
     --trainer.log_every_n_steps 1 \
@@ -81,7 +80,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-512-yd/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-512/${method}-lr-${lr}
 }
 
 # 运行所有数据集
@@ -90,14 +89,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  # 按不同的方法运行（比如 'distill_lora', 'distill_lora_new', 'vanilla'）
-
+  # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
   run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "lora_best" ${DATASET_NAME} ${LR}
+  run_training "lora" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "distill_new" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora_new" ${DATASET_NAME} ${LR}
+
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
