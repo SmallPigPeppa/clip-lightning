@@ -15,7 +15,7 @@ DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=1e-4
+  ["flickr30k"]=2e-5
   ["coco2014"]=2e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
@@ -30,8 +30,8 @@ declare -A DATASET_LR_MAP=(
 # 脚本方法映射
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-#  ["lora_best"]="cli_vanilla_zeroshot_lora_bestv2.py"
-  ["lora_best"]="cli_vanilla_zeroshot_lora_best.py"
+  ["lora_best"]="cli_vanilla_zeroshot_lora_bestv2.py"
+#  ["lora_best"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
   ["distill_new"]="cli_distill_zeroshot_new.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
