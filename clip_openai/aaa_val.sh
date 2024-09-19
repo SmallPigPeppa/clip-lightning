@@ -9,7 +9,8 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k")
 #DATASETS=("wikiart")
-DATASETS=("coco2014")
+#DATASETS=("coco2014")
+
 
 
 # 其他参数
@@ -37,7 +38,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  python aaa_cli_val.py validate \
+  python cli_vanilla_zeroshot.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -54,10 +55,10 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
-    --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt/${DATASET_NAME}-512/distill-new-v1.ckpt  \
+    --model.recall_eval_interval 1 \
+    --model.zero_shot_eval_interval 1 \
+    --model.old_checkpoint_path ckpt/${DATASET_NAME}-512/distill-lr-2e-5.ckpt  \
     --trainer.accelerator gpu \
-    --trainer.devices 1 \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \

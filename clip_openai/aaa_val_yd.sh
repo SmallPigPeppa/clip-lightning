@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/ppio_net0/huggingface
+export HF_HOME=/home/ma-user/work/wenzhuoliu/huggingface
 # 模型名称
 MODEL_NAME=ViT-B/16
 
@@ -15,7 +15,7 @@ DATASETS=("flickr30k")
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ROOT_DIR=/ppio_net0/torch_ds
+ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
 
 # 定义不同数据集的学习率
 declare -A DATASET_LR_MAP=(
@@ -56,8 +56,9 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
-    --model.zero_shot_eval_interval 40 \
-    --trainer.accelerator gpu \
+    --model.zero_shot_eval_interval 1 \
+    --model.old_checkpoint_path ckpt/${DATASET_NAME}-512/distill-lr-2e-5.ckpt  \
+    --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
     --trainer.log_every_n_steps 1 \
