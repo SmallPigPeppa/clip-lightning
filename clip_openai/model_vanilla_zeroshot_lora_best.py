@@ -97,8 +97,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        # self.val_img_feats = []
-        # self.val_text_feats = []
 
         # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
