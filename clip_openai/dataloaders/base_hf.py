@@ -85,6 +85,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
+    'clothes': {
+        'hf_name': 'Luna288/image-captioning-FACAD-base',
+        'keys': {'image': 'image', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
     # 'plans': {
     #     'hf_name': 'ShazShoaib/SingleFloorPlans',
     #     'keys': {'image': 'image', 'text': 'text'},
