@@ -26,6 +26,14 @@ declare -A DATASET_LR_MAP=(
   ["styles"]=2e-5
   ["kream"]=2e-5
   ["sketch"]=2e-5
+  ["emoji"]=4e-5
+  ["fashion"]=3e-5
+  ["nouns"]=4e-5
+  ["shahnegar"]=4e-5
+  ["artbench"]=4e-5
+  ["hausavg"]=1e-5
+  ["food"]=2e-5
+  ["clothes"]=2e-5
 )
 
 # 脚本方法映射

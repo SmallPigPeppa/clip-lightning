@@ -15,6 +15,7 @@ DATASETS=("flickr30k")
 DATASETS=("wikiart")
 DATASETS=("patfig")
 DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
+DATASETS=("food" "clothes")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -34,6 +35,8 @@ declare -A DATASET_LR_MAP=(
   ["shahnegar"]=4e-5
   ["artbench"]=4e-5
   ["hausavg"]=1e-5
+  ["food"]=2e-5
+  ["clothes"]=2e-5
 )
 
 
