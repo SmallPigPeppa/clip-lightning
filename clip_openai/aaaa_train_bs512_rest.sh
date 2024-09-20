@@ -28,12 +28,12 @@ declare -A DATASET_LR_MAP=(
   ["styles"]=2e-5
   ["kream"]=2e-5
   ["sketch"]=2e-5
-  ["emoji"]=2e-5
-  ["fashion"]=2e-5
-  ["nouns"]=2e-5
-  ["shahnegar"]=2e-5
-  ["artbench"]=2e-5
-  ["hausavg"]=2e-5
+  ["emoji"]=4e-5
+  ["fashion"]=3e-5
+  ["nouns"]=4e-5
+  ["shahnegar"]=4e-5
+  ["artbench"]=4e-5
+  ["hausavg"]=1e-5
 )
 
 
