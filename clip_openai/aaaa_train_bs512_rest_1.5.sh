@@ -15,6 +15,7 @@ DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 #DATASETS=("wikiart")
 #DATASETS=("patfig")
 #DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
+DATASETS=("pet" "simpsons" "lexica")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
