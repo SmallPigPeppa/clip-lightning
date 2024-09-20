@@ -20,7 +20,7 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
-  ["coco2014"]=2e-5
+  ["coco2014"]=1e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
   ["pet"]=2e-5
@@ -80,7 +80,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt/flickr30k-512/${method}-lr-${lr}.ckpt  \
+    --model.old_checkpoint_path ckpt/flickr30k-512/${method}-lr-2e-5.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
