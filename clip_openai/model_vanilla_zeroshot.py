@@ -98,16 +98,39 @@ class CLIPDualEncoderModel(LightningModule):
             "lr_scheduler": lr_scheduler,
         }
 
+    # def _compute_losses(self, image_features, text_features):
+    #
+    #     # normalized features
+    #     image_features = image_features / image_features.norm(dim=1, keepdim=True)
+    #     text_features = text_features / text_features.norm(dim=1, keepdim=True)
+    #
+    #     # cosine similarity as logits
+    #     logit_scale = self.model.logit_scale.exp()
+    #     logits_per_image = logit_scale * image_features @ text_features.t()
+    #     logits_per_text = logits_per_image.t()
+    #
+    #     # shape = [global_batch_size, global_batch_size]
+    #
+    #     labels = torch.arange(len(logits_per_image)).to(self.device)
+    #
+    #     image_loss = F.cross_entropy(logits_per_image, labels)
+    #     text_loss = F.cross_entropy(logits_per_text, labels)
+    #
+    #     loss = (image_loss + text_loss) / 2
+    #
+    #     return loss
+
     def _compute_losses(self, image_features, text_features):
 
         # normalized features
-        image_features = image_features / image_features.norm(dim=1, keepdim=True)
-        text_features = text_features / text_features.norm(dim=1, keepdim=True)
+        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
 
         # cosine similarity as logits
         logit_scale = self.model.logit_scale.exp()
         logits_per_image = logit_scale * image_features @ text_features.t()
-        logits_per_text = logits_per_image.t()
+        logits_per_text = logit_scale * text_features @ image_features.t()
 
         # shape = [global_batch_size, global_batch_size]
 
@@ -119,6 +142,8 @@ class CLIPDualEncoderModel(LightningModule):
         loss = (image_loss + text_loss) / 2
 
         return loss
+
+
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
