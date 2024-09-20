@@ -16,8 +16,8 @@ DATASETS=("coco2014")
 #DATASETS=("patfig")
 #DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 #DATASETS=("food" "clothes")
-DATASETS=("lexica")
-#DATASETS=("pet")
+#DATASETS=("lexica")
+DATASETS=("pet")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
