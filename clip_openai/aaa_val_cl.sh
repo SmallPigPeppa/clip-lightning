@@ -11,6 +11,7 @@ DATASETS=("flickr30k")
 #DATASETS=("wikiart")
 DATASETS=("coco2014")
 DATASETS=("wikiart")
+DATASETS=("kream")
 
 
 
