@@ -107,8 +107,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
-#  run_training "lora" ${DATASET_NAME} ${LR}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR}
+  run_training "lora" ${DATASET_NAME} ${LR}
+  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"

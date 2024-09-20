@@ -83,7 +83,7 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-$lora-lr-1e-5 \
+    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr-${lr} \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
@@ -99,7 +99,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR}
+  run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
   run_training "lora" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
