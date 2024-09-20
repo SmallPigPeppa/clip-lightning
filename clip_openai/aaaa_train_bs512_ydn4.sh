@@ -12,6 +12,7 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("coco2014")
 DATASETS=("flickr30k" "coco2014")
+DATASETS=("clothes")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -25,6 +26,8 @@ declare -A DATASET_LR_MAP=(
   ["styles"]=2e-5
   ["kream"]=2e-5
   ["sketch"]=2e-5
+  ["food"]=2e-5
+  ["clothes"]=2e-5
 )
 
 # 脚本方法映射
