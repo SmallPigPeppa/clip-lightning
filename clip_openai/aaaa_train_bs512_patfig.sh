@@ -14,14 +14,14 @@ DATASETS=("coco2014")
 DATASETS=("flickr30k")
 DATASETS=("wikiart")
 DATASETS=("patfig")
-DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
+#DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=2e-5
   ["wikiart"]=2e-5
-  ["patfig"]=2e-5
+  ["patfig"]=3e-5
   ["pet"]=2e-5
   ["simpsons"]=2e-5
   ["lexica"]=2e-5
