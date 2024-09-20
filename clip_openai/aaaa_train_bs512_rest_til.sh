@@ -23,7 +23,7 @@ DATASETS=("lexica")
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=1e-5
-  ["lexica"]=1e-5
+  ["lexica"]=2e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
   ["pet"]=2e-5
@@ -105,10 +105,10 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR}
+  run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
