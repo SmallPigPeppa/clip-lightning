@@ -249,6 +249,7 @@ class ImageRetrievalDataset(Dataset):
 
     def __getitem__(self, index):
         sample = self.hf_dataset[index]
+        import pdb;pdb.set_trace()
         image_url = sample[self.keys['image']]
         text = sample[self.keys['text']]
 
