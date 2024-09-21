@@ -19,7 +19,7 @@ DATASETS=("wikiart")
 #DATASETS=("lexica")
 #DATASETS=("pet")
 #DATASETS=("simpsons")
-DATASETS=("text2food")
+DATASETS=("wit")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -41,7 +41,7 @@ declare -A DATASET_LR_MAP=(
   ["hausavg"]=1e-5
   ["food"]=2e-5
   ["clothes"]=2e-5
-  ["text2food"]=2e-5
+  ["wit"]=2e-5
 )
 
 
