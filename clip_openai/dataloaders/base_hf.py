@@ -91,7 +91,7 @@ DATASET_MAPPINGS = {
         'splits': {'train': 0.8, 'val': 0.2}
     },
     'text2food': {
-        'hf_name': 'Luna288/image-captioning-FACAD-base',
+        'hf_name': 'tum-nlp/text2food-mmc4',
         'keys': {'image': 'Raw URL', 'text': 'Matched Text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
@@ -249,7 +249,6 @@ class ImageRetrievalDataset(Dataset):
 
     def __getitem__(self, index):
         sample = self.hf_dataset[index]
-        print(sample)
         image_url = sample[self.keys['image']]
         text = sample[self.keys['text']]
 
