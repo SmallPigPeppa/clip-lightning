@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sleep 2400
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/wenzhuoliu/huggingface
 ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
