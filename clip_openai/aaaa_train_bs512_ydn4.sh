@@ -13,6 +13,7 @@ DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 #DATASETS=("coco2014")
 DATASETS=("flickr30k" "coco2014")
 DATASETS=("clothes")
+DATASETS=("polaris")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -28,6 +29,7 @@ declare -A DATASET_LR_MAP=(
   ["sketch"]=2e-5
   ["food"]=2e-5
   ["clothes"]=1e-5
+  ["polaris"]=2e-5
 )
 
 # 脚本方法映射
