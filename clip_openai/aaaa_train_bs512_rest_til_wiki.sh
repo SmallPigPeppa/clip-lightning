@@ -83,7 +83,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt-til/lexica-512/$lora-lr-7.5e-6.ckpt  \
+    --model.old_checkpoint_path ckpt-til/lexica-512/lora-lr-7.5e-6.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
