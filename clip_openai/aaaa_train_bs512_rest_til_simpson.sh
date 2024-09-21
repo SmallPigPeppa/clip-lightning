@@ -16,8 +16,9 @@ DATASETS=("coco2014")
 #DATASETS=("patfig")
 #DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 #DATASETS=("food" "clothes")
-DATASETS=("lexica")
+#DATASETS=("lexica")
 #DATASETS=("pet")
+DATASETS=("simpsons")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -27,7 +28,7 @@ declare -A DATASET_LR_MAP=(
   ["pet"]=1e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
-  ["simpsons"]=2e-5
+  ["simpsons"]=1e-5
   ["styles"]=2e-5
   ["kream"]=2e-5
   ["sketch"]=2e-5
@@ -82,7 +83,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt-til/coco2014-512/distill_lora-lr-1e-5.ckpt  \
+    --model.old_checkpoint_path ckpt-til/lexica-512/lora-lr-7.5e-6.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
