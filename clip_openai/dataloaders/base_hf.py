@@ -90,6 +90,11 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
+    'text2food': {
+        'hf_name': 'Luna288/image-captioning-FACAD-base',
+        'keys': {'image': 'Raw URL', 'text': 'Matched Text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
     # 'plans': {
     #     'hf_name': 'ShazShoaib/SingleFloorPlans',
     #     'keys': {'image': 'image', 'text': 'text'},
@@ -248,7 +253,7 @@ class ImageRetrievalDataset(Dataset):
         text = sample[self.keys['text']]
 
         # Check if 'url' is in the key for image data to determine if it's a URL
-        if 'url' in self.keys['image']:
+        if 'url' in self.keys['image'] or 'URL' in self.keys['image']:
             image_path = self.download_image(image_url)
             if image_path is None:
                 # If image_path is None, access the 0th element
