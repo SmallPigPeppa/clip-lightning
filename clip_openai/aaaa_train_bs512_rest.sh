@@ -17,6 +17,7 @@ DATASETS=("patfig")
 DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 DATASETS=("food" "clothes")
 DATASETS=("wit")
+DATASETS=("polaris")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -39,6 +40,7 @@ declare -A DATASET_LR_MAP=(
   ["food"]=2e-5
   ["clothes"]=2e-5
   ["wit"]=2e-5
+  ["polaris"]=2e-5
 )
 
 

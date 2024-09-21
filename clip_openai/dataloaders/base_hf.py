@@ -95,6 +95,29 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'caption_attribution_description'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
+    'oldbook': {
+        'hf_name': 'gigant/oldbookillustrations',
+        'keys': {'image': 'rawscan', 'text': 'image_caption'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    'polaris': {
+        'hf_name': 'yuwd/Polaris',
+        'keys': {'image': 'img', 'text': 'refs'},
+        'splits': {'train': 'train', 'val': 'test'}
+    },
+    'news': {
+        'hf_name': 'Oztobuzz/Kosmos_news',
+        'keys': {'image': 'img', 'text': 'caption'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+    'cxiu': {
+        'hf_name': 'Shrey-1329/cxiu_hf_dataset',
+        'keys': {'image': 'img', 'text': 'text'},
+        'splits': {'train': 0.8, 'val': 0.2}
+    },
+
+
+
     # 'text2food': {
     #     'hf_name': 'tum-nlp/text2food-mmc4',
     #     'keys': {'image': 'Raw URL', 'text': 'Matched Text'},
