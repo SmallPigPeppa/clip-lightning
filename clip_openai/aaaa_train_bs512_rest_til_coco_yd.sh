@@ -3,7 +3,7 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/home/ma-user/work/wenzhuoliu/huggingface
 ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
-PROJECT=CLIP-1step-512-yd
+PROJECT=CLIP-til-yd
 # 模型名称
 MODEL_NAME=ViT-B/16
 
