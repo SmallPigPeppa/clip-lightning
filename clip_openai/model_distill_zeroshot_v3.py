@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 
 class DistillPredictor(nn.Module):
-    def __init__(self, projection_dims_in,projection_dims_out, distill_proj_hidden_dim):
+    def __init__(self, projection_dims_in, projection_dims_out, distill_proj_hidden_dim):
         super(DistillPredictor, self).__init__()
         self.pd_linear1 = nn.Linear(projection_dims_in, distill_proj_hidden_dim)
         self.pd_batch_norm = nn.BatchNorm1d(distill_proj_hidden_dim)
@@ -202,8 +202,10 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def training_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
+        # image_embeddings, text_embeddings = self.forward(batch)
         image_embeddings_wo, text_embeddings_wo = self.forward_wo(batch)
+        image_embeddings = image_embeddings_wo @ self.model.visual.proj
+        text_embeddings = text_embeddings_wo @ self.model.text_projection
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
@@ -227,8 +229,10 @@ class CLIPDualEncoderModel(LightningModule):
             return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
+        # image_embeddings, text_embeddings = self.forward(batch)
         image_embeddings_wo, text_embeddings_wo = self.forward_wo(batch)
+        image_embeddings = image_embeddings_wo @ self.model.visual.proj
+        text_embeddings = text_embeddings_wo @ self.model.text_projection
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
 
@@ -269,9 +273,6 @@ class CLIPDualEncoderModel(LightningModule):
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
 
-
-
-
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
         val_text_feats = []
@@ -287,7 +288,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
-
 
         metrics = self.recall_score(
             image_features=all_image_features,
@@ -313,7 +313,6 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
-
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
@@ -349,7 +348,6 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
-
 
     def on_save_checkpoint(self, checkpoint):
         # 处理视觉模块中的 conv1 和 transformer
