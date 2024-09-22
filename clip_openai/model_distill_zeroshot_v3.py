@@ -74,12 +74,12 @@ class CLIPDualEncoderModel(LightningModule):
         distill_proj_hidden_dim = 2048
         self.distill_predictor_v = DistillPredictor(
             projection_dims_in=self.model.visual.proj.shape[0],
-            projection_dims_out=self.model.visual.proj.shape[0],
+            projection_dims_out=self.model.visual.proj.shape[1],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         self.distill_predictor_c = DistillPredictor(
             projection_dims_in=self.model.text_projection.shape[0],
-            projection_dims_out=self.model.text_projection.shape[0],
+            projection_dims_out=self.model.text_projection.shape[1],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         if not self.distill:
@@ -98,8 +98,8 @@ class CLIPDualEncoderModel(LightningModule):
 
     def forward_old(self, inputs):
         with torch.no_grad():
-            image_features = self.model_old.encode_image_wo(inputs["image"])
-            text_features = self.model_old.encode_text_wo(inputs["caption"])
+            image_features = self.model_old.encode_image(inputs["image"])
+            text_features = self.model_old.encode_text(inputs["caption"])
         return image_features, text_features
 
     def configure_optimizers(self):
@@ -212,14 +212,14 @@ class CLIPDualEncoderModel(LightningModule):
             p1 = self.distill_predictor_v(image_embeddings_wo)
             p2 = self.distill_predictor_c(text_embeddings_wo)
 
-            # distill_loss = (
-            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-            #                ) / 2
             distill_loss = (
-                                   self._compute_losses(p1, frozen_z2)
-                                   + self._compute_losses(frozen_z1, p2)
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
+            # distill_loss = (
+            #                        self._compute_losses(p1, frozen_z2)
+            #                        + self._compute_losses(frozen_z1, p2)
+            #                ) / 2
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
