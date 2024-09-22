@@ -39,6 +39,7 @@ class CLIPDualEncoderModel(LightningModule):
             download_root: str = None,
             projection_dims: int = 1024,
             temperature: float = 1.0,
+            alpha: float = 0.15,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
             lr_warmup_epochs: int = 5,
@@ -247,7 +248,7 @@ class CLIPDualEncoderModel(LightningModule):
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
             self.log("train/distill_lossv2", distill_loss_v2, sync_dist=True)
-            return clip_loss + distill_loss + distill_loss_v2 * 0.15
+            return clip_loss + distill_loss + distill_loss_v2 * self.hparams.alpha
         else:
             return clip_loss
 
@@ -275,7 +276,7 @@ class CLIPDualEncoderModel(LightningModule):
 
             self.log("val/distill_loss", distill_loss, sync_dist=True)
             self.log("val/distill_lossv2", distill_loss_v2, sync_dist=True)
-            return clip_loss + distill_loss + distill_loss_v2 * 0.15
+            return clip_loss + distill_loss + distill_loss_v2 * self.hparams.alpha
         else:
             return clip_loss
 

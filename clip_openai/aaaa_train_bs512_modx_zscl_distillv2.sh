@@ -117,8 +117,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
 #  run_training "distill" ${DATASET_NAME} ${LR}
 #  run_training "modx" ${DATASET_NAME} ${LR}
-#  run_training "zscl" ${DATASET_NAME} ${LR}
-  run_training "distill_v2" ${DATASET_NAME} ${LR}
+  run_training "zscl" ${DATASET_NAME} ${LR}
+#  run_training "distill_v2" ${DATASET_NAME} ${LR}
 #  run_training "lora" ${DATASET_NAME} ${LR}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
