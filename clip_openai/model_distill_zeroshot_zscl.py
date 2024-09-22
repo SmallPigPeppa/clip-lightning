@@ -319,7 +319,7 @@ class CLIPDualEncoderModel(LightningModule):
             )
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.1
+            return clip_loss + distill_loss * 0.2
         else:
             return clip_loss
 
