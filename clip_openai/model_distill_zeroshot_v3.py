@@ -17,12 +17,12 @@ from tqdm import tqdm
 
 
 class DistillPredictor(nn.Module):
-    def __init__(self, projection_dims, distill_proj_hidden_dim):
+    def __init__(self, projection_dims_in,projection_dims_out, distill_proj_hidden_dim):
         super(DistillPredictor, self).__init__()
-        self.pd_linear1 = nn.Linear(projection_dims, distill_proj_hidden_dim)
+        self.pd_linear1 = nn.Linear(projection_dims_in, distill_proj_hidden_dim)
         self.pd_batch_norm = nn.BatchNorm1d(distill_proj_hidden_dim)
         self.pd_relu = nn.ReLU()
-        self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
+        self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims_out)
 
     def forward(self, x):
         x = self.pd_linear1(x)
@@ -73,11 +73,13 @@ class CLIPDualEncoderModel(LightningModule):
 
         distill_proj_hidden_dim = 2048
         self.distill_predictor_v = DistillPredictor(
-            projection_dims=self.model.visual.proj.shape[0],
+            projection_dims_in=self.model.visual.proj.shape[0],
+            projection_dims_out=self.model.visual.proj.shape[1],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         self.distill_predictor_c = DistillPredictor(
-            projection_dims=self.model.text_projection.shape[0],
+            projection_dims_in=self.model.text_projection.shape[0],
+            projection_dims_out=self.model.text_projection.shape[1],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         if not self.distill:
