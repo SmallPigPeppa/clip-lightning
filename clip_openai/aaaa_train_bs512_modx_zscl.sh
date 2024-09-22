@@ -54,7 +54,8 @@ declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
   ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
-  ["modx"]="cli_modx_zeroshot.py"
+  ["modx"]="cli_distill_zeroshot_modx.py"
+  ["zscl"]="cli_distill_zeroshot_zscl.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
 )
 
@@ -115,6 +116,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
 #  run_training "distill" ${DATASET_NAME} ${LR}
   run_training "modx" ${DATASET_NAME} ${LR}
+  run_training "zscl" ${DATASET_NAME} ${LR}
 #  run_training "lora" ${DATASET_NAME} ${LR}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
