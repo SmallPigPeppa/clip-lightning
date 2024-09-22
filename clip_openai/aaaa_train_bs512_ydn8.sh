@@ -6,14 +6,15 @@ ROOT_DIR=/home/ma-user/work/wenzhuoliu/torch_ds
 PROJECT=CLIP-1step-512-yd
 
 # 模型名称
-MODEL_NAME=ViT-B/16
+MODEL_NAME=ViT-L/14
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
+#DATASETS=("coco2014")
 #DATASETS=("flickr30k" "coco2014")
 #DATASETS=("wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 #DATASETS=("clothes")
+DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -94,9 +95,9 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
   run_training "vanilla" ${DATASET_NAME} ${LR}
-#  run_training "lora" ${DATASET_NAME} ${LR}
-#  run_training "distill" ${DATASET_NAME} ${LR}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR}
+  run_training "lora" ${DATASET_NAME} ${LR}
+  run_training "distill" ${DATASET_NAME} ${LR}
+  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
