@@ -91,8 +91,8 @@ class CLIPDualEncoderModel(LightningModule):
 
     def forward_old(self, inputs):
         with torch.no_grad():
-            image_features = self.model_old.encode_image(inputs["image"])
-            text_features = self.model_old.encode_text(inputs["caption"])
+            image_features = self.model_old.encode_image_wo(inputs["image"])
+            text_features = self.model_old.encode_text_wo(inputs["caption"])
         return image_features, text_features
 
     def configure_optimizers(self):
