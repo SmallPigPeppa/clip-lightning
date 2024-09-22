@@ -20,7 +20,7 @@ DATASETS=("coco2014")
 #DATASETS=("polaris")
 #DATASETS=("oldbook")
 #DATASETS=("cxiu")
-#DATASETS=("pet")
+DATASETS=("pet")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -28,7 +28,7 @@ declare -A DATASET_LR_MAP=(
   ["coco2014"]=2e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
-  ["pet"]=5e-6
+  ["pet"]=2e-5
   ["simpsons"]=2e-5
   ["lexica"]=2e-5
   ["styles"]=2e-5
