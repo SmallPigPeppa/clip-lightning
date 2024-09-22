@@ -19,6 +19,7 @@ DATASETS=("food" "clothes")
 DATASETS=("wit")
 DATASETS=("polaris")
 DATASETS=("oldbook")
+DATASETS=("cxiu")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -43,6 +44,7 @@ declare -A DATASET_LR_MAP=(
   ["wit"]=2e-5
   ["polaris"]=2e-5
   ["oldbook"]=2e-5
+  ["cxiu"]=2e-5
 )
 
 
