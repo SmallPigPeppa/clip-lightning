@@ -18,6 +18,7 @@ DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
 DATASETS=("food" "clothes")
 DATASETS=("wit")
 DATASETS=("polaris")
+DATASETS=("oldbook")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
@@ -41,6 +42,7 @@ declare -A DATASET_LR_MAP=(
   ["clothes"]=2e-5
   ["wit"]=2e-5
   ["polaris"]=2e-5
+  ["oldbook"]=2e-5
 )
 
 
