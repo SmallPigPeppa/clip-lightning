@@ -74,12 +74,12 @@ class CLIPDualEncoderModel(LightningModule):
         distill_proj_hidden_dim = 2048
         self.distill_predictor_v = DistillPredictor(
             projection_dims_in=self.model.visual.proj.shape[0],
-            projection_dims_out=self.model.visual.proj.shape[1],
+            projection_dims_out=self.model.visual.proj.shape[0],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         self.distill_predictor_c = DistillPredictor(
             projection_dims_in=self.model.text_projection.shape[0],
-            projection_dims_out=self.model.text_projection.shape[1],
+            projection_dims_out=self.model.text_projection.shape[0],
             distill_proj_hidden_dim=distill_proj_hidden_dim
         )
         if not self.distill:
@@ -89,6 +89,11 @@ class CLIPDualEncoderModel(LightningModule):
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
+        return image_features, text_features
+
+    def forward_wo(self, inputs):
+        image_features = self.model.encode_image_wo(inputs["image"])
+        text_features = self.model.encode_text_wo(inputs["caption"])
         return image_features, text_features
 
     def forward_old(self, inputs):
@@ -198,17 +203,22 @@ class CLIPDualEncoderModel(LightningModule):
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
+        image_embeddings_wo, text_embeddings_wo = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor_v(image_embeddings)
-            p2 = self.distill_predictor_c(text_embeddings)
+            p1 = self.distill_predictor_v(image_embeddings_wo)
+            p2 = self.distill_predictor_c(text_embeddings_wo)
 
+            # distill_loss = (
+            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+            #                ) / 2
             distill_loss = (
-                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                                   self._compute_losses(p1, frozen_z2)
+                                   + self._compute_losses(frozen_z1, p2)
                            ) / 2
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
