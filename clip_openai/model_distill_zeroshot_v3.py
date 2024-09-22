@@ -203,7 +203,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        image_embeddings_wo, text_embeddings_wo = self.forward(batch)
+        image_embeddings_wo, text_embeddings_wo = self.forward_wo(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
@@ -228,13 +228,14 @@ class CLIPDualEncoderModel(LightningModule):
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
+        image_embeddings_wo, text_embeddings_wo = self.forward_wo(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
 
         if self.distill:
             frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor_v(image_embeddings)
-            p2 = self.distill_predictor_c(text_embeddings)
+            p1 = self.distill_predictor_v(image_embeddings_wo)
+            p2 = self.distill_predictor_c(text_embeddings_wo)
 
             distill_loss = (
                                    self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
