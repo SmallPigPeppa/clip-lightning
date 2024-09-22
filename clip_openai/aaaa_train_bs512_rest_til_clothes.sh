@@ -39,7 +39,7 @@ declare -A DATASET_LR_MAP=(
   ["artbench"]=4e-5
   ["hausavg"]=1e-5
   ["food"]=2e-5
-  ["clothes"]=1e-5
+  ["clothes"]=5e-6
 )
 
 
