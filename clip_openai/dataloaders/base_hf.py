@@ -112,7 +112,7 @@ DATASET_MAPPINGS = {
     },
     'cxiu': {
         'hf_name': 'Shrey-1329/cxiu_hf_dataset',
-        'keys': {'image': 'img', 'text': 'text'},
+        'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
 
