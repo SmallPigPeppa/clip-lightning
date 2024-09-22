@@ -39,6 +39,7 @@ class CLIPDualEncoderModel(LightningModule):
             download_root: str = None,
             projection_dims: int = 1024,
             temperature: float = 1.0,
+            alpha: float = 0.15,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
             lr_warmup_epochs: int = 5,
