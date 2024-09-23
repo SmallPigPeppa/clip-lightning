@@ -60,7 +60,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
     --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt-til/pet-512/vanilla-lr-5e-6.ckpt  \
+    --model.old_checkpoint_path ckpt-til/pet-512-new/vanilla-lr-5e-6.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
