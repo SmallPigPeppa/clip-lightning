@@ -60,7 +60,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
     --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt/coco2014-512-new/distill-lr-1e-5.ckpt  \
+    --model.old_checkpoint_path ckpt-til/coco2014-512-new/distill-lr-1e-5.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
