@@ -41,7 +41,7 @@ declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
   ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
-  ["distill_v4"]="cli_distill_zeroshot.py"
+  ["distill_v4"]="cli_distill_zeroshot_v4.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
 )
 
