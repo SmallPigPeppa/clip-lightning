@@ -106,7 +106,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-512/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-512-new/${method}-lr-${lr}
 }
 
 # 运行所有数据集
