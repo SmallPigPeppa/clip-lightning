@@ -96,7 +96,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt-til \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-512/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-512-new/${method}-lr-${lr}
 }
 
 # 运行所有数据集
@@ -107,10 +107,10 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
-#  run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "distill_v2" ${DATASET_NAME} ${LR}
-#  run_training "lora" ${DATASET_NAME} ${LR}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR}
+  run_training "distill" ${DATASET_NAME} ${LR}
+#  run_training "distill_v2" ${DATASET_NAME} ${LR}
+  run_training "lora" ${DATASET_NAME} ${LR}
+  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
