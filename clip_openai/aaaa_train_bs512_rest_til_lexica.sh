@@ -23,7 +23,7 @@ DATASETS=("lexica")
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=1e-5
-  ["lexica"]=2e-6
+  ["lexica"]=7.5e-6
   ["pet"]=1e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
@@ -82,7 +82,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt-til/coco2014-512/distill_lora-lr-1e-5.ckpt  \
+    --model.old_checkpoint_path ckpt-til/coco2014-512-new/distill-lr-7.5e-6.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -105,7 +105,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR}
+  run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
   run_training "lora" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
