@@ -109,7 +109,7 @@ class CLIPDualEncoderModel(LightningModule):
             {
                 "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
                 # 其他部分设置 4 倍学习率
-                "lr": 4 * self.hparams.lr,
+                "lr": 8 * self.hparams.lr,
                 "weight_decay": self.hparams.weight_decay
             }
         ]
