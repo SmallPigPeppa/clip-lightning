@@ -22,7 +22,7 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
-  ["coco2014"]=2e-6
+  ["coco2014"]=1e-5
   ["lexica"]=2e-5
   ["pet"]=5e-6
   ["wikiart"]=2e-5
@@ -47,6 +47,7 @@ declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
   ["lora"]="cli_vanilla_zeroshot_lora_best.py"
   ["distill"]="cli_distill_zeroshot.py"
+  ["distill_v2"]="cli_distill_zeroshot_v2.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
 )
 
@@ -106,9 +107,10 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora" ${DATASET_NAME} ${LR}
+#  run_training "distill" ${DATASET_NAME} ${LR}
+  run_training "distill_v2" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
