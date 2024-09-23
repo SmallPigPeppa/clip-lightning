@@ -111,6 +111,9 @@ class CLIPDualEncoderModel(LightningModule):
         # )
         # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
+        for param in self.model.visual.conv1.parameters():
+            param.requires_grad = False
+
     def initialize_old_modules(self):
         # load task N-1 checkpoint
         if self.hparams.old_checkpoint_path is not None:

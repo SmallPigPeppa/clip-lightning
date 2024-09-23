@@ -58,6 +58,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.distill = True
         self.initialize_old_modules()
+        for param in self.model.visual.conv1.parameters():
+            param.requires_grad = False
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint

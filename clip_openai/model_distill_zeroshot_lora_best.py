@@ -136,6 +136,10 @@ class CLIPDualEncoderModel(LightningModule):
             print(name)
 
 
+        for param in self.model.visual.conv1.parameters():
+            param.requires_grad = False
+
+
 
 
     def initialize_old_modules(self):
