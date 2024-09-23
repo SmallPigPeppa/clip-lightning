@@ -22,7 +22,7 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
-  ["coco2014"]=1e-5
+  ["coco2014"]=7.5e-6
   ["lexica"]=2e-5
   ["pet"]=5e-6
   ["wikiart"]=2e-5
@@ -109,8 +109,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
 #  run_training "distill_v2" ${DATASET_NAME} ${LR}
-  run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
