@@ -60,6 +60,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
         for param in self.model.visual.conv1.parameters():
             param.requires_grad = False
+        for param in self.model.visual.class_embedding.parameters():
+            param.requires_grad = False
+        for param in self.model.visual.positional_embedding.parameters():
+            param.requires_grad = False
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
