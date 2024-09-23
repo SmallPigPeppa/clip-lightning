@@ -2,7 +2,7 @@ from lightning.pytorch import cli
 from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 from dataloaders.data_module_dil_json_zeroshot_hf_all import ImageRetrievalDataModule
-from model_distill_zeroshot import CLIPDualEncoderModel
+from model_distill_zeroshot_v4 import CLIPDualEncoderModel
 
 import os
 
