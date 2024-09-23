@@ -41,6 +41,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
+        for param in self.model.visual.conv1.parameters():
+            param.requires_grad = False
+        self.model.visual.class_embedding.requires_grad = False
+        self.model.visual.positional_embedding.requires_grad = False
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
