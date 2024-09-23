@@ -24,7 +24,7 @@ declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=1e-5
   ["lexica"]=2e-6
-  ["pet"]=2e-6
+  ["pet"]=5e-6
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
   ["simpsons"]=2e-5
@@ -82,7 +82,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt-til/lexica-512/lora-lr-7.5e-6.ckpt  \
+    --model.old_checkpoint_path ckpt-til/lexica-512/distill-lr-7.5e-6-v1.ckpt  \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -107,8 +107,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
   run_training "vanilla" ${DATASET_NAME} ${LR}
   run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
