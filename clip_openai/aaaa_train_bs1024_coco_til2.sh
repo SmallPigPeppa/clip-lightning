@@ -99,7 +99,7 @@ run_training() {
     --model.temperature 0.1 \
     --model.lr ${lr} \
     --model.lr_text ${lr_text} \
-    --model.lr_project 1e-5 \
+    --model.lr_project 1e-7 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
