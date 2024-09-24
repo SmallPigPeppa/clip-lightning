@@ -110,5 +110,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 46e358198c65fd38
+#/ppio_net0/code/openapi.sh stop 46e358198c65fd38
 
