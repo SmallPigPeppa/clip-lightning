@@ -24,7 +24,7 @@ class CLIPDualEncoderModel(LightningModule):
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
-            lr_tex: float = 5e-4,
+            lr_text: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
