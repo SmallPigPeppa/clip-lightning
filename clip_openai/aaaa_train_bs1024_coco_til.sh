@@ -103,7 +103,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt/flickr30k/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
+    --model.old_checkpoint_path ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -139,5 +139,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
+#/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
 
