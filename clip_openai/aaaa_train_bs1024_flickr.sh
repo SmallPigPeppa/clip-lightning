@@ -10,7 +10,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
+#DATASETS=("coco2014")
 DATASETS=("flickr30k")
 
 # 数据集学习率映射
@@ -82,7 +82,7 @@ run_training() {
   local method=$1
   local dataset_name=$2
   local lr=$3
-  local lr_text=$3
+  local lr_text=$4
 
   python ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \

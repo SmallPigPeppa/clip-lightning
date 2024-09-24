@@ -82,7 +82,7 @@ run_training() {
   local method=$1
   local dataset_name=$2
   local lr=$3
-  local lr_text=$3
+  local lr_text=$4
 
   python ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \
