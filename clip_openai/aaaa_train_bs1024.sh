@@ -10,14 +10,14 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
-#DATASETS=("flickr30k")
+#DATASETS=("coco2014")
+DATASETS=("flickr30k")
 #DATASETS=("pet" "simpsons" "lexica" "styles" "kream" "sketch")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
-  ["coco2014"]=2e-5
+  ["coco2014"]=1e-5
   ["wikiart"]=2e-5
   ["patfig"]=2e-5
   ["pet"]=2e-5
@@ -43,6 +43,7 @@ declare -A METHOD_MAP=(
   ["distill"]="cli_distill_zeroshot.py"
   ["distill_v4"]="cli_distill_zeroshot_v4.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
+  ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
 )
 
 # 其他参数
@@ -100,14 +101,14 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "distill" ${DATASET_NAME} ${LR}
-  run_training "lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora" ${DATASET_NAME} ${LR}
+#  run_training "vanilla" ${DATASET_NAME} ${LR}
+#  run_training "distill" ${DATASET_NAME} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop a2b028e85b48907c
+/ppio_net0/code/openapi.sh stop 46e358198c65fd38
 
