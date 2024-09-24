@@ -36,24 +36,24 @@ declare -A DATASET_LR_MAP=(
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=5e-4
-  ["coco2014"]=5e-4
-  ["wikiart"]=5e-4
-  ["patfig"]=5e-4
-  ["pet"]=5e-4
-  ["simpsons"]=5e-4
-  ["lexica"]=5e-4
-  ["styles"]=5e-4
-  ["kream"]=5e-4
-  ["sketch"]=5e-4
-  ["emoji"]=5e-4
-  ["fashion"]=5e-4
-  ["nouns"]=5e-4
-  ["shahnegar"]=5e-4
-  ["artbench"]=5e-4
-  ["hausavg"]=5e-4
-  ["food"]=5e-4
-  ["clothes"]=5e-4
+  ["flickr30k"]=2e-4
+  ["coco2014"]=2e-4
+  ["wikiart"]=2e-4
+  ["patfig"]=2e-4
+  ["pet"]=2e-4
+  ["simpsons"]=2e-4
+  ["lexica"]=2e-4
+  ["styles"]=2e-4
+  ["kream"]=2e-4
+  ["sketch"]=2e-4
+  ["emoji"]=2e-4
+  ["fashion"]=2e-4
+  ["nouns"]=2e-4
+  ["shahnegar"]=2e-4
+  ["artbench"]=2e-4
+  ["hausavg"]=2e-4
+  ["food"]=2e-4
+  ["clothes"]=2e-4
 )
 
 
