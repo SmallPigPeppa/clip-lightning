@@ -16,7 +16,7 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=1e-5
-  ["coco2014"]=5e-7
+  ["coco2014"]=1e-7
   ["wikiart"]=1e-5
   ["patfig"]=1e-5
   ["pet"]=1e-5
