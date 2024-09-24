@@ -80,6 +80,7 @@ class CLIPDualEncoderModel(LightningModule):
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
+            lr_tex: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
@@ -96,13 +97,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        # self.val_img_feats = []
-        # self.val_text_feats = []
 
         # Apply LoRA to the model
-        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
-
         # lora: model.visual conv1
         # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
         # lora_config = LoraConfig(
@@ -113,6 +111,9 @@ class CLIPDualEncoderModel(LightningModule):
         #     target_modules=['conv1'],
         # )
         # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+
+        for param in self.model.visual.conv1.parameters():
+            param.requires_grad = False
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
@@ -132,11 +133,23 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        parameters = [{
-            "params": self.model.parameters(),
-            "lr": self.hparams.lr,
-            "weight_decay": self.hparams.weight_decay
-        }]
+        # parameters = [{
+        #     "params": self.model.parameters(),
+        #     "lr": self.hparams.lr,
+        #     "weight_decay": self.hparams.weight_decay
+        # }]
+        parameters = [
+            {
+                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
+                "lr": self.hparams.lr
+            },
+            {
+                "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
+                # 其他部分设置 4 倍学习率
+                "lr": self.hparams.lr_text,
+                "weight_decay": self.hparams.weight_decay
+            }
+        ]
 
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
@@ -340,9 +353,8 @@ class CLIPDualEncoderModel(LightningModule):
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
             # conv1 = copy.deepcopy(self.model.visual.conv1)
             # self.model.visual.conv1 = conv1.merge_and_unload().conv1
-
             self.model.visual.transformer.merge_and_unload()
-            # self.model.transformer.merge_and_unload()
+            self.model.transformer.merge_and_unload()
 
             # 仅在主进程中输出
             if self.trainer.is_global_zero:

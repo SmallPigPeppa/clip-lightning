@@ -80,7 +80,7 @@ class CLIPDualEncoderModel(LightningModule):
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
-            lr_text_scale: float = 1.0,
+            lr_tex: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
@@ -146,7 +146,7 @@ class CLIPDualEncoderModel(LightningModule):
             {
                 "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
                 # 其他部分设置 4 倍学习率
-                "lr": self.hparams.lr_text_scale * self.hparams.lr,
+                "lr": self.hparams.lr_text,
                 "weight_decay": self.hparams.weight_decay
             }
         ]
@@ -351,7 +351,7 @@ class CLIPDualEncoderModel(LightningModule):
         if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            conv1 = copy.deepcopy(self.model.visual.conv1)
+            # conv1 = copy.deepcopy(self.model.visual.conv1)
             # self.model.visual.conv1 = conv1.merge_and_unload().conv1
             self.model.visual.transformer.merge_and_unload()
             # self.model.transformer.merge_and_unload()
