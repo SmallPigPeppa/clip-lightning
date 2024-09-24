@@ -11,49 +11,49 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("coco2014")
-#DATASETS=("flickr30k")
+DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=1e-5
   ["coco2014"]=1e-5
-  ["wikiart"]=2e-5
-  ["patfig"]=2e-5
-  ["pet"]=2e-5
-  ["simpsons"]=2e-5
-  ["lexica"]=2e-5
-  ["styles"]=2e-5
-  ["kream"]=2e-5
-  ["sketch"]=2e-5
-  ["emoji"]=4e-5
-  ["fashion"]=3e-5
-  ["nouns"]=4e-5
-  ["shahnegar"]=4e-5
-  ["artbench"]=4e-5
+  ["wikiart"]=1e-5
+  ["patfig"]=1e-5
+  ["pet"]=1e-5
+  ["simpsons"]=1e-5
+  ["lexica"]=1e-5
+  ["styles"]=1e-5
+  ["kream"]=1e-5
+  ["sketch"]=1e-5
+  ["emoji"]=1e-5
+  ["fashion"]=1e-5
+  ["nouns"]=1e-5
+  ["shahnegar"]=1e-5
+  ["artbench"]=1e-5
   ["hausavg"]=1e-5
-  ["food"]=2e-5
-  ["clothes"]=2e-5
+  ["food"]=1e-5
+  ["clothes"]=1e-5
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=5e-4
-  ["coco2014"]=5e-4
-  ["wikiart"]=5e-4
-  ["patfig"]=5e-4
-  ["pet"]=5e-4
-  ["simpsons"]=5e-4
-  ["lexica"]=5e-4
-  ["styles"]=5e-4
-  ["kream"]=5e-4
-  ["sketch"]=5e-4
-  ["emoji"]=5e-4
-  ["fashion"]=5e-4
-  ["nouns"]=5e-4
-  ["shahnegar"]=5e-4
-  ["artbench"]=5e-4
-  ["hausavg"]=5e-4
-  ["food"]=5e-4
-  ["clothes"]=5e-4
+  ["flickr30k"]=2e-4
+  ["coco2014"]=2e-4
+  ["wikiart"]=2e-4
+  ["patfig"]=2e-4
+  ["pet"]=2e-4
+  ["simpsons"]=2e-4
+  ["lexica"]=2e-4
+  ["styles"]=2e-4
+  ["kream"]=2e-4
+  ["sketch"]=2e-4
+  ["emoji"]=2e-4
+  ["fashion"]=2e-4
+  ["nouns"]=2e-4
+  ["shahnegar"]=2e-4
+  ["artbench"]=2e-4
+  ["hausavg"]=2e-4
+  ["food"]=2e-4
+  ["clothes"]=2e-4
 )
 
 
