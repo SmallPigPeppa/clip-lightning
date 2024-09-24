@@ -103,7 +103,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt-til/coco2014-1024/ distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
+    --model.old_checkpoint_path ckpt/flickr30k/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
