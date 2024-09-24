@@ -37,7 +37,7 @@ declare -A DATASET_LR_MAP=(
 
 declare -A DATASET_LR_TEXT_MAP=(
   ["flickr30k"]=2e-4
-  ["coco2014"]=4e-4
+  ["coco2014"]=8e-4
   ["wikiart"]=2e-4
   ["patfig"]=2e-4
   ["pet"]=2e-4
