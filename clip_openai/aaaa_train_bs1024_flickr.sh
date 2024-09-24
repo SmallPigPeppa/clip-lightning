@@ -15,7 +15,7 @@ DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=1e-5
+  ["flickr30k"]=7.5e-6
   ["coco2014"]=1e-5
   ["wikiart"]=1e-5
   ["patfig"]=1e-5
@@ -36,7 +36,7 @@ declare -A DATASET_LR_MAP=(
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=2e-4
+  ["flickr30k"]=1.5e-4
   ["coco2014"]=2e-4
   ["wikiart"]=2e-4
   ["patfig"]=2e-4
