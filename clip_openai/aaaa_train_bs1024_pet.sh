@@ -16,11 +16,11 @@ DATASETS=("pet")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
+  ["pet"]=1e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
   ["wikiart"]=1e-5
   ["patfig"]=1e-5
-  ["pet"]=8e-6
   ["simpsons"]=1e-5
   ["lexica"]=1e-5
   ["styles"]=1e-5
@@ -37,11 +37,11 @@ declare -A DATASET_LR_MAP=(
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
+  ["pet"]=2e-4
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
   ["wikiart"]=2e-4
   ["patfig"]=2e-4
-  ["pet"]=1.2e-4
   ["simpsons"]=2e-4
   ["lexica"]=2e-4
   ["styles"]=2e-4
