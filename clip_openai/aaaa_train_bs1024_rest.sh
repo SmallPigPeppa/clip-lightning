@@ -43,6 +43,7 @@ declare -A METHOD_MAP=(
   ["distill"]="cli_distill_zeroshot.py"
   ["distill_v4"]="cli_distill_zeroshot_v4.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
+  ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
 )
 
 # 其他参数
@@ -104,6 +105,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   run_training "distill" ${DATASET_NAME} ${LR}
   run_training "lora" ${DATASET_NAME} ${LR}
   run_training "distill_lora" ${DATASET_NAME} ${LR}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
