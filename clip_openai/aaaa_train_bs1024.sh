@@ -74,7 +74,7 @@ run_training() {
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${lr} \
-    --model.lr_text_scale 10 \
+    --model.lr_text_scale 20 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
