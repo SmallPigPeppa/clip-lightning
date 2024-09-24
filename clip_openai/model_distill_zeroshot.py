@@ -42,6 +42,7 @@ class CLIPDualEncoderModel(LightningModule):
             alpha: float = 0.15,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
+            text_lr_scale: float = 1.0,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
@@ -94,11 +95,23 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        parameters = [{
-            "params": self.model.parameters(),
-            "lr": self.hparams.lr,
-            "weight_decay": self.hparams.weight_decay
-        }]
+        # parameters = [{
+        #     "params": self.model.parameters(),
+        #     "lr": self.hparams.lr,
+        #     "weight_decay": self.hparams.weight_decay
+        # }]
+        parameters = [
+            {
+                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
+                "lr": self.hparams.lr
+            },
+            {
+                "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
+                # 其他部分设置 4 倍学习率
+                "lr": self.hparams.text_lr_scale * self.hparams.lr,
+                "weight_decay": self.hparams.weight_decay
+            }
+        ]
 
         if self.distill:
             parameters.append({

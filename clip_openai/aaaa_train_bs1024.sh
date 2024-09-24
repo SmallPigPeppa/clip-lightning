@@ -73,6 +73,7 @@ run_training() {
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${lr} \
+    --model.lr_text_scale 10 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
@@ -99,10 +100,10 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "distill_v4" ${DATASET_NAME} ${LR}
-#  run_training "lora" ${DATASET_NAME} ${LR}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR}
+  run_training "vanilla" ${DATASET_NAME} ${LR}
+  run_training "distill" ${DATASET_NAME} ${LR}
+  run_training "lora" ${DATASET_NAME} ${LR}
+  run_training "distill_lora" ${DATASET_NAME} ${LR}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
