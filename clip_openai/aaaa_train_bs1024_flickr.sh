@@ -36,6 +36,29 @@ declare -A DATASET_LR_MAP=(
   ["clothes"]=2e-5
 )
 
+declare -A DATASET_LR_TEXT_MAP=(
+  ["flickr30k"]=5e-4
+  ["coco2014"]=5e-4
+  ["wikiart"]=5e-4
+  ["patfig"]=5e-4
+  ["pet"]=5e-4
+  ["simpsons"]=5e-4
+  ["lexica"]=5e-4
+  ["styles"]=5e-4
+  ["kream"]=5e-4
+  ["sketch"]=5e-4
+  ["emoji"]=5e-4
+  ["fashion"]=5e-4
+  ["nouns"]=5e-4
+  ["shahnegar"]=5e-4
+  ["artbench"]=5e-4
+  ["hausavg"]=5e-4
+  ["food"]=5e-4
+  ["clothes"]=5e-4
+)
+
+
+
 # 脚本方法映射
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
@@ -60,6 +83,7 @@ run_training() {
   local method=$1
   local dataset_name=$2
   local lr=$3
+  local lr_text=$3
 
   python ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \
@@ -75,7 +99,7 @@ run_training() {
     --model.projection_dims 512 \
     --model.temperature 0.1 \
     --model.lr ${lr} \
-    --model.lr_text 5e-4 \
+    --model.lr_text ${lr_text} \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
@@ -86,18 +110,19 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr-${lr} \
+    --trainer.logger.name ${dataset_name}-${method}-lr-${lr}-lr_text-${lr_text} \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
 }
 
 # 运行所有数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
   LR=${DATASET_LR_MAP[${DATASET_NAME}]}
+  LR_TEXT=${DATASET_LR_TEXT_MAP[${DATASET_NAME}]}
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
@@ -107,7 +132,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "lora" ${DATASET_NAME} ${LR}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR}
-  run_training "distill_lora_v2" ${DATASET_NAME} ${LR}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
