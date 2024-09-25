@@ -30,6 +30,7 @@ python cli_val.py validate \
     --data.num_workers 8 \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
+    --model.result_path metrics_evaluation.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
     --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \

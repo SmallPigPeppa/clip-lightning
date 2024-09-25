@@ -20,6 +20,7 @@ class CLIPDualEncoderModel(LightningModule):
             batch_size: int = 64,
             batch_size_zs: int = 256,
             old_checkpoint_path: str = None,
+            result_path: str = 'metrics_evaluation.xlsx',
             *args,
             **kwargs,
     ) -> None:
@@ -59,9 +60,6 @@ class CLIPDualEncoderModel(LightningModule):
                 checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
                 self.model.load_state_dict(checkpoint['model'], strict=True)
                 print("Model weights loaded successfully and old parts copied.")
-
-
-
 
     def validation_step(self, batch, *args, **kwargs):
         self.log("val/clip_loss", 0., sync_dist=True)
@@ -176,7 +174,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def save_metrics_to_excel(self, metrics):
         df = pd.DataFrame(metrics)
-        df.to_excel('metrics_evaluation.xlsx', index=False)
+        df.to_excel(self.hparams.result_path, index=False)
         print("Metrics saved to Excel.")
 
     def log_metrics_to_wandb(self, metrics):
@@ -193,5 +191,3 @@ class CLIPDualEncoderModel(LightningModule):
             )
 
         wandb.log({"metrics_table": table})
-
-
