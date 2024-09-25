@@ -132,13 +132,13 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 ##  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 ##  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill_lora_v3" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill_lora_v3" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
+/ppio_net0/code/openapi.sh stop a2b028e85b48907c
 
