@@ -178,13 +178,19 @@ class CLIPDualEncoderModel(LightningModule):
     #     print("Metrics saved to Excel.")
 
     def save_metrics_to_excel(self, metrics):
+        # 创建 DataFrame
         df = pd.DataFrame(metrics)
 
-        # 转置以使不同的 metrics 作为行，不同的数据集作为列
-        df_pivot = df.pivot(index=None, columns="dataset")
-        df_pivot.columns = [f"{col[1]}_{col[0]}" for col in df_pivot.columns]  # 调整列名，方便阅读
+        # 转换为长格式（适用于 pivot 操作），将每个指标作为一列
+        df_melt = pd.melt(df, id_vars=["dataset"],
+                          value_vars=["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"],
+                          var_name="metric", value_name="value")
 
-        df_pivot.to_excel(self.hparams.result_path, index=False)
+        # 进行 pivot 操作，数据集为列，metric 为行
+        df_pivot = df_melt.pivot(index="metric", columns="dataset", values="value")
+
+        # 保存为 Excel 文件
+        df_pivot.to_excel(self.hparams.result_path, index=True)
         print("Metrics saved to Excel.")
 
     # def log_metrics_to_wandb(self, metrics):
