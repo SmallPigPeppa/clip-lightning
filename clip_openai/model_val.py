@@ -203,7 +203,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         for idx, dataset_name in enumerate(dataset_all):
             val_loader = self.trainer.datamodule.val_dataloader(dataset_name)
-            recall_metric = self.get_recall_metrics(val_loader)
+            recall_metric = self.get_recall_metrics(val_loader,num_caption=val_loader.dataset.caption_num)
             self.log_dict(recall_metric, sync_dist=True)
 
             metrics_row = {
