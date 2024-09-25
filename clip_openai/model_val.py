@@ -102,17 +102,22 @@ class CLIPDualEncoderModel(LightningModule):
 
                     # 对每个 caption 进行 tokenize，然后 stack
                     tokenized_texts = [self.tokenize(t).to(self.device) for t_batch in texts for t in t_batch]
-                    texts = torch.stack(tokenized_texts).view(num_caption, -1)  # 形状 (5, 128)
+                    texts = torch.stack(tokenized_texts)
 
-                    # 重组为 640 维向量，将每个 caption 的第一个元素排列到新的向量前 5 个元素，以此类推
-                    batch_size = images.size(0)
-                    texts = texts.permute(1, 0).contiguous().view(batch_size * num_caption, -1)  # 形状 (640, D)
+                    # images = inputs["image"].to(self.device)
+                    images = images.repeat_interleave(num_caption, dim=0)
 
-                    # 复制每张图片 num_caption 次，使其与 captions 对应
-                    # 每张图片都复制 num_caption 次，以便与它的所有 captions 匹配
-                    images = images.unsqueeze(1).repeat(1, num_caption, 1, 1, 1).view(batch_size * num_caption, -1,
-                                                                                      images.size(2), images.size(
-                            3))  # 形状 (640, C, H, W)
+                    # texts = torch.stack(tokenized_texts).view(num_caption, -1)  # 形状 (5, 128)
+
+                    # # 重组为 640 维向量，将每个 caption 的第一个元素排列到新的向量前 5 个元素，以此类推
+                    # batch_size = images.size(0)
+                    # texts = texts.permute(1, 0).contiguous().view(batch_size * num_caption, -1)  # 形状 (640, D)
+                    #
+                    # # 复制每张图片 num_caption 次，使其与 captions 对应
+                    # # 每张图片都复制 num_caption 次，以便与它的所有 captions 匹配
+                    # images = images.unsqueeze(1).repeat(1, num_caption, 1, 1, 1).view(batch_size * num_caption, -1,
+                    #                                                                   images.size(2), images.size(
+                    #         3))  # 形状 (640, C, H, W)
                 else:
                     # 单一 caption 的情况
                     texts = inputs["text"]
