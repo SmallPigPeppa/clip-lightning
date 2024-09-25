@@ -301,6 +301,8 @@ class ImageRetrievalDataset(Dataset):
         elif isinstance(text, str):
             pass
         else:
+            import warnings
+            warnings.warn(f"self.dataset_name is {self.dataset_name}: The text list contains {len(text)} element.")
             text = text[0]
 
         # text = self.tokenize(text)
