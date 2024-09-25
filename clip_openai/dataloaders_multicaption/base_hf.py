@@ -301,7 +301,7 @@ class ImageRetrievalDataset(Dataset):
         elif isinstance(text, str):
             pass
         else:
-            raise ValueError("Input must be a str or list with exactly one element.")
+            text = text[0]
 
         # text = self.tokenize(text)
 
