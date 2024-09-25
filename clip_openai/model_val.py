@@ -172,22 +172,48 @@ class CLIPDualEncoderModel(LightningModule):
         # Log the table to W&B
         self.log_metrics_to_wandb(all_metrics)
 
+    # def save_metrics_to_excel(self, metrics):
+    #     df = pd.DataFrame(metrics)
+    #     df.to_excel(self.hparams.result_path, index=False)
+    #     print("Metrics saved to Excel.")
+
     def save_metrics_to_excel(self, metrics):
         df = pd.DataFrame(metrics)
-        df.to_excel(self.hparams.result_path, index=False)
+
+        # 转置以使不同的 metrics 作为行，不同的数据集作为列
+        df_pivot = df.pivot(index=None, columns="dataset")
+        df_pivot.columns = [f"{col[1]}_{col[0]}" for col in df_pivot.columns]  # 调整列名，方便阅读
+
+        df_pivot.to_excel(self.hparams.result_path, index=False)
         print("Metrics saved to Excel.")
 
-    def log_metrics_to_wandb(self, metrics):
-        table = wandb.Table(
-            columns=["Dataset", "Image2Text Recall", "Text2Image Recall", "Zero-shot Top1", "Zero-shot Top5"])
+    # def log_metrics_to_wandb(self, metrics):
+    #     table = wandb.Table(
+    #         columns=["Dataset", "Image2Text Recall", "Text2Image Recall", "Zero-shot Top1", "Zero-shot Top5"])
+    #
+    #     for metric in metrics:
+    #         table.add_data(
+    #             metric.get("dataset"),
+    #             metric.get("image2text_recall"),
+    #             metric.get("text2image_recall"),
+    #             metric.get("zero_shot_top1", 0),
+    #             metric.get("zero_shot_top5", 0)
+    #         )
+    #
+    #     wandb.log({"metrics_table": table})
 
-        for metric in metrics:
-            table.add_data(
-                metric.get("dataset"),
-                metric.get("image2text_recall"),
-                metric.get("text2image_recall"),
-                metric.get("zero_shot_top1", 0),
-                metric.get("zero_shot_top5", 0)
-            )
+    def log_metrics_to_wandb(self, metrics):
+        # 创建表格，列为数据集名，行代表 metric
+        columns = ["Metric"] + [metric.get("dataset") for metric in metrics]
+        table = wandb.Table(columns=columns)
+
+        # 将每个 metric 作为行添加，行首为 metric 名称，后面为不同数据集的值
+        metrics_list = ["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"]
+        for metric_name in metrics_list:
+            row_data = [metric_name]
+            for metric in metrics:
+                row_data.append(metric.get(metric_name, 0))
+            table.add_data(*row_data)
 
         wandb.log({"metrics_table": table})
+

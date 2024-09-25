@@ -6,7 +6,9 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 # 数据集列表，拼接成逗号分隔的字符串
-DATASETS="flickr30k,coco2014,pet"
+datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
+DATASETS=$(IFS=','; echo "${datasets[*]}")
+
 # 定义检查点列表
 CKPTS=(
   "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
