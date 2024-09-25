@@ -95,8 +95,8 @@ class CLIPDualEncoderModel(LightningModule):
                     # texts = inputs["text"].to(self.device)
                     # texts = [self.tokenize(t).to(self.device) for t in texts]
                     # texts = torch.stack(texts)
-                    texts = inputs["text"].to(self.device)
-                    texts = self.tokenize(texts[0]).to(self.device)
+                    texts = inputs["text"][0].to(self.device)
+                    texts = self.tokenize(texts)
                 else:
                     texts = inputs["text"].to(self.device)
                     texts = self.tokenize(texts)
