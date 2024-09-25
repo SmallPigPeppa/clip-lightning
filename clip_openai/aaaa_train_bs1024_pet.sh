@@ -38,7 +38,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["pet"]=1e-4
+  ["pet"]=2e-5
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
   ["wikiart"]=2e-4
@@ -75,7 +75,7 @@ declare -A METHOD_MAP=(
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
-BATCH_SIZE=128
+BATCH_SIZE=64
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
@@ -129,8 +129,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}

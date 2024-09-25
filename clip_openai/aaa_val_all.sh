@@ -10,14 +10,14 @@ datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 datasets=(
 "flickr30k"
 "coco2014"
-#"pet"
+"pet"
 "lexica"
-#"simpsons"
-#"patfig"
-#"wikiart"
-#"styles"
-#"kream"
-#"sketch"
+"simpsons"
+"patfig"
+"wikiart"
+"styles"
+"kream"
+"sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
 DATASETS=$(IFS=','; echo "${datasets[*]}")
@@ -30,8 +30,9 @@ CKPTS=(
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+    "ckpt/pet-1024/pet-ViT-B/16-distill-lr-2e-5"
 #    "ckpt/lexica-1024/distill_lora-lr-3e-5-lr_text-3e-5.ckpt"
-    "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-1e-4.ckpt"
+#    "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-1e-4.ckpt"
 #  "ckpt/pet-1024/distill_lora_v2-lr-1e-5-lr_text-4e-4.ckpt"
 #    "ckpt/pet-1024/distill-lr-2e-5-lr_text-2e-5.ckpt"
 #  "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-3e-5.ckpt"
