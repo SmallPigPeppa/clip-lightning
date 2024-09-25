@@ -19,6 +19,8 @@ from .coco2014 import COCO2014Dataset
 
 import torch
 import numpy as np
+from typing import List
+
 
 DATASET_LOOKUP = {
     'flickr30k': Flickr30kDataset,
