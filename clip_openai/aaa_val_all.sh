@@ -14,6 +14,7 @@ datasets=(
 "lexica"
 "simpsons"
 )
+datasets=("lexica" "styles" "kream" "sketch")
 DATASETS=$(IFS=','; echo "${datasets[*]}")
 
 # 定义检查点列表
