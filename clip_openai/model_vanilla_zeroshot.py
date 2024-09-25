@@ -51,12 +51,6 @@ class CLIPDualEncoderModel(LightningModule):
         # self.model.visual.positional_embedding.requires_grad = False
 
     def initialize_old_modules(self):
-        # load task N-1 checkpoint
-        # if self.hparams.old_checkpoint_path is not None:
-        #     checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
-        #     self.model.load_state_dict(checkpoint['model'], strict=True)
-        #     print("Model weights loaded successfully and old parts copied.")
-
         if self.hparams.old_checkpoint_path is not None:
             if ',' in self.hparams.old_checkpoint_path:
                 self.hparams.old_checkpoint_path = self.hparams.old_checkpoint_path.split(',')

@@ -14,6 +14,16 @@ DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 DATASETS=("flickr30k")
 DATASETS=("pet")
 
+
+CKPTS=(
+    "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+    "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+)
+
+# 拼接检查点
+CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
+
+
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["pet"]=2e-5
@@ -105,6 +115,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
+    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -129,11 +140,11 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
