@@ -202,8 +202,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.eval()
 
         for idx, dataset_name in enumerate(dataset_all):
+            num_caption = 5 if dataset_name in ['flickr30k', 'coco2014'] else 1
             val_loader = self.trainer.datamodule.val_dataloader(dataset_name)
-            recall_metric = self.get_recall_metrics(val_loader,num_caption=val_loader.dataset.caption_num)
+            recall_metric = self.get_recall_metrics(val_loader, num_caption=num_caption)
             self.log_dict(recall_metric, sync_dist=True)
 
             metrics_row = {
