@@ -1,3 +1,5 @@
+from logging import logMultiprocessing
+
 import numpy as np
 import torch
 from lightning import LightningModule
@@ -171,6 +173,8 @@ class CLIPDualEncoderModel(LightningModule):
                 recall_metric = self.get_recall_metrics_5caption(val_loader, num_caption=5)
             else:
                 recall_metric = self.get_recall_metrics_1caption(val_loader)
+                if recall_metric is None:
+                    import pdb;pdb.set_trace()
 
             self.log_dict(recall_metric, sync_dist=True)
 
