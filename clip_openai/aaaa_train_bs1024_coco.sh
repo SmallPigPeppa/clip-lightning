@@ -67,6 +67,7 @@ declare -A METHOD_MAP=(
   ["distill_v4"]="cli_distill_zeroshot_v4.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
   ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
+  ["distill_lora_v3"]="cli_distill_zeroshot_lora_best_v3.py"
 )
 
 # 其他参数
@@ -126,17 +127,18 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
+##  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+##  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v3" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 46e358198c65fd38
+/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
 
