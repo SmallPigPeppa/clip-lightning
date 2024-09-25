@@ -95,38 +95,40 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 images = inputs["image"].to(self.device)
+                batch_size = images.shape[0]  # 获取当前 batch 的实际大小（可能小于 128）
 
-                # 如果有多个caption，将其转换为 (5, 128) 的格式
+                # 如果有多个 caption，将其转换为 (5, batch_size) 的格式
                 if num_caption > 1:
-                    texts_list = inputs["text"]  # texts_list 是一个包含多个 captions 的 list，每个 caption 都是 128 个样本
-                    # 假设 texts_list 是一个 5x128 维的文本列表，转换为 (5, 128)
+                    texts_list = inputs["text"]  # texts_list 是一个包含多个 captions 的 list，每个 caption 都是当前 batch_size 的样本
+                    # 假设 texts_list 是一个 5x(batch_size) 维的文本列表，转换为 (5, batch_size)
                     text_batch = []
                     for texts in texts_list:  # 遍历每个 caption 列表
                         tokenized_texts = [self.tokenize(t).to(self.device) for t in texts]  # tokenize 并移动到设备
-                        tokenized_texts = torch.stack(tokenized_texts)  # 将文本堆叠为 (128, D) 的张量
+                        tokenized_texts = torch.stack(tokenized_texts)  # 将文本堆叠为 (batch_size, D) 的张量
                         text_batch.append(tokenized_texts)
-                    texts = torch.stack(text_batch)  # 将5个(128, D)的张量堆叠为 (5, 128, D)
+                    texts = torch.stack(text_batch)  # 将 5 个 (batch_size, D) 的张量堆叠为 (5, batch_size, D)
                 else:
                     texts = inputs["text"]
                     texts = [self.tokenize(t).to(self.device) for t in texts]
                     texts = torch.stack(texts)
 
-                # 图像编码
-                image_features = self.model.encode_image(images)  # (128, D)
+                # 图像编码，注意 batch_size 可能小于 128
+                image_features = self.model.encode_image(images)  # (batch_size, D)
 
-                # 文本编码，需处理多caption的情况
+                # 文本编码，需处理多 caption 的情况
                 if num_caption > 1:
-                    # 对每个 caption 进行编码，然后将其 reshape 成 (5, 128, D)
+                    # 对每个 caption 进行编码，然后将其 reshape 成 (5, batch_size, D)
                     text_features = [self.model.encode_text(texts[i]) for i in range(num_caption)]
-                    text_features = torch.stack(text_features)  # (5, 128, D)
+                    text_features = torch.stack(text_features)  # (5, batch_size, D)
                 else:
                     text_features = self.model.encode_text(texts)
 
                 val_img_feats.append(image_features)
                 val_text_feats.append(text_features)
 
-        all_image_features = torch.cat(val_img_feats)  # (N, D)
-        all_text_features = torch.cat(val_text_feats)  # 如果是多caption的情况，会是 (5*N, D)
+        # 最后拼接所有的图像和文本特征
+        all_image_features = torch.cat(val_img_feats, dim=0)  # (N, D)
+        all_text_features = torch.cat(val_text_feats, dim=1 if num_caption > 1 else 0)  # (5*N, D) 或 (N, D)
 
         metrics = self.recall_score(
             image_features=all_image_features,
