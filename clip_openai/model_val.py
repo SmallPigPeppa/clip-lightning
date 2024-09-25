@@ -107,7 +107,7 @@ class CLIPDualEncoderModel(LightningModule):
             preds = preds.detach().cpu().numpy()
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-        return
+        return metrics
 
     def recall_score_5caption(self, image_features, text_features, caps_per_image=5):
 
