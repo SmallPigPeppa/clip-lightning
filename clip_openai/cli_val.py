@@ -16,15 +16,6 @@ class CLI(cli.LightningCLI):
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
         parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
-        # Accept multiple datasets from the command line
-        parser.add_argument(
-            "val_datasets",
-            type=str,
-            nargs='+',  # allow multiple datasets to be passed as a list
-            help="List of datasets to evaluate on"
-        )
-
-        parser.link_arguments("data.dataset_names", "val_datasets")
 
 
 if __name__ == "__main__":

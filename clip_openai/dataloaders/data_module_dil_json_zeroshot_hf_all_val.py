@@ -36,7 +36,7 @@ DATASET_LOOKUP = {
 class ImageRetrievalDataModule(LightningDataModule):
     def __init__(
             self,
-            dataset_names: List[str],  # Modify to accept a list of dataset names
+            dataset_names: str,  # Accept a comma-separated string
             config: str,
             root_dir: str = None,
             max_length: int = 77,
@@ -49,7 +49,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.dataset_names = dataset_names  # Store the list of dataset names
+        self.dataset_names = dataset_names.split(',')
         self.config = config
         self.root_dir = root_dir
         self.batch_size = batch_size

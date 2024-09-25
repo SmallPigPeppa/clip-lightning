@@ -5,9 +5,8 @@ export HF_HOME=/ppio_net0/huggingface
 # 模型名称
 MODEL_NAME=ViT-B/16
 
-# 数据集列表
-#DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("flickr30k" "coco2014" "pet")
+# 数据集列表，拼接成逗号分隔的字符串
+DATASETS="flickr30k,coco2014,pet"
 # 定义检查点列表
 CKPTS=(
   "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
@@ -22,9 +21,9 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
 
-# 遍历所有数据集进行评估
-python cli_val.py validate \
-    --val_datasets "${DATASETS[@]}" \
+# 评估所有数据集
+python cli_vanilla_zeroshot_hf.py validate \
+    --data.dataset_names ${DATASETS} \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
