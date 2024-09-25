@@ -13,8 +13,6 @@ DATASETS=("flickr30k")
 #DATASETS=("wikiart")
 #DATASETS=("kream")
 
-
-
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
@@ -40,7 +38,6 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-
   python cli_vanilla_zeroshot_hf.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
@@ -60,7 +57,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
     --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt,ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
+    --model.old_checkpoint_path ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt, \
+    ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
