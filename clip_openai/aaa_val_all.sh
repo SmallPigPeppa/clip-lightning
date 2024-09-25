@@ -10,8 +10,8 @@ datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "s
 datasets=(
 "flickr30k"
 "coco2014"
-"pet"
-#"lexica"
+#"pet"
+"lexica"
 #"simpsons"
 #"patfig"
 #"wikiart"
