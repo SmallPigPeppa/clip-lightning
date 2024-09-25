@@ -94,6 +94,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                images = inputs["image"].to(self.device)
+
                 # 如果有多个caption，将其转换为 5x128 的格式
                 if num_caption > 1:
                     texts = inputs["text"]  # texts 形状为 (5, 128)
@@ -109,8 +111,6 @@ class CLIPDualEncoderModel(LightningModule):
                     texts = inputs["text"]
                     texts = [self.tokenize(t).to(self.device) for t in texts[0]]
                     texts = torch.stack(texts)
-
-                images = inputs["image"].to(self.device)
 
                 image_features = self.model.encode_image(images)
                 text_features = self.model.encode_text(texts)
@@ -128,7 +128,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    def recall_score(self, image_features, text_features, logit_scale=1.0):
+    def recall_score(self, image_features, text_features, logit_scale=1.0, caps_per_image=1):
         metrics = {}
         # logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         # logits_per_text = logits_per_image.t().detach().cpu()
@@ -143,8 +143,16 @@ class CLIPDualEncoderModel(LightningModule):
         #     for k in [1]:
         #         metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
-        i2t_r1 = i2t(images=image_features, captions=text_features, caps_per_image=1)
-        t2i_r1 = t2i(images=image_features, captions=text_features, caps_per_image=1)
+        i2t_r1 = i2t(
+            images=image_features.cpu().numpy(),
+            captions=text_features.cpu().numpy(),
+            caps_per_image=caps_per_image
+        )
+        t2i_r1 = t2i(
+            images=image_features.cpu().numpy(),
+            captions=text_features.cpu().numpy(),
+            caps_per_image=caps_per_image
+        )
         metrics = {
             "val/image_to_text_R@1": i2t_r1,
             "val/text_to_image_R@1": t2i_r1
