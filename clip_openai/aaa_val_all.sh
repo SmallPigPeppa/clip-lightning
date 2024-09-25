@@ -12,7 +12,7 @@ datasets=(
 "coco2014"
 "pet"
 "lexica"
-"simpson"
+"simpsons"
 )
 DATASETS=$(IFS=','; echo "${datasets[*]}")
 
