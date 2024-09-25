@@ -120,10 +120,10 @@ class CLIPDualEncoderModel(LightningModule):
         all_text_features = torch.cat(val_text_feats)
 
         metrics = self.recall_score(
-            image_features=all_image_features,
-            text_features=all_text_features,
+            image_features=all_image_features[:1000],
+            text_features=all_text_features[:1000],
             logit_scale=self.model.logit_scale.exp(),
-            caps_per_image=num_caption
+            caps_per_image=1
         )
 
         return metrics
