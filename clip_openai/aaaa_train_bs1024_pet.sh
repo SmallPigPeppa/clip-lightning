@@ -26,7 +26,7 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["pet"]=2e-5
+  ["pet"]=1e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
   ["wikiart"]=1e-5
@@ -48,7 +48,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["pet"]=1e-5
+  ["pet"]=4e-4
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
   ["wikiart"]=2e-4
@@ -85,7 +85,7 @@ declare -A METHOD_MAP=(
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
-BATCH_SIZE=64
+BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
