@@ -29,7 +29,7 @@ CKPTS=(
 #  "ckpt/coco2014-1024/vanilla-lr-1e-8-lr_text-5e-4.ckpt"
 #  "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
 #  "ckpt/pet-1024/vanilla-lr-2e-5-lr_text-2e-5.ckpt"
-  "ckpt/lexica-1024/vanilla-lr-3e-5-lr_text-3e-5.ckpt"
+  "ckpt/lexica-1024/vanilla-lr-3e-5-lr_text-3e-5-v1.ckpt"
 #  "ckpt/pet-1024/distill_lora_v2-lr-1e-5-lr_text-4e-4.ckpt"
 )
 
