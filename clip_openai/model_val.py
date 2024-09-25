@@ -99,6 +99,8 @@ class CLIPDualEncoderModel(LightningModule):
                     # texts = inputs["text"][0]
                     # texts = self.tokenize(texts).to(self.device)
                 else:
+                    import pdb;
+                    pdb.set_trace()
                     texts = inputs["text"]
                     texts = self.tokenize(texts).to(self.device)
 
