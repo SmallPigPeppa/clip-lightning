@@ -88,7 +88,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return 0
 
-    def get_recall_metrics(self, dataloader, num_caption=1):
+    def get_recall_metrics(self, dataloader, num_caption=5):
         val_img_feats = []
         val_text_feats = []
 
@@ -96,9 +96,10 @@ class CLIPDualEncoderModel(LightningModule):
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 images = inputs["image"].to(self.device)
 
-                # 如果有多个caption，将其转换为 5x128 的格式
+                # 如果有多个caption，将其转换为 (5, 128) 的格式
                 if num_caption > 1:
                     texts = inputs["text"]  # texts 形状为 (5, 128)
+
                     # 对每个 caption 进行 tokenize，然后 stack
                     tokenized_texts = [self.tokenize(t).to(self.device) for t_batch in texts for t in t_batch]
                     texts = torch.stack(tokenized_texts).view(num_caption, -1)  # 形状 (5, 128)
@@ -106,6 +107,12 @@ class CLIPDualEncoderModel(LightningModule):
                     # 重组为 640 维向量，将每个 caption 的第一个元素排列到新的向量前 5 个元素，以此类推
                     batch_size = images.size(0)
                     texts = texts.permute(1, 0).contiguous().view(batch_size * num_caption, -1)  # 形状 (640, D)
+
+                    # 复制每张图片 num_caption 次，使其与 captions 对应
+                    # 每张图片都复制 num_caption 次，以便与它的所有 captions 匹配
+                    images = images.unsqueeze(1).repeat(1, num_caption, 1, 1, 1).view(batch_size * num_caption, -1,
+                                                                                      images.size(2), images.size(
+                            3))  # 形状 (640, C, H, W)
                 else:
                     # 单一 caption 的情况
                     texts = inputs["text"]
@@ -124,12 +131,13 @@ class CLIPDualEncoderModel(LightningModule):
             image_features=all_image_features,
             text_features=all_text_features,
             logit_scale=self.model.logit_scale.exp(),
+            caps_per_image=num_caption
         )
 
         return metrics
 
     def recall_score(self, image_features, text_features, logit_scale=1.0, caps_per_image=1):
-        metrics = {}
+        # metrics = {}
         # logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
         # logits_per_text = logits_per_image.t().detach().cpu()
         #
