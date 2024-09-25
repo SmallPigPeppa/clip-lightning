@@ -50,7 +50,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["lexica"]=1.5e-4
+  ["lexica"]=3e-5
   ["pet"]=6e-5
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
