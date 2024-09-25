@@ -99,15 +99,17 @@ class CLIPDualEncoderModel(LightningModule):
 
                 if num_caption > 1:
                     # 重复图像 num_caption 次
-                    images = images.repeat_interleave(num_caption, dim=0)
+                    images = images.repeat_interleave(num_caption, dim=0)  # [batch_size * num_caption, C, H, W]
 
-                    # 展平 captions 列表
-                    texts = inputs["text"]  # 假设 inputs["text"] 是长度为 batch_size 的列表，每个元素是 num_caption 个 captions 的列表
-                    texts = [caption for captions in texts for caption in captions]
+                    # 展开 captions 列表
+                    texts = [inputs["text"][i][j] for j in range(batch_size) for i in range(num_caption)]
+                    # texts 长度为 batch_size * num_caption，顺序为 [cap1_1, cap1_2, ..., cap1_num_caption, cap2_1, cap2_2, ..., cap2_num_caption, ...]
+
+                    # Tokenization 和堆叠
                     texts = [self.tokenize(t).to(self.device) for t in texts]
                     texts = torch.stack(texts)
                 else:
-                    texts = inputs["text"]
+                    texts = inputs["text"]  # 长度为 batch_size 的列表
                     texts = [self.tokenize(t).to(self.device) for t in texts]
                     texts = torch.stack(texts)
 
@@ -120,10 +122,10 @@ class CLIPDualEncoderModel(LightningModule):
         all_text_features = torch.cat(val_text_feats)
 
         metrics = self.recall_score(
-            image_features=all_image_features[:1000],
-            text_features=all_text_features[:1000],
+            image_features=all_image_features,
+            text_features=all_text_features,
             logit_scale=self.model.logit_scale.exp(),
-            caps_per_image=1
+            caps_per_image=num_caption
         )
 
         return metrics
