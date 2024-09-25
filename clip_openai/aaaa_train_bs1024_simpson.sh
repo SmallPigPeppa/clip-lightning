@@ -120,6 +120,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
+    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -135,7 +136,6 @@ run_training() {
     --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
 }
 
-#    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
 
 # 运行所有数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
@@ -145,12 +145,12 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
