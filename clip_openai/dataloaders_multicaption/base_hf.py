@@ -308,4 +308,4 @@ class ImageRetrievalDataset(Dataset):
         if self.transforms:
             image = self.transforms(image)
 
-        return {"image": image, "caption": text}
+        return {"image": image, "text": text}
