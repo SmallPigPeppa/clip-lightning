@@ -147,6 +147,7 @@ class CLIPDualEncoderModel(LightningModule):
     def on_validation_epoch_end(self):
         dataset_all = self.trainer.datamodule.dataset_name  # assuming dataset names are in the datamodule
         all_metrics = []
+        self.model.eval()
 
         for idx, dataset_name in enumerate(dataset_all):
             val_loader = self.trainer.datamodule.val_dataloader(dataset_name)
@@ -175,6 +176,47 @@ class CLIPDualEncoderModel(LightningModule):
         # Log the table to W&B
         self.log_metrics_to_wandb(all_metrics)
 
+    # def save_metrics_to_excel(self, metrics):
+    #     # 创建 DataFrame
+    #     df = pd.DataFrame(metrics)
+    #
+    #     # 确保按照自定义的 dataset_name 列表顺序
+    #     dataset_order = self.trainer.datamodule.dataset_name  # 假设 dataset_name 是你定义的顺序列表
+    #     df['dataset'] = pd.Categorical(df['dataset'], categories=dataset_order, ordered=True)
+    #
+    #     # 转换为长格式（适用于 pivot 操作），将每个指标作为一列
+    #     df_melt = pd.melt(
+    #         df,
+    #         id_vars=["dataset"],
+    #         value_vars=["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"],
+    #         var_name="metric",
+    #         value_name="value"
+    #     )
+    #
+    #     # 进行 pivot 操作，数据集为列，metric 为行
+    #     df_pivot = df_melt.pivot(index="metric", columns="dataset", values="value")
+    #
+    #     # 按照自定义顺序排列列
+    #     df_pivot = df_pivot[dataset_order]
+    #
+    #     # 保存为 Excel 文件
+    #     df_pivot.to_excel(self.hparams.result_path, index=True)
+    #     print("Metrics saved to Excel.")
+    #
+    # def log_metrics_to_wandb(self, metrics):
+    #     # 创建表格，列为数据集名，行代表 metric
+    #     columns = ["Metric"] + [metric.get("dataset") for metric in metrics]
+    #     table = wandb.Table(columns=columns)
+    #
+    #     # 将每个 metric 作为行添加，行首为 metric 名称，后面为不同数据集的值
+    #     metrics_list = ["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"]
+    #     for metric_name in metrics_list:
+    #         row_data = [metric_name]
+    #         for metric in metrics:
+    #             row_data.append(metric.get(metric_name, 0))
+    #         table.add_data(*row_data)
+    #
+    #     wandb.log({"metrics_table": table})
     def save_metrics_to_excel(self, metrics):
         # 创建 DataFrame
         df = pd.DataFrame(metrics)
@@ -183,10 +225,19 @@ class CLIPDualEncoderModel(LightningModule):
         dataset_order = self.trainer.datamodule.dataset_name  # 假设 dataset_name 是你定义的顺序列表
         df['dataset'] = pd.Categorical(df['dataset'], categories=dataset_order, ordered=True)
 
+        # 动态设置要记录的值，如果 evaluate_zero_shot 为 False，则不记录 zero-shot 的键
+        value_vars = ["image2text_recall", "text2image_recall"]
+        if self.evaluate_zero_shot:
+            value_vars += ["zero_shot_top1", "zero_shot_top5"]
+
         # 转换为长格式（适用于 pivot 操作），将每个指标作为一列
-        df_melt = pd.melt(df, id_vars=["dataset"],
-                          value_vars=["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"],
-                          var_name="metric", value_name="value")
+        df_melt = pd.melt(
+            df,
+            id_vars=["dataset"],
+            value_vars=value_vars,
+            var_name="metric",
+            value_name="value"
+        )
 
         # 进行 pivot 操作，数据集为列，metric 为行
         df_pivot = df_melt.pivot(index="metric", columns="dataset", values="value")
@@ -203,8 +254,12 @@ class CLIPDualEncoderModel(LightningModule):
         columns = ["Metric"] + [metric.get("dataset") for metric in metrics]
         table = wandb.Table(columns=columns)
 
+        # 动态设置要记录的 metrics 列表
+        metrics_list = ["image2text_recall", "text2image_recall"]
+        if self.evaluate_zero_shot:
+            metrics_list += ["zero_shot_top1", "zero_shot_top5"]
+
         # 将每个 metric 作为行添加，行首为 metric 名称，后面为不同数据集的值
-        metrics_list = ["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"]
         for metric_name in metrics_list:
             row_data = [metric_name]
             for metric in metrics:
@@ -212,4 +267,3 @@ class CLIPDualEncoderModel(LightningModule):
             table.add_data(*row_data)
 
         wandb.log({"metrics_table": table})
-
