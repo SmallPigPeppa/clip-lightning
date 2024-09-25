@@ -95,26 +95,17 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 images = inputs["image"].to(self.device)
+                batch_size = images.size(0)
 
                 if num_caption > 1:
-                    # Handling multiple captions per image
-                    texts = inputs["text"]  # Assume this is a list of lists where each list contains multiple captions
-                    all_texts = []
-                    replicated_images = []
+                    # 重复图像 num_caption 次
+                    images = images.repeat_interleave(num_caption, dim=0)
 
-                    for i in range(len(texts)):
-                        captions = texts[i]
-                        # Tokenize each caption in the group of captions for a single image
-                        tokenized_captions = [self.tokenize(caption).to(self.device) for caption in captions]
-                        # Stack them along a new dimension, resulting in a shape of (num_caption, tokenizer_dim)
-                        all_texts.append(torch.stack(tokenized_captions))
-
-                        # Replicate the corresponding image for each caption
-                        replicated_images.append(images[i].unsqueeze(0).repeat(num_caption, 1))
-
-                    # Concatenate along the batch dimension to form a 2D tensor: (batch_size * num_caption, tokenizer_dim)
-                    texts = torch.cat(all_texts)
-                    images = torch.cat(replicated_images)
+                    # 展平 captions 列表
+                    texts = inputs["text"]  # 假设 inputs["text"] 是长度为 batch_size 的列表，每个元素是 num_caption 个 captions 的列表
+                    texts = [caption for captions in texts for caption in captions]
+                    texts = [self.tokenize(t).to(self.device) for t in texts]
+                    texts = torch.stack(texts)
                 else:
                     texts = inputs["text"]
                     texts = [self.tokenize(t).to(self.device) for t in texts]
@@ -122,11 +113,9 @@ class CLIPDualEncoderModel(LightningModule):
 
                 image_features = self.model.encode_image(images)
                 text_features = self.model.encode_text(texts)
-
                 val_img_feats.append(image_features)
                 val_text_feats.append(text_features)
 
-        # Concatenate all the image and text features collected from the batches
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
 

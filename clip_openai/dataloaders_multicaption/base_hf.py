@@ -296,8 +296,8 @@ class ImageRetrievalDataset(Dataset):
         else:  # Direct image loading without download
             image = sample[self.keys['image']]
 
-        # if isinstance(text, list):
-        #     text = random.choice(text)
+        if isinstance(text, list) and len(text) == 1:
+            text = text[0]
         # text = self.tokenize(text)
 
         if self.transforms:
