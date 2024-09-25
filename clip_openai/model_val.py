@@ -21,6 +21,7 @@ class CLIPDualEncoderModel(LightningModule):
             batch_size_zs: int = 256,
             old_checkpoint_path: str = None,
             result_path: str = 'metrics_evaluation.xlsx',
+            evaluate_zero_shot: bool = True,
             *args,
             **kwargs,
     ) -> None:
@@ -28,6 +29,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.initialize_old_modules()
+        self.evaluate_zero_shot = evaluate_zero_shot
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
@@ -157,7 +159,8 @@ class CLIPDualEncoderModel(LightningModule):
                 "text2image_recall": recall_metric.get("val/text_to_image_R@1", 0)
             }
 
-            if idx == 0:  # Zero-shot evaluation only for the first dataset
+            # 仅当 evaluate_zero_shot 为 True 时才进行 zero-shot 评估
+            if idx == 0 and self.evaluate_zero_shot:
                 zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
                 zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
                 metrics_row["zero_shot_top1"] = zero_shot_metric.get("zero_shot/top1_accuracy", 0)
@@ -171,11 +174,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         # Log the table to W&B
         self.log_metrics_to_wandb(all_metrics)
-
-    # def save_metrics_to_excel(self, metrics):
-    #     df = pd.DataFrame(metrics)
-    #     df.to_excel(self.hparams.result_path, index=False)
-    #     print("Metrics saved to Excel.")
 
     def save_metrics_to_excel(self, metrics):
         # 创建 DataFrame
@@ -199,21 +197,6 @@ class CLIPDualEncoderModel(LightningModule):
         # 保存为 Excel 文件
         df_pivot.to_excel(self.hparams.result_path, index=True)
         print("Metrics saved to Excel.")
-
-    # def log_metrics_to_wandb(self, metrics):
-    #     table = wandb.Table(
-    #         columns=["Dataset", "Image2Text Recall", "Text2Image Recall", "Zero-shot Top1", "Zero-shot Top5"])
-    #
-    #     for metric in metrics:
-    #         table.add_data(
-    #             metric.get("dataset"),
-    #             metric.get("image2text_recall"),
-    #             metric.get("text2image_recall"),
-    #             metric.get("zero_shot_top1", 0),
-    #             metric.get("zero_shot_top5", 0)
-    #         )
-    #
-    #     wandb.log({"metrics_table": table})
 
     def log_metrics_to_wandb(self, metrics):
         # 创建表格，列为数据集名，行代表 metric
