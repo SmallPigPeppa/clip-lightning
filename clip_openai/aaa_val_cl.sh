@@ -18,6 +18,7 @@ DATASETS=("pet")
 CKPTS=(
   "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
   "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+  "ckpt/pet-1024/distill_lora_v2-lr-7.5e-6-lr_text-2.625e-4.ckpt"
 )
 
 
