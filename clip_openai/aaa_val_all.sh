@@ -50,7 +50,7 @@ python cli_val.py validate \
     --data.num_workers 8 \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
-    --model.evaluate_zero_shot True \
+    --model.evaluate_zero_shot False \
     --model.result_path metrics_evaluation.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
