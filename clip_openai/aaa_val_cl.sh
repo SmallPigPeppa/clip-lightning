@@ -76,7 +76,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
-    --model.zero_shot_eval_interval 1 \
+    --model.zero_shot_eval_interval 2 \
     --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
