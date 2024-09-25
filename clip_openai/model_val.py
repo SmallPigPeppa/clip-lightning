@@ -94,21 +94,21 @@ class CLIPDualEncoderModel(LightningModule):
 
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                # 如果有多个caption，将其转换为 5x128 的格式
                 if num_caption > 1:
-                    import pdb;
-                    pdb.set_trace()
-                    texts = inputs["text"].to(self.device)
-                    texts = [self.tokenize(t).to(self.device) for t in texts]
-                    texts = torch.stack(texts)
-                    # texts = inputs["text"][0]
-                    # texts = self.tokenize(texts).to(self.device)
+                    texts = inputs["text"]  # texts 形状为 (5, 128)
+                    # 对每个 caption 进行 tokenize，然后 stack
+                    tokenized_texts = [self.tokenize(t).to(self.device) for t_batch in texts for t in t_batch]
+                    texts = torch.stack(tokenized_texts).view(num_caption, -1)  # 形状 (5, 128)
+
+                    # 重组为 640 维向量，将每个 caption 的第一个元素排列到新的向量前 5 个元素，以此类推
+                    batch_size = images.size(0)
+                    texts = texts.permute(1, 0).contiguous().view(batch_size * num_caption, -1)  # 形状 (640, D)
                 else:
-                    # import pdb;
-                    # pdb.set_trace()
+                    # 单一 caption 的情况
                     texts = inputs["text"]
                     texts = [self.tokenize(t).to(self.device) for t in texts[0]]
                     texts = torch.stack(texts)
-                    # texts = self.tokenize(texts).to(self.device)
 
                 images = inputs["image"].to(self.device)
 
@@ -130,18 +130,25 @@ class CLIPDualEncoderModel(LightningModule):
 
     def recall_score(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
-        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        logits_per_text = logits_per_image.t().detach().cpu()
+        # logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+        # logits_per_text = logits_per_image.t().detach().cpu()
+        #
+        # logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+        # ground_truth = torch.arange(len(text_features)).view(-1, 1)
+        #
+        # for name, logit in logits.items():
+        #     ranking = torch.argsort(logit, descending=True)
+        #     preds = torch.where(ranking == ground_truth)[1]
+        #     preds = preds.detach().cpu().numpy()
+        #     for k in [1]:
+        #         metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
-
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
-            preds = preds.detach().cpu().numpy()
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+        i2t_r1 = i2t(images=image_features, captions=text_features, caps_per_image=1)
+        t2i_r1 = t2i(images=image_features, captions=text_features, caps_per_image=1)
+        metrics = {
+            "val/image_to_text_R@1": i2t_r1,
+            "val/text_to_image_R@1": t2i_r1
+        }
 
         return metrics
 
