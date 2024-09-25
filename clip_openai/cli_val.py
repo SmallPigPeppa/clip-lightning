@@ -18,11 +18,13 @@ class CLI(cli.LightningCLI):
 
         # Accept multiple datasets from the command line
         parser.add_argument(
-            "--data.datasets",
+            "val_datasets",
             type=str,
             nargs='+',  # allow multiple datasets to be passed as a list
             help="List of datasets to evaluate on"
         )
+
+        parser.link_arguments("data.dataset_names", "val_datasets")
 
 
 if __name__ == "__main__":

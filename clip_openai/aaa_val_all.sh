@@ -24,7 +24,7 @@ ROOT_DIR=/ppio_net0/torch_ds
 
 # 遍历所有数据集进行评估
 python cli_val.py validate \
-    --data.datasets "${DATASETS[@]}" \
+    --val_datasets "${DATASETS[@]}" \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
