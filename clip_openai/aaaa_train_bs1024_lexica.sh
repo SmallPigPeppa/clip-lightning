@@ -20,7 +20,8 @@ DATASETS=("lexica")
 CKPTS=(
     "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
-    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
+#    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
+    "ckpt/pet-1024/distill_lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
 )
 
 # 拼接检查点
@@ -28,7 +29,7 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["lexica"]=2e-4
+  ["lexica"]=1.99e-4
   ["pet"]=3e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
@@ -50,7 +51,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["lexica"]=2e-4
+  ["lexica"]=1.99e-4
   ["pet"]=6e-5
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
