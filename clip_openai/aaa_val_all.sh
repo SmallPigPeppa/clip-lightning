@@ -67,7 +67,6 @@ python cli_val.py validate \
     --model.result_path metrics_evaluation-vanilla.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
-    --model.old_checkpoint_path None \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
