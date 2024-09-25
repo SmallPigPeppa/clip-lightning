@@ -12,6 +12,7 @@ DATASETS=("flickr30k")
 DATASETS=("coco2014")
 #DATASETS=("wikiart")
 #DATASETS=("kream")
+DATASETS=("pet")
 
 # 定义检查点列表
 CKPTS=(
