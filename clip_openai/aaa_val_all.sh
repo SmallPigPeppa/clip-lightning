@@ -33,7 +33,7 @@ CKPTS=(
 #    "ckpt/lexica-1024/distill_lora-lr-3e-5-lr_text-3e-5.ckpt"
 #    "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-1e-4.ckpt"
 #  "ckpt/pet-1024/distill_lora_v2-lr-1e-5-lr_text-4e-4.ckpt"
-    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-2e-5.ckpt"
+    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
 #  "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
