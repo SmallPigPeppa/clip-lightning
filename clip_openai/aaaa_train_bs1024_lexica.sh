@@ -41,7 +41,7 @@ declare -A DATASET_LR_MAP=(
 
 declare -A DATASET_LR_TEXT_MAP=(
   ["pet"]=3e-5
-  ["lexica"]=1e-4
+  ["lexica"]=5e-4
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
   ["wikiart"]=2e-4
@@ -141,5 +141,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-#/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
+/ppio_net0/code/openapi.sh stop 46e358198c65fd38
 
