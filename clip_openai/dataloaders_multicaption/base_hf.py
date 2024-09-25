@@ -305,10 +305,11 @@ class ImageRetrievalDataset(Dataset):
             warnings.warn(f"self.dataset_name is {self.dataset_name}: The text list contains {len(text)} elements.")
             # 选择最长的元素
             longest_text = max(text, key=len)
-            print(f"Longest text: {longest_text}")
+            # print(f"Longest text: {longest_text}")
             # 输出所有元素
-            for idx, t in enumerate(text):
-                print(f"Element {idx}: {t}")
+            # for idx, t in enumerate(text):
+            #     print(f"Element {idx}: {t}")
+            text = longest_text
 
         # text = self.tokenize(text)
 
