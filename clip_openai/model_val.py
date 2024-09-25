@@ -88,7 +88,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return 0
 
-    def get_recall_metrics(self, dataloader, num_caption=5):
+    def get_recall_metrics(self, dataloader, num_caption=1):
         val_img_feats = []
         val_text_feats = []
 
