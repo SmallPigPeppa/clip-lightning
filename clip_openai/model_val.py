@@ -23,6 +23,7 @@ class CLIPDualEncoderModel(LightningModule):
             old_checkpoint_path: str = None,
             result_path: str = 'metrics_evaluation.xlsx',
             evaluate_zero_shot: bool = True,
+            max_length: int = 77,
             *args,
             **kwargs,
     ) -> None:
@@ -32,6 +33,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.initialize_old_modules()
         self.evaluate_zero_shot = evaluate_zero_shot
         self.tokenizer = SimpleTokenizer()
+        self.max_length = max_length
 
     def tokenize(self, text):
         sot_token = self.tokenizer.encoder["<|startoftext|>"]
