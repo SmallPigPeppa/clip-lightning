@@ -11,6 +11,7 @@ from typing import Union, List
 import pandas as pd
 import wandb
 from packaging import version
+from metric import i2t, t2i
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -94,7 +95,8 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 if num_caption > 1:
-                    import pdb;pdb.set_trace()
+                    import pdb;
+                    pdb.set_trace()
                     texts = inputs["text"].to(self.device)
                     texts = [self.tokenize(t).to(self.device) for t in texts]
                     texts = torch.stack(texts)

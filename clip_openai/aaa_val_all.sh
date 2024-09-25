@@ -9,7 +9,7 @@ MODEL_NAME=ViT-B/16
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
 "coco2014"
-"flickr30k"
+#"flickr30k"
 
 )
 DATASETS=$(IFS=','; echo "${datasets[*]}")
