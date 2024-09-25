@@ -28,7 +28,7 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["lexica"]=6e-5
+  ["lexica"]=5e-4
   ["pet"]=3e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
