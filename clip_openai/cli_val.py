@@ -1,5 +1,5 @@
 from lightning.pytorch import cli
-from dataloaders.data_module_dil_json_zeroshot_hf_all_val import ImageRetrievalDataModule
+from dataloaders_multicaption.data_module_val import ImageRetrievalDataModule
 from model_val import CLIPDualEncoderModel
 
 import os

@@ -10,6 +10,7 @@ from tqdm import tqdm
 from typing import Union, List
 import pandas as pd
 import wandb
+from packaging import version
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -30,6 +31,22 @@ class CLIPDualEncoderModel(LightningModule):
         self.model = my_load(name=model_name, download_root=download_root)
         self.initialize_old_modules()
         self.evaluate_zero_shot = evaluate_zero_shot
+        self.tokenizer = SimpleTokenizer()
+
+    def tokenize(self, text):
+        sot_token = self.tokenizer.encoder["<|startoftext|>"]
+        eot_token = self.tokenizer.encoder["<|endoftext|>"]
+        tokens = [sot_token] + self.tokenizer.encode(text) + [eot_token]
+        if version.parse(torch.__version__) < version.parse("1.8.0"):
+            result = torch.zeros(self.max_length, dtype=torch.long)
+        else:
+            result = torch.zeros(self.max_length, dtype=torch.int)
+
+        if len(tokens) <= self.max_length:
+            result[:len(tokens)] = torch.tensor(tokens)
+        else:
+            result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
+        return result
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
@@ -68,16 +85,26 @@ class CLIPDualEncoderModel(LightningModule):
 
         return 0
 
-    def get_recall_metrics(self, dataloader):
+    def get_recall_metrics(self, dataloader, num_caption=1):
         val_img_feats = []
         val_text_feats = []
 
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                if num_caption > 1:
+                    # texts = inputs["text"].to(self.device)
+                    # texts = [self.tokenize(t).to(self.device) for t in texts]
+                    # texts = torch.stack(texts)
+                    texts = inputs["text"].to(self.device)
+                    texts = self.tokenize(texts[0]).to(self.device)
+                else:
+                    texts = inputs["text"].to(self.device)
+                    texts = self.tokenize(texts)
+
                 images = inputs["image"].to(self.device)
-                targets = inputs["caption"].to(self.device)
+
                 image_features = self.model.encode_image(images)
-                text_features = self.model.encode_text(targets)
+                text_features = self.model.encode_text(texts)
                 val_img_feats.append(image_features)
                 val_text_feats.append(text_features)
 
@@ -110,7 +137,6 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
     def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
         self.zero_shot_classifier = ZeroShotClassifier(
             model=self.model,
             tokenizer=self.tokenizer,
@@ -176,47 +202,6 @@ class CLIPDualEncoderModel(LightningModule):
         # Log the table to W&B
         self.log_metrics_to_wandb(all_metrics)
 
-    # def save_metrics_to_excel(self, metrics):
-    #     # 创建 DataFrame
-    #     df = pd.DataFrame(metrics)
-    #
-    #     # 确保按照自定义的 dataset_name 列表顺序
-    #     dataset_order = self.trainer.datamodule.dataset_name  # 假设 dataset_name 是你定义的顺序列表
-    #     df['dataset'] = pd.Categorical(df['dataset'], categories=dataset_order, ordered=True)
-    #
-    #     # 转换为长格式（适用于 pivot 操作），将每个指标作为一列
-    #     df_melt = pd.melt(
-    #         df,
-    #         id_vars=["dataset"],
-    #         value_vars=["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"],
-    #         var_name="metric",
-    #         value_name="value"
-    #     )
-    #
-    #     # 进行 pivot 操作，数据集为列，metric 为行
-    #     df_pivot = df_melt.pivot(index="metric", columns="dataset", values="value")
-    #
-    #     # 按照自定义顺序排列列
-    #     df_pivot = df_pivot[dataset_order]
-    #
-    #     # 保存为 Excel 文件
-    #     df_pivot.to_excel(self.hparams.result_path, index=True)
-    #     print("Metrics saved to Excel.")
-    #
-    # def log_metrics_to_wandb(self, metrics):
-    #     # 创建表格，列为数据集名，行代表 metric
-    #     columns = ["Metric"] + [metric.get("dataset") for metric in metrics]
-    #     table = wandb.Table(columns=columns)
-    #
-    #     # 将每个 metric 作为行添加，行首为 metric 名称，后面为不同数据集的值
-    #     metrics_list = ["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"]
-    #     for metric_name in metrics_list:
-    #         row_data = [metric_name]
-    #         for metric in metrics:
-    #             row_data.append(metric.get(metric_name, 0))
-    #         table.add_data(*row_data)
-    #
-    #     wandb.log({"metrics_table": table})
     def save_metrics_to_excel(self, metrics):
         # 创建 DataFrame
         df = pd.DataFrame(metrics)

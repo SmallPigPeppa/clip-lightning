@@ -4,6 +4,7 @@ from typing import Sequence, Callable, Union, Optional
 from packaging import version
 from tqdm import tqdm
 import copy
+
 class ZeroShotClassifier(LightningModule):
     def __init__(
             self,
