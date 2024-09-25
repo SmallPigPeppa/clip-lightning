@@ -181,6 +181,9 @@ class CLIPDualEncoderModel(LightningModule):
         # 创建 DataFrame
         df = pd.DataFrame(metrics)
 
+        # 按照 "dataset" 列的顺序排序
+        df = df.sort_values(by="dataset", ascending=True)
+
         # 转换为长格式（适用于 pivot 操作），将每个指标作为一列
         df_melt = pd.melt(df, id_vars=["dataset"],
                           value_vars=["image2text_recall", "text2image_recall", "zero_shot_top1", "zero_shot_top5"],
@@ -188,6 +191,9 @@ class CLIPDualEncoderModel(LightningModule):
 
         # 进行 pivot 操作，数据集为列，metric 为行
         df_pivot = df_melt.pivot(index="metric", columns="dataset", values="value")
+
+        # 保持数据集列的顺序，防止顺序混乱
+        df_pivot = df_pivot.sort_index(axis=1)
 
         # 保存为 Excel 文件
         df_pivot.to_excel(self.hparams.result_path, index=True)
