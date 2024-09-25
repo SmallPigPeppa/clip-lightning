@@ -3,7 +3,7 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/ppio_net0/huggingface
 ROOT_DIR=/ppio_net0/torch_ds
-PROJECT=CLIP-1step-1024
+PROJECT=CLIP-1step-1024-til
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -16,7 +16,7 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=1e-5
-  ["coco2014"]=5e-7
+  ["coco2014"]=1e-8
   ["wikiart"]=1e-5
   ["patfig"]=1e-5
   ["pet"]=1e-5
@@ -37,7 +37,7 @@ declare -A DATASET_LR_MAP=(
 
 declare -A DATASET_LR_TEXT_MAP=(
   ["flickr30k"]=2e-4
-  ["coco2014"]=4e-5
+  ["coco2014"]=5e-4
   ["wikiart"]=2e-4
   ["patfig"]=2e-4
   ["pet"]=2e-4
@@ -56,7 +56,7 @@ declare -A DATASET_LR_TEXT_MAP=(
   ["clothes"]=2e-4
 )
 
-
+#coco2014-distill_lora_v2-lr-5.12e-7-lr_text-4.096e-5
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
@@ -67,7 +67,6 @@ declare -A METHOD_MAP=(
   ["distill_v4"]="cli_distill_zeroshot_v4.py"
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
   ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
-  ["distill_lora_v3"]="cli_distill_zeroshot_lora_best_v3.py"
 )
 
 # 其他参数
@@ -100,10 +99,12 @@ run_training() {
     --model.temperature 0.1 \
     --model.lr ${lr} \
     --model.lr_text ${lr_text} \
+    --model.lr_project 1e-7 \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
+    --model.old_checkpoint_path ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -114,7 +115,7 @@ run_training() {
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt \
+    --model_checkpoint.dirpath ckpt-dil \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
 }
@@ -131,14 +132,13 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 ##  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-##  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
   run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v3" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop a2b028e85b48907c
+/ppio_net0/code/openapi.sh 46e358198c65fd38
 

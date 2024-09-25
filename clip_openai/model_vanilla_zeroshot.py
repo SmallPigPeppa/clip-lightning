@@ -13,6 +13,9 @@ from timm.utils import accuracy
 from tqdm import tqdm
 import copy
 import random
+from typing import Union, List
+
+
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -27,7 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
             lr_text: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
-            old_checkpoint_path: str = None,
+            old_checkpoint_path: Union[str, List[str]] = None,
             current_task: int = 0,
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
@@ -49,10 +52,41 @@ class CLIPDualEncoderModel(LightningModule):
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
+        # if self.hparams.old_checkpoint_path is not None:
+        #     checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+        #     self.model.load_state_dict(checkpoint['model'], strict=True)
+        #     print("Model weights loaded successfully and old parts copied.")
+
         if self.hparams.old_checkpoint_path is not None:
-            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
-            self.model.load_state_dict(checkpoint['model'], strict=True)
-            print("Model weights loaded successfully and old parts copied.")
+            if ',' in self.hparams.old_checkpoint_path:
+                self.hparams.old_checkpoint_path = self.hparams.old_checkpoint_path.split(',')
+                # 初始化一个字典来存储所有检查点的参数和计数
+                avg_params = None
+                count = 0
+
+                for chkpt_path in self.hparams.old_checkpoint_path:
+                    checkpoint = torch.load(chkpt_path, map_location=torch.device('cpu'))
+                    model_params = checkpoint['model']
+
+                    if avg_params is None:
+                        avg_params = {k: v.clone().detach() for k, v in model_params.items()}
+                    else:
+                        for k in avg_params.keys():
+                            avg_params[k] += model_params[k]
+
+                    count += 1
+
+                # 计算均值
+                for k in avg_params.keys():
+                    avg_params[k] /= count
+
+                # 加载均值参数
+                self.model.load_state_dict(avg_params, strict=True)
+                print("Model weights loaded successfully and old parts averaged.")
+            else:
+                checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+                self.model.load_state_dict(checkpoint['model'], strict=True)
+                print("Model weights loaded successfully and old parts copied.")
 
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules

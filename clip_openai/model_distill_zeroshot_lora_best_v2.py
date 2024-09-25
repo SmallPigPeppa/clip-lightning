@@ -26,6 +26,7 @@ def find_target_modules(model):
             target_modules.append(name)
     return target_modules
 
+
 def get_lora_model_vision(model):
     # Define the target modules where LoRA should be applied
     target_modules = find_target_modules(model)
@@ -136,7 +137,6 @@ class CLIPDualEncoderModel(LightningModule):
         for name, param in self.model.named_parameters():
             print(name)
 
-
         for param in self.model.visual.conv1.parameters():
             param.requires_grad = False
 
@@ -144,9 +144,6 @@ class CLIPDualEncoderModel(LightningModule):
         # self.model.visual.positional_embedding.requires_grad = False
         # self.model.token_embedding.requires_grad = False
         # self.model.positional_embedding.requires_grad = False
-
-
-
 
     def initialize_old_modules(self):
         # load task N-1 checkpoint
@@ -168,7 +165,6 @@ class CLIPDualEncoderModel(LightningModule):
         if not self.distill:
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
-
 
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
@@ -194,17 +190,15 @@ class CLIPDualEncoderModel(LightningModule):
             },
             {
                 "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
-                # 其他部分设置 4 倍学习率
                 "lr": self.hparams.lr_text,
                 "weight_decay": self.hparams.weight_decay
             }
         ]
 
-
         if self.distill:
             parameters.append({
                 "params": self.distill_predictor.parameters(),
-                "lr": self.hparams.lr,  # 可以根据需要调整学习率
+                "lr": self.hparams.lr,
                 "weight_decay": self.hparams.weight_decay
             })
             # parameters.append({
@@ -356,9 +350,6 @@ class CLIPDualEncoderModel(LightningModule):
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
 
-
-
-
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
         val_text_feats = []
@@ -374,7 +365,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
-
 
         metrics = self.recall_score(
             image_features=all_image_features,
@@ -400,7 +390,6 @@ class CLIPDualEncoderModel(LightningModule):
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
 
         return metrics
-
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
@@ -479,7 +468,6 @@ class CLIPDualEncoderModel(LightningModule):
 
                 print('************************')
 
-
     # def on_before_optimizer_step(self, optimizer) -> None:
     #     print("**************on_before_opt enter1*********")
     #     for name, param in self.model.named_parameters():
@@ -488,4 +476,3 @@ class CLIPDualEncoderModel(LightningModule):
     #         # if param.requires_grad :
     #         #     print(name)
     #     print("***************on_before_opt exit1*********")
-

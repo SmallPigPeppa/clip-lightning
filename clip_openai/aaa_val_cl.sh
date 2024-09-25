@@ -9,11 +9,26 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k")
 #DATASETS=("wikiart")
-#DATASETS=("coco2014")
+DATASETS=("coco2014")
 #DATASETS=("wikiart")
 #DATASETS=("kream")
 
+# 定义检查点列表
+CKPTS=(
+  "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+  "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+)
 
+
+#CKPTS=(
+#  "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+#  "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+#)
+
+CKPTS_COMMA_JOINED=$(
+  IFS=','
+  echo "${CKPTS[*]}"
+) # 用逗号拼接
 
 # 其他参数
 CONFIG_FILE=config.yaml
@@ -40,7 +55,6 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-
   python cli_vanilla_zeroshot_hf.py validate \
     --data.num_tasks 1 \
     --data.current_task 0 \
@@ -59,8 +73,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
-    --model.zero_shot_eval_interval 40 \
-    --model.old_checkpoint_path ckpt-til/pet-512-new/distill-lr-5e-6.ckpt  \
+    --model.zero_shot_eval_interval 2 \
+    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \

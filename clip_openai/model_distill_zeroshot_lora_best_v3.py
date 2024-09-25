@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,14 +7,16 @@ import torch.optim as optim
 from lightning import LightningModule
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
+import copy
+
 from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
+
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
-import copy
 
 
 def find_target_modules(model):
@@ -31,6 +34,7 @@ def get_lora_model_vision(model):
         inference_mode=False,
         r=16,  # Rank of the low-rank decomposition
         lora_alpha=32,  # Scaling factor
+        task_type='vision',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
     )
@@ -60,6 +64,22 @@ def get_lora_model_text(model):
     return lora_model
 
 
+class DistillPredictor(nn.Module):
+    def __init__(self, projection_dims, distill_proj_hidden_dim):
+        super(DistillPredictor, self).__init__()
+        self.pd_linear1 = nn.Linear(projection_dims, distill_proj_hidden_dim)
+        self.pd_batch_norm = nn.BatchNorm1d(distill_proj_hidden_dim)
+        self.pd_relu = nn.ReLU()
+        self.pd_linear2 = nn.Linear(distill_proj_hidden_dim, projection_dims)
+
+    def forward(self, x):
+        x = self.pd_linear1(x)
+        x = self.pd_batch_norm(x)
+        x = self.pd_relu(x)
+        x = self.pd_linear2(x)
+        return x
+
+
 class NewModel(nn.Module):
     def __init__(self, original_conv1):
         super(NewModel, self).__init__()
@@ -81,7 +101,6 @@ class CLIPDualEncoderModel(LightningModule):
             weight_decay: float = 0.0,
             lr: float = 1e-3,
             lr_text: float = 5e-4,
-            lr_project: float = 1e-5,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
@@ -95,14 +114,15 @@ class CLIPDualEncoderModel(LightningModule):
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
+        self.log_softmax = nn.LogSoftmax(dim=-1)
+        self.val_img_feats = []
+        self.val_text_feats = []
+        self.distill = True
         self.initialize_old_modules()
 
-        self.log_softmax = nn.LogSoftmax(dim=-1)
-
-        # Apply LoRA to the model
         self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
-        # lora: model.visual conv1
+        # # lora: model.visual conv1
         # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
         # lora_config = LoraConfig(
         #     inference_mode=False,
@@ -113,24 +133,78 @@ class CLIPDualEncoderModel(LightningModule):
         # )
         # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
 
+        print('********************************************')
+        for name, param in self.model.named_parameters():
+            print(name)
+
         for param in self.model.visual.conv1.parameters():
             param.requires_grad = False
 
+        # self.model.visual.class_embedding.requires_grad = False
+        # self.model.visual.positional_embedding.requires_grad = False
+        # self.model.token_embedding.requires_grad = False
+        # self.model.positional_embedding.requires_grad = False
+
     def initialize_old_modules(self):
         # load task N-1 checkpoint
+        # if self.hparams.old_checkpoint_path is not None:
+        #     checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+        #     self.model.load_state_dict(checkpoint['model'], strict=True)
+        #     print("Model weights loaded successfully and old parts copied.")
+
         if self.hparams.old_checkpoint_path is not None:
-            checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
-            self.model.load_state_dict(checkpoint['model'], strict=True)
-            print("Model weights loaded successfully and old parts copied.")
+            if isinstance(self.hparams.old_checkpoint_path, list):
+                # 初始化一个字典来存储所有检查点的参数和计数
+                avg_params = None
+                count = 0
+
+                for chkpt_path in self.hparams.old_checkpoint_path:
+                    checkpoint = torch.load(chkpt_path, map_location=torch.device('cpu'))
+                    model_params = checkpoint['model']
+
+                    if avg_params is None:
+                        avg_params = {k: v.clone().detach() for k, v in model_params.items()}
+                    else:
+                        for k in avg_params.keys():
+                            avg_params[k] += model_params[k]
+
+                    count += 1
+
+                # 计算均值
+                for k in avg_params.keys():
+                    avg_params[k] /= count
+
+                # 加载均值参数
+                self.model.load_state_dict(avg_params, strict=True)
+                print("Model weights loaded successfully and old parts averaged.")
+            else:
+                checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
+                self.model.load_state_dict(checkpoint['model'], strict=True)
+                print("Model weights loaded successfully and old parts copied.")
 
         self.model_old = copy.deepcopy(self.model)
         # Set requires_grad to False for all parameters in the old modules
         for param in self.model_old.parameters():
             param.requires_grad = False
 
+        distill_proj_hidden_dim = 2048
+        self.distill_predictor = DistillPredictor(
+            projection_dims=self.hparams.projection_dims,
+            distill_proj_hidden_dim=distill_proj_hidden_dim
+        )
+        if not self.distill:
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
+
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
+        return image_features, text_features
+
+    def forward_old(self, inputs):
+        with torch.no_grad():
+            image_features = self.model_old.encode_image(inputs["image"])
+            text_features = self.model_old.encode_text(inputs["caption"])
         return image_features, text_features
 
     def configure_optimizers(self):
@@ -151,6 +225,22 @@ class CLIPDualEncoderModel(LightningModule):
                 "weight_decay": self.hparams.weight_decay
             }
         ]
+
+        if self.distill:
+            parameters.append({
+                "params": self.distill_predictor.parameters(),
+                "lr": self.hparams.lr,
+                "weight_decay": self.hparams.weight_decay
+            })
+            # parameters.append({
+            #     "params": self.distill_predictor2.parameters(),
+            #     "lr": self.hparams.lr * 2.,  # 可以根据需要调整学习率
+            #     "weight_decay": self.hparams.weight_decay
+            # })
+        else:
+            # 如果不进行蒸馏，冻结参数
+            for param in self.distill_predictor.parameters():
+                param.requires_grad = False
 
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
@@ -188,22 +278,86 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
+    def simclr_distill_loss_func(
+            self,
+            p1: torch.Tensor,
+            p2: torch.Tensor,
+            z1: torch.Tensor,
+            z2: torch.Tensor,
+            # temperature: float = 0.1,
+    ) -> torch.Tensor:
+
+        device = self.device
+        logit_scale = self.model.logit_scale.exp()
+
+        b = z1.size(0)
+
+        p = F.normalize(torch.cat([p1, p2]), dim=-1)
+        z = F.normalize(torch.cat([z1, z2]), dim=-1)
+
+        logits = torch.einsum("if, jf -> ij", p, z) * logit_scale
+        logits_max, _ = torch.max(logits, dim=1, keepdim=True)
+        logits = logits - logits_max.detach()
+
+        # positive mask are matches i, j (i from aug1, j from aug2), where i == j and matches j, i
+        pos_mask = torch.zeros((2 * b, 2 * b), dtype=torch.bool, device=device)
+        pos_mask.fill_diagonal_(True)
+
+        # all matches excluding the main diagonal
+        logit_mask = torch.ones_like(pos_mask, device=device)
+        logit_mask.fill_diagonal_(True)
+        logit_mask[:, b:].fill_diagonal_(True)
+        logit_mask[b:, :].fill_diagonal_(True)
+
+        exp_logits = torch.exp(logits) * logit_mask
+        log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
+
+        # compute mean of log-likelihood over positives
+        mean_log_prob_pos = (pos_mask * log_prob).sum(1) / pos_mask.sum(1)
+        # loss
+        loss = -mean_log_prob_pos.mean()
+        return loss
+
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("train/clip_loss", clip_loss, sync_dist=True)
 
-        return clip_loss
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            distill_loss = (
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                           ) / 2
+
+            self.log("train/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss
+        else:
+            return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
-
         # self.val_img_feats.append(image_embeddings)
         # self.val_text_feats.append(text_embeddings)
 
-        return clip_loss
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            distill_loss = (
+                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                           ) / 2
+            self.log("val/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss
+        else:
+            return clip_loss
 
     def on_train_start(self):
         # recall metric
@@ -221,15 +375,11 @@ class CLIPDualEncoderModel(LightningModule):
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
-
         # zero-shot metric
         if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
-
-
-
 
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
@@ -246,7 +396,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
-
 
         metrics = self.recall_score(
             image_features=all_image_features,
@@ -273,7 +422,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
         self.zero_shot_classifier = ZeroShotClassifier(
@@ -309,81 +457,58 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
-        self.zero_shot_classifier = ZeroShotClassifier(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            classnames=IMAGENET_CLASSNAMES,
-            templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size_zs,
-        ).to(self.device)
-
-        self.zero_shot_classifier.compute_weights()
-
-        top1, top5, n = 0., 0., 0.
-
-        with torch.no_grad():
-            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
-                images = images.to(self.device)
-                targets = targets.to(self.device)
-                logits = self.zero_shot_classifier(images)
-                # Measure accuracy
-                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
-                top1 += acc1.item() * images.size(0)
-                top5 += acc5.item() * images.size(0)
-                n += images.size(0)
-
-        top1 = top1 / n
-        top5 = top5 / n
-        metrics = {
-            "zero_shot/top1_accuracy": top1,
-            "zero_shot/top5_accuracy": top5
-        }
-        # Release the zero-shot classifier model to free up GPU memory
-        del self.zero_shot_classifier
-        return metrics
-
-
-
+    # def on_save_checkpoint(self, checkpoint):
+    #     # 处理视觉模块中的 conv1 和 transformer
+    #     if self.trainer.current_epoch != self.trainer.max_epochs - 1:
+    #         pass
+    #     elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
+    #         # conv1 = copy.deepcopy(self.model.visual.conv1)
+    #         # self.model.visual.conv1 = conv1.merge_and_unload().conv1
+    #
+    #         self.model.visual.transformer.merge_and_unload()
+    #         self.model.transformer.merge_and_unload()
+    #
+    #         # 仅在主进程中输出
+    #         if self.trainer.is_global_zero:
+    #             print('************************')
+    #
+    #             # 创建一个新的 state_dict 用于保存权重
+    #             new_state_dict = {}
+    #
+    #             # 遍历当前模型的参数，处理名称
+    #             for name, param in self.model.named_parameters():
+    #                 # 如果参数名称中包含 'base_model.model'，则去掉
+    #                 new_name = name.replace("base_model.model.", "")
+    #                 new_state_dict[new_name] = param.data
+    #
+    #             # 保存处理后的权重到检查点
+    #             checkpoint['model'] = new_state_dict
+    #
+    #             print('Saved model parameters with modified names:')
+    #             for new_name in new_state_dict.keys():
+    #                 print(new_name)
+    #
+    #             print('************************')
+    #
+    #             # 比较新模型参数名与旧模型参数名
+    #             print('Parameter Comparison with Old Model:')
+    #             for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
+    #                                                                 self.model_old.named_parameters()):
+    #                 if new_name != old_name:
+    #                     print(f"New: {new_name} | Old: {old_name}")
+    #
+    #             print('************************')
 
     def on_save_checkpoint(self, checkpoint):
-        # 处理视觉模块中的 conv1 和 transformer
         if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            # conv1 = copy.deepcopy(self.model.visual.conv1)
-            # self.model.visual.conv1 = conv1.merge_and_unload().conv1
-            self.model.visual.transformer.merge_and_unload()
-            self.model.transformer.merge_and_unload()
-
-            # 仅在主进程中输出
             if self.trainer.is_global_zero:
                 print('************************')
+                state_dict = {}
 
-                # 创建一个新的 state_dict 用于保存权重
-                new_state_dict = {}
-
-                # 遍历当前模型的参数，处理名称
                 for name, param in self.model.named_parameters():
-                    # 如果参数名称中包含 'base_model.model'，则去掉
-                    new_name = name.replace("base_model.model.", "")
-                    new_state_dict[new_name] = param.data
+                    state_dict[new_name] = param.data
 
                 # 保存处理后的权重到检查点
-                checkpoint['model'] = new_state_dict
-
-                print('Saved model parameters with modified names:')
-                for new_name in new_state_dict.keys():
-                    print(new_name)
-
-                print('************************')
-
-                # 比较新模型参数名与旧模型参数名
-                print('Parameter Comparison with Old Model:')
-                for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
-                                                                    self.model_old.named_parameters()):
-                    if new_name != old_name:
-                        print(f"New: {new_name} | Old: {old_name}")
-
-                print('************************')
+                checkpoint['model'] = state_dict
