@@ -32,10 +32,10 @@ def i2t(images, captions, caps_per_image=5):
         top1[index] = inds[0]
 
     r1 = 100.0 * len(numpy.where(ranks < 1)[0]) / len(ranks)
-    r5 = 100.0 * len(numpy.where(ranks < 5)[0]) / len(ranks)
-    r10 = 100.0 * len(numpy.where(ranks < 10)[0]) / len(ranks)
-    medr = numpy.floor(numpy.median(ranks)) + 1
-    meanr = ranks.mean() + 1
+    # r5 = 100.0 * len(numpy.where(ranks < 5)[0]) / len(ranks)
+    # r10 = 100.0 * len(numpy.where(ranks < 10)[0]) / len(ranks)
+    # medr = numpy.floor(numpy.median(ranks)) + 1
+    # meanr = ranks.mean() + 1
     return r1
 
 
@@ -71,8 +71,8 @@ def t2i(images, captions, caps_per_image=5):
             top1[caps_per_image * index + i] = inds[i][0]
 
     r1 = 100.0 * len(numpy.where(ranks < 1)[0]) / len(ranks)
-    r5 = 100.0 * len(numpy.where(ranks < 5)[0]) / len(ranks)
-    r10 = 100.0 * len(numpy.where(ranks < 10)[0]) / len(ranks)
-    medr = numpy.floor(numpy.median(ranks)) + 1
-    meanr = ranks.mean() + 1
+    # r5 = 100.0 * len(numpy.where(ranks < 5)[0]) / len(ranks)
+    # r10 = 100.0 * len(numpy.where(ranks < 10)[0]) / len(ranks)
+    # medr = numpy.floor(numpy.median(ranks)) + 1
+    # meanr = ranks.mean() + 1
     return r1

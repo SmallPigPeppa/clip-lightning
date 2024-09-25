@@ -92,11 +92,12 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 if num_caption > 1:
-                    # texts = inputs["text"].to(self.device)
-                    # texts = [self.tokenize(t).to(self.device) for t in texts]
-                    # texts = torch.stack(texts)
-                    texts = inputs["text"][0]
-                    texts = self.tokenize(texts).to(self.device)
+                    import pdb;pdb.set_trace()
+                    texts = inputs["text"].to(self.device)
+                    texts = [self.tokenize(t).to(self.device) for t in texts]
+                    texts = torch.stack(texts)
+                    # texts = inputs["text"][0]
+                    # texts = self.tokenize(texts).to(self.device)
                 else:
                     texts = inputs["text"]
                     texts = self.tokenize(texts).to(self.device)
