@@ -12,7 +12,6 @@ class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("data.batch_size", "model.batch_size")
         parser.link_arguments("data.batch_size_zs", "model.batch_size_zs")
-        parser.link_arguments("data.current_task", "model.current_task")
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
         parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
