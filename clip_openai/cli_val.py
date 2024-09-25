@@ -1,6 +1,4 @@
 from lightning.pytorch import cli
-from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
-from lightning.pytorch.callbacks.lr_monitor import LearningRateMonitor
 from dataloaders.data_module_dil_json_zeroshot_hf_all_val import ImageRetrievalDataModule
 from model_val import CLIPDualEncoderModel
 
@@ -12,8 +10,6 @@ class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("data.batch_size", "model.batch_size")
         parser.link_arguments("data.batch_size_zs", "model.batch_size_zs")
-        parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
-        parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
 
 

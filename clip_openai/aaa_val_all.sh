@@ -31,14 +31,7 @@ python cli_val.py validate \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
     --model.model_name ${MODEL_NAME} \
-    --model.projection_dims 512 \
-    --model.temperature 0.1 \
-    --model.lr 0. \
-    --model.lr_warmup_epochs 5 \
-    --model.weight_decay 0.1 \
     --model.download_root ./ \
-    --model.recall_eval_interval 1 \
-    --model.zero_shot_eval_interval 2 \
     --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
@@ -46,12 +39,8 @@ python cli_val.py validate \
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project CLIP-debug \
-    --trainer.logger.name ${MODEL_NAME}-multiple-datasets-evaluation \
+    --trainer.logger.name ${MODEL_NAME}-eval-all \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
-    --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt \
-    --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${MODEL_NAME}-lora-best
 
 echo "Completed evaluation for all datasets"

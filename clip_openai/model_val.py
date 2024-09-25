@@ -17,18 +17,9 @@ class CLIPDualEncoderModel(LightningModule):
             self,
             model_name: str = 'RN50',
             download_root: str = None,
-            projection_dims: int = 1024,
-            temperature: float = 1.0,
-            weight_decay: float = 0.0,
-            lr: float = 1e-3,
-            lr_text: float = 5e-4,
-            lr_warmup_epochs: int = 5,
             batch_size: int = 64,
-            old_checkpoint_path: Union[str, List[str]] = None,
-            current_task: int = 0,
             batch_size_zs: int = 256,
-            zero_shot_eval_interval: int = 5,
-            recall_eval_interval: int = 5,
+            old_checkpoint_path: str = None,
             *args,
             **kwargs,
     ) -> None:
@@ -197,8 +188,8 @@ class CLIPDualEncoderModel(LightningModule):
                 metric.get("dataset"),
                 metric.get("image2text_recall"),
                 metric.get("text2image_recall"),
-                metric.get("zero_shot_top1", "N/A"),
-                metric.get("zero_shot_top5", "N/A")
+                metric.get("zero_shot_top1", 0),
+                metric.get("zero_shot_top5", 0)
             )
 
         wandb.log({"metrics_table": table})
