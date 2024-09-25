@@ -99,10 +99,12 @@ class CLIPDualEncoderModel(LightningModule):
                     # texts = inputs["text"][0]
                     # texts = self.tokenize(texts).to(self.device)
                 else:
-                    import pdb;
-                    pdb.set_trace()
+                    # import pdb;
+                    # pdb.set_trace()
                     texts = inputs["text"]
-                    texts = self.tokenize(texts).to(self.device)
+                    texts = [self.tokenize(t).to(self.device) for t in texts[0]]
+                    texts = torch.stack(texts)
+                    # texts = self.tokenize(texts).to(self.device)
 
                 images = inputs["image"].to(self.device)
 
