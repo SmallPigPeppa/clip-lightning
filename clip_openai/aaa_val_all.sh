@@ -25,16 +25,8 @@ DATASETS=$(IFS=','; echo "${datasets[*]}")
 # 定义检查点列表
 CKPTS=(
     "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
-#    "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
-#    "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
-#    "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
-#    "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
-#    "ckpt/lexica-1024/distill_lora-lr-3e-5-lr_text-3e-5.ckpt"
-#    "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-1e-4.ckpt"
-#  "ckpt/pet-1024/distill_lora_v2-lr-1e-5-lr_text-4e-4.ckpt"
     "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
-#  "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
 # 拼接检查点
@@ -53,7 +45,7 @@ python cli_val.py validate \
     --data.num_workers 8 \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
-    --model.evaluate_zero_shot False \
+    --model.evaluate_zero_shot True \
     --model.result_path metrics_evaluation.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
@@ -67,28 +59,6 @@ python cli_val.py validate \
     --trainer.logger.name ${MODEL_NAME}-eval-all \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
-
-#python cli_val.py validate \
-#    --data.dataset_name ${DATASETS} \
-#    --data.max_length 77 \
-#    --data.batch_size 128 \
-#    --data.batch_size_zs 32 \
-#    --data.num_workers 8 \
-#    --data.config ${CONFIG_FILE} \
-#    --data.root_dir ${ROOT_DIR} \
-#    --model.evaluate_zero_shot False \
-#    --model.result_path metrics_evaluation-vanilla.xlsx \
-#    --model.model_name ${MODEL_NAME} \
-#    --model.download_root ./ \
-#    --trainer.accelerator gpu \
-#    --trainer.precision 16 \
-#    --trainer.max_epochs 1 \
-#    --trainer.log_every_n_steps 1 \
-#    --trainer.logger WandbLogger \
-#    --trainer.logger.project CLIP-debug \
-#    --trainer.logger.name ${MODEL_NAME}-eval-all \
-#    --trainer.logger.log_model False \
-#    --trainer.strategy ddp_find_unused_parameters_true \
 
 
 
