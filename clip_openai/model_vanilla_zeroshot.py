@@ -58,7 +58,8 @@ class CLIPDualEncoderModel(LightningModule):
         #     print("Model weights loaded successfully and old parts copied.")
 
         if self.hparams.old_checkpoint_path is not None:
-            if isinstance(self.hparams.old_checkpoint_path, list):
+            if ',' in self.hparams.old_checkpoint_path:
+                self.hparams.old_checkpoint_path = self.hparams.old_checkpoint_path.split(',')
                 # 初始化一个字典来存储所有检查点的参数和计数
                 avg_params = None
                 count = 0
