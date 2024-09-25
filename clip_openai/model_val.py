@@ -289,7 +289,7 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 images = inputs["image"].to(self.device)
-                targets = inputs["caption"].to(self.device)
+                targets = inputs["text"].to(self.device)
                 image_features = self.model.encode_image(images)
                 text_features = self.model.encode_text(targets)
                 val_img_feats.append(image_features)
