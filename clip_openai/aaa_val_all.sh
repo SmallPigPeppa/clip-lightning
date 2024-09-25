@@ -14,7 +14,7 @@ datasets=(
 "lexica"
 "simpsons"
 )
-datasets=("lexica" "styles" "kream" "sketch")
+datasets=("patfig" "wikiart" "styles" "kream" "sketch")
 DATASETS=$(IFS=','; echo "${datasets[*]}")
 
 # 定义检查点列表
@@ -31,7 +31,30 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
 
-# 评估所有数据集
+## 评估所有数据集
+#python cli_val.py validate \
+#    --data.dataset_name ${DATASETS} \
+#    --data.max_length 77 \
+#    --data.batch_size 128 \
+#    --data.batch_size_zs 32 \
+#    --data.num_workers 8 \
+#    --data.config ${CONFIG_FILE} \
+#    --data.root_dir ${ROOT_DIR} \
+#    --model.evaluate_zero_shot False \
+#    --model.result_path metrics_evaluation.xlsx \
+#    --model.model_name ${MODEL_NAME} \
+#    --model.download_root ./ \
+#    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
+#    --trainer.accelerator gpu \
+#    --trainer.precision 16 \
+#    --trainer.max_epochs 1 \
+#    --trainer.log_every_n_steps 1 \
+#    --trainer.logger WandbLogger \
+#    --trainer.logger.project CLIP-debug \
+#    --trainer.logger.name ${MODEL_NAME}-eval-all \
+#    --trainer.logger.log_model False \
+#    --trainer.strategy ddp_find_unused_parameters_true \
+
 python cli_val.py validate \
     --data.dataset_name ${DATASETS} \
     --data.max_length 77 \
@@ -41,10 +64,9 @@ python cli_val.py validate \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
     --model.evaluate_zero_shot False \
-    --model.result_path metrics_evaluation.xlsx \
+    --model.result_path metrics_evaluation-vanilla.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
-    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs 1 \
@@ -54,8 +76,6 @@ python cli_val.py validate \
     --trainer.logger.name ${MODEL_NAME}-eval-all \
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
-
-
 
 
 
