@@ -9,7 +9,7 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 DATASETS=("flickr30k")
 #DATASETS=("wikiart")
-#DATASETS=("coco2014")
+DATASETS=("coco2014")
 #DATASETS=("wikiart")
 #DATASETS=("kream")
 
@@ -73,7 +73,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.recall_eval_interval 1 \
-    --model.zero_shot_eval_interval 1 \
+    --model.zero_shot_eval_interval 2 \
     --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
