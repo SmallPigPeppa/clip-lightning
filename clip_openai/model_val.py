@@ -88,62 +88,26 @@ class CLIPDualEncoderModel(LightningModule):
 
         return 0
 
-    def get_recall_metrics(self, dataloader, num_caption=5):
-        val_img_feats = []
-        val_text_feats = []
 
-        with torch.no_grad():
-            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
-                images = inputs["image"].to(self.device)
-                batch_size = images.size(0)
 
-                if num_caption > 1:
-                    # 重复图像 num_caption 次
-                    images = images.repeat_interleave(num_caption, dim=0)  # [batch_size * num_caption, C, H, W]
 
-                    # 展开 captions 列表
-                    texts = [inputs["text"][i][j] for j in range(batch_size) for i in range(num_caption)]
-                    # texts 长度为 batch_size * num_caption，顺序为 [cap1_1, cap1_2, ..., cap1_num_caption, cap2_1, cap2_2, ..., cap2_num_caption, ...]
+    def recall_score_1caption(self, image_features, text_features, logit_scale=1.0):
+        metrics = {}
+        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
+        logits_per_text = logits_per_image.t().detach().cpu()
 
-                    # Tokenization 和堆叠
-                    texts = [self.tokenize(t).to(self.device) for t in texts]
-                    texts = torch.stack(texts)
-                else:
-                    texts = inputs["text"]  # 长度为 batch_size 的列表
-                    texts = [self.tokenize(t).to(self.device) for t in texts]
-                    texts = torch.stack(texts)
+        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
+        ground_truth = torch.arange(len(text_features)).view(-1, 1)
 
-                image_features = self.model.encode_image(images)
-                text_features = self.model.encode_text(texts)
-                val_img_feats.append(image_features)
-                val_text_feats.append(text_features)
+        for name, logit in logits.items():
+            ranking = torch.argsort(logit, descending=True)
+            preds = torch.where(ranking == ground_truth)[1]
+            preds = preds.detach().cpu().numpy()
+            for k in [1]:
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+        return
 
-        all_image_features = torch.cat(val_img_feats)
-        all_text_features = torch.cat(val_text_feats)
-
-        metrics = self.recall_score(
-            image_features=all_image_features,
-            text_features=all_text_features,
-            logit_scale=self.model.logit_scale.exp(),
-            caps_per_image=num_caption
-        )
-
-        return metrics
-
-    def recall_score(self, image_features, text_features, logit_scale=1.0, caps_per_image=1):
-        # metrics = {}
-        # logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        # logits_per_text = logits_per_image.t().detach().cpu()
-        #
-        # logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        # ground_truth = torch.arange(len(text_features)).view(-1, 1)
-        #
-        # for name, logit in logits.items():
-        #     ranking = torch.argsort(logit, descending=True)
-        #     preds = torch.where(ranking == ground_truth)[1]
-        #     preds = preds.detach().cpu().numpy()
-        #     for k in [1]:
-        #         metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+    def recall_score_5caption(self, image_features, text_features, caps_per_image=5):
 
         i2t_r1 = i2t(
             images=image_features.cpu().numpy(),
@@ -202,9 +166,12 @@ class CLIPDualEncoderModel(LightningModule):
         self.model.eval()
 
         for idx, dataset_name in enumerate(dataset_all):
-            num_caption = 5 if dataset_name in ['flickr30k', 'coco2014'] else 1
             val_loader = self.trainer.datamodule.val_dataloader(dataset_name)
-            recall_metric = self.get_recall_metrics(val_loader, num_caption=num_caption)
+            if dataset_name in ['flickr30k', 'coco2014']:
+                recall_metric = self.get_recall_metrics_5caption(val_loader, num_caption=5)
+            else:
+                recall_metric = self.get_recall_metrics_1caption(val_loader)
+
             self.log_dict(recall_metric, sync_dist=True)
 
             metrics_row = {
@@ -279,3 +246,62 @@ class CLIPDualEncoderModel(LightningModule):
             table.add_data(*row_data)
 
         wandb.log({"metrics_table": table})
+
+    def get_recall_metrics_5caption(self, dataloader, num_caption=5):
+        val_img_feats = []
+        val_text_feats = []
+
+        with torch.no_grad():
+            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                images = inputs["image"].to(self.device)
+                batch_size = images.size(0)
+
+                images = images.repeat_interleave(num_caption, dim=0)  # [batch_size * num_caption, C, H, W]
+
+                # 展开 captions 列表
+                texts = [inputs["text"][i][j] for j in range(batch_size) for i in range(num_caption)]
+                # texts 长度为 batch_size * num_caption，顺序为 [cap1_1, cap1_2, ..., cap1_num_caption, cap2_1, cap2_2, ..., cap2_num_caption, ...]
+
+                # Tokenization 和堆叠
+                texts = [self.tokenize(t).to(self.device) for t in texts]
+                texts = torch.stack(texts)
+
+                image_features = self.model.encode_image(images)
+                text_features = self.model.encode_text(texts)
+                val_img_feats.append(image_features)
+                val_text_feats.append(text_features)
+
+        all_image_features = torch.cat(val_img_feats)
+        all_text_features = torch.cat(val_text_feats)
+
+        metrics = self.recall_score_5caption(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            caps_per_image=num_caption
+        )
+
+        return metrics
+
+    def get_recall_metrics_1caption(self, dataloader):
+        val_img_feats = []
+        val_text_feats = []
+
+        with torch.no_grad():
+            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
+                images = inputs["image"].to(self.device)
+                targets = inputs["caption"].to(self.device)
+                image_features = self.model.encode_image(images)
+                text_features = self.model.encode_text(targets)
+                val_img_feats.append(image_features)
+                val_text_feats.append(text_features)
+
+        all_image_features = torch.cat(val_img_feats)
+        all_text_features = torch.cat(val_text_feats)
+
+        metrics = self.recall_score_1caption(
+            image_features=all_image_features,
+            text_features=all_text_features,
+            logit_scale=self.model.logit_scale.exp(),
+        )
+
+        return metrics
