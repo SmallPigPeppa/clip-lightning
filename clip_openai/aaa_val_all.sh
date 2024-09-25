@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-#"flickr30k"
+"flickr30k"
 "coco2014"
 )
 DATASETS=$(IFS=','; echo "${datasets[*]}")
