@@ -8,16 +8,16 @@ MODEL_NAME=ViT-B/16
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-#"flickr30k"
-#"coco2014"
-#"pet"
+"flickr30k"
+"coco2014"
+"pet"
 "lexica"
-#"simpsons"
-#"patfig"
-#"wikiart"
-#"styles"
-#"kream"
-#"sketch"
+"simpsons"
+"patfig"
+"wikiart"
+"styles"
+"kream"
+"sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
 DATASETS=$(IFS=','; echo "${datasets[*]}")
@@ -53,7 +53,7 @@ python cli_val.py validate \
     --data.num_workers 8 \
     --data.config ${CONFIG_FILE} \
     --data.root_dir ${ROOT_DIR} \
-    --model.evaluate_zero_shot False \
+    --model.evaluate_zero_shot True \
     --model.result_path metrics_evaluation.xlsx \
     --model.model_name ${MODEL_NAME} \
     --model.download_root ./ \
