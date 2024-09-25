@@ -36,6 +36,7 @@ declare -A DATASET_LR_MAP=(
   ["clothes"]=1e-5
 )
 
+
 declare -A DATASET_LR_TEXT_MAP=(
   ["pet"]=5e-4
   ["flickr30k"]=1.2e-4
