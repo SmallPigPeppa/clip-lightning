@@ -31,7 +31,7 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["simpsons"]=2e-4
+  ["simpsons"]=1e-4
   ["lexica"]=3e-5
   ["pet"]=3e-5
   ["flickr30k"]=8e-6
@@ -53,7 +53,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["simpsons"]=2e-4
+  ["simpsons"]=1e-4
   ["lexica"]=3e-5
   ["pet"]=6e-5
   ["flickr30k"]=1.2e-4
@@ -146,7 +146,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
@@ -156,6 +156,6 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
+/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
 
 
