@@ -30,7 +30,7 @@ CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["lexica"]=1e-4
+  ["lexica"]=2e-4
   ["pet"]=3e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
@@ -52,7 +52,7 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["lexica"]=1e-4
+  ["lexica"]=2e-4
   ["pet"]=6e-5
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
@@ -154,5 +154,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 46e358198c65fd38
+/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
 
