@@ -8,16 +8,16 @@ MODEL_NAME=ViT-B/16
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-"flickr30k"
-"coco2014"
-"pet"
-"lexica"
+#"flickr30k"
+#"coco2014"
+#"pet"
+#"lexica"
 "simpsons"
-"patfig"
-"wikiart"
-"styles"
-"kream"
-"sketch"
+#"patfig"
+#"wikiart"
+#"styles"
+#"kream"
+#"sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
 DATASETS=$(IFS=','; echo "${datasets[*]}")
@@ -27,19 +27,20 @@ CKPTS=(
     "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
     "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
 
-#    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
-   "ckpt/pet-1024/distill_lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
+    "ckpt/pet-1024/distill_lora_v2-lr-2e-5-lr_text-4e-5.ckpt"
+#   "ckpt/pet-1024/distill_lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
 
-#    "ckpt/lexica-1024/lora_v2-lr-3e-5-lr_text-3e-5.ckpt"
+    "ckpt/lexica-1024/lora_v2-lr-3e-5-lr_text-3e-5.ckpt"
 #    "ckpt/lexica-1024/distill_lora_v2-lr-3e-5-lr_text-3e-5-v1.ckpt"
 #    "ckpt/lexica-1024/lora_v2-lr-3e-5-lr_text-1.5e-4.ckpt"
 #    "ckpt/lexica-1024/lora_v2-lr-5e-4-lr_text-5e-4.ckpt"
 #    "ckpt/lexica-1024/lora_v2-lr-1.99e-4-lr_text-1.99e-4.ckpt"
-    "ckpt/lexica-1024/lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
+#    "ckpt/lexica-1024/lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
 
 #    "ckpt/lexica-1024/lora_v2-lr-6e-5-lr_text-5e-4.ckpt"
 
 #    "ckpt/simpsons-1024/distill_lora_v2-lr-4e-5-lr_text-4e-5.ckpt"
+    "ckpt/simpsons-1024/distill_lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
 )
 
 
