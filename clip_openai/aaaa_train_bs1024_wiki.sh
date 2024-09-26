@@ -10,20 +10,38 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-#DATASETS=("coco2014")
+DATASETS=("coco2014")
 DATASETS=("flickr30k")
 DATASETS=("pet")
 DATASETS=("wikiart")
+DATASETS=("lexica")
+DATASETS=("simpsons")
+DATASETS=("patfig")
+DATASETS=("wikiart")
+
+
+CKPTS=(
+    "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+    "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+    "ckpt/pet-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+    "ckpt/lexica-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
+    "ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
+    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+)
+
+
+# 拼接检查点
+CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["pet"]=7.5e-6
+  ["wikiart"]=3e-5
+  ["patfig"]=1e-5
+  ["simpsons"]=3e-5
+  ["lexica"]=3e-5
+  ["pet"]=3e-5
   ["flickr30k"]=8e-6
   ["coco2014"]=1e-5
-  ["wikiart"]=1e-5
-  ["patfig"]=1e-5
-  ["simpsons"]=1e-5
-  ["lexica"]=1e-5
   ["styles"]=1e-5
   ["kream"]=1e-5
   ["sketch"]=1e-5
@@ -39,13 +57,13 @@ declare -A DATASET_LR_MAP=(
 
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["pet"]=2.625e-4
+  ["wikiart"]=3e-5
+  ["patfig"]=1e-5
+  ["simpsons"]=3e-5
+  ["lexica"]=3e-5
+  ["pet"]=6e-5
   ["flickr30k"]=1.2e-4
   ["coco2014"]=2e-4
-  ["wikiart"]=2e-4
-  ["patfig"]=2e-4
-  ["simpsons"]=2e-4
-  ["lexica"]=2e-4
   ["styles"]=2e-4
   ["kream"]=2e-4
   ["sketch"]=2e-4
@@ -106,6 +124,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
+    --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -121,6 +140,7 @@ run_training() {
     --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
 }
 
+
 # 运行所有数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
   LR=${DATASET_LR_MAP[${DATASET_NAME}]}
@@ -129,16 +149,17 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
+/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
+
 
