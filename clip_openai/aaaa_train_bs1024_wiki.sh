@@ -9,14 +9,6 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
-DATASETS=("flickr30k")
-DATASETS=("pet")
-DATASETS=("wikiart")
-DATASETS=("lexica")
-DATASETS=("simpsons")
-DATASETS=("patfig")
 DATASETS=("wikiart")
 
 
@@ -29,64 +21,15 @@ CKPTS=(
 #    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
+# 学习率列表
+LEARNING_RATES=(2e-4 1e-4 5e-5 2e-5)
 
 # 拼接检查点
 CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
-# 数据集学习率映射
-declare -A DATASET_LR_MAP=(
-  ["wikiart"]=3e-5
-  ["patfig"]=1e-5
-  ["simpsons"]=3e-5
-  ["lexica"]=3e-5
-  ["pet"]=3e-5
-  ["flickr30k"]=8e-6
-  ["coco2014"]=1e-5
-  ["styles"]=1e-5
-  ["kream"]=1e-5
-  ["sketch"]=1e-5
-  ["emoji"]=1e-5
-  ["fashion"]=1e-5
-  ["nouns"]=1e-5
-  ["shahnegar"]=1e-5
-  ["artbench"]=1e-5
-  ["hausavg"]=1e-5
-  ["food"]=1e-5
-  ["clothes"]=1e-5
-)
-
-
-declare -A DATASET_LR_TEXT_MAP=(
-  ["wikiart"]=3e-5
-  ["patfig"]=1e-5
-  ["simpsons"]=3e-5
-  ["lexica"]=3e-5
-  ["pet"]=6e-5
-  ["flickr30k"]=1.2e-4
-  ["coco2014"]=2e-4
-  ["styles"]=2e-4
-  ["kream"]=2e-4
-  ["sketch"]=2e-4
-  ["emoji"]=2e-4
-  ["fashion"]=2e-4
-  ["nouns"]=2e-4
-  ["shahnegar"]=2e-4
-  ["artbench"]=2e-4
-  ["hausavg"]=2e-4
-  ["food"]=2e-4
-  ["clothes"]=2e-4
-)
-
-
-
 # 脚本方法映射
 declare -A METHOD_MAP=(
-  ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
-  ["lora_v2"]="cli_vanilla_zeroshot_lora_best_v2.py"
   ["distill"]="cli_distill_zeroshot.py"
-  ["distill_v4"]="cli_distill_zeroshot_v4.py"
-  ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
   ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
 )
 
@@ -143,19 +86,15 @@ run_training() {
 
 # 运行所有数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
-  LR=${DATASET_LR_MAP[${DATASET_NAME}]}
-  LR_TEXT=${DATASET_LR_TEXT_MAP[${DATASET_NAME}]}
 
-  echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
+  echo "Running training for dataset: ${DATASET_NAME}"
 
-  # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-
+  # 按不同的学习率运行
+  for LR in "${LEARNING_RATES[@]}"; do
+    echo "Using learning rate: ${LR}"
+    run_training "distill" ${DATASET_NAME} ${LR} ${LR}
+    run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR}
+  done
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
