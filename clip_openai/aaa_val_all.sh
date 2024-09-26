@@ -52,6 +52,7 @@ CKPTS=(
 #    "ckpt/simpsons-1024/distill_lora_v2-lr-2e-4-lr_text-2e-4.ckpt"
 #    "ckpt/simpsons-1024/distill_lora_v2-lr-5e-4-lr_text-5e-4.ckpt"
     "ckpt/simpsons-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
+    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
 
