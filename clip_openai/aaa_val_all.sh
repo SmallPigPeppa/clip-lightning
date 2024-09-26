@@ -62,6 +62,7 @@ CKPTS=(
     "ckpt/lexica-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
     "ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
     "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
 # 拼接检查点
