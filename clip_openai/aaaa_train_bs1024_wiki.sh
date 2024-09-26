@@ -26,7 +26,7 @@ CKPTS=(
     "ckpt/pet-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
     "ckpt/lexica-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
     "ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+#    "ckpt/patfig-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
 )
 
 
@@ -154,7 +154,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
