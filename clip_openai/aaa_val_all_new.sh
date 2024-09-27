@@ -29,6 +29,7 @@ DATASETS=$(
 #CKPT="ckpt-cl/task7-kream-lora.ckpt"
 CKPT="ckpt-cl/task7-kream.ckpt"
 CKPT="ckpt-cl/task7-kream-5e-5.ckpt"
+CKPT="ckpt-cl/task8-sketch-5e-5.ckpt"
 
 
 # 其他参数
