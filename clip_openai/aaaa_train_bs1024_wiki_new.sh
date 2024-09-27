@@ -9,7 +9,7 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("wiki")
+DATASETS=("wikiart")
 
 CKPT="ckpt-cl/task5-simpsons-new.ckpt"
 
