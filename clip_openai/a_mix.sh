@@ -35,14 +35,14 @@ CKPTS=(
 
 
 
-# task4 lexical
-CHECKPOINT_PATH1="ckpt-cl/pet-task3.ckpt"
-CHECKPOINT_PATH2="ckpt/lexica-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
-OUTPUT_PATH="ckpt-cl/lexica-task4.ckpt"
-RATIO1=2
-RATIO2=1
-
-python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
+## task4 lexical
+#CHECKPOINT_PATH1="ckpt-cl/pet-task3.ckpt"
+#CHECKPOINT_PATH2="ckpt/lexica-1024/distill-lr-1e-4-lr_text-1e-4.ckpt"
+#OUTPUT_PATH="ckpt-cl/lexica-task4.ckpt"
+#RATIO1=2
+#RATIO2=1
+#
+#python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 
 
 
