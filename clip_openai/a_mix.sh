@@ -59,7 +59,7 @@ CKPTS=(
 
 # task 6 wikiart
 CHECKPOINT_PATH1="ckpt-cl/task5-simpsons-new.ckpt"
-CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
 OUTPUT_PATH="ckpt-cl/task6-wikiart.ckpt"
 RATIO1=2
 RATIO2=1
