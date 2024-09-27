@@ -92,7 +92,7 @@ for i in "${!DATASETS[@]}"; do
     CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR}.ckpt"
   else
 #    CKPT=""
-    CKPT="ckpt-others/$flickr30k-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT="ckpt-others/flickr30k-lr-${LR}-lr_text-${LR}.ckpt"
   fi
 
   # 按不同的方法运行
