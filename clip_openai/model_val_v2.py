@@ -123,7 +123,7 @@ class CLIPDualEncoderModel(LightningModule):
 
                 # 对 old 和最后一个检查点求均值
                 for k in avg_params.keys():
-                    avg_params[k] = (avg_params[k] + last_params[k]) / 2
+                    avg_params[k] = (avg_params[k]*2 + last_params[k]) / 3
 
                 # 将最终均值的参数加载到模型中
                 self.model.load_state_dict(avg_params, strict=True)
