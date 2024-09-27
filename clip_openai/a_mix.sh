@@ -72,7 +72,7 @@ CKPTS=(
 # task 7 kream
 CHECKPOINT_PATH1="ckpt-cl/task6-wikiart.ckpt"
 CHECKPOINT_PATH2="ckpt/kream-1024/distill_lora_v2-lr-5e-5-lr_text-5e-5.ckpt"
-OUTPUT_PATH="ckpt-cl/tas7-kream-lora.ckpt"
+OUTPUT_PATH="ckpt-cl/task7-kream-lora.ckpt"
 RATIO1=2
 RATIO2=1
 

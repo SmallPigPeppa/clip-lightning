@@ -9,7 +9,7 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("wikiart")
+DATASETS=("kream")
 
 CKPT="ckpt-cl/task6-wikiart.ckpt"
 
