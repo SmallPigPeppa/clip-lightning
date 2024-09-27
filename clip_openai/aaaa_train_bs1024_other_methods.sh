@@ -76,8 +76,6 @@ run_training() {
 # 运行所有数据集
 for i in "${!DATASETS[@]}"; do
   DATASET_NAME=${DATASETS[$i]}
-  LR=${DATASET_LR_MAP[${DATASET_NAME}]}
-  LR_TEXT=${DATASET_LR_TEXT_MAP[${DATASET_NAME}]}
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
@@ -85,7 +83,7 @@ for i in "${!DATASETS[@]}"; do
   if [[ $i -eq 0 ]]; then
     CKPT=None
   else
-    CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR_TEXT}.ckpt"
+    CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR}.ckpt"
   fi
 
   # 按不同的方法运行
@@ -93,7 +91,7 @@ for i in "${!DATASETS[@]}"; do
   run_training "zscl" ${DATASET_NAME} ${LR} ${LR} ${CKPT}
 
   # 更新 PREV_CKPT 为当前数据集的 checkpoint
-  PREV_CKPT="ckpt-others/${DATASET_NAME}-lr-${LR}-lr_text-${LR_TEXT}.ckpt"
+  PREV_CKPT="ckpt-others/${DATASET_NAME}-lr-${LR}-lr_text-${LR}.ckpt"
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
