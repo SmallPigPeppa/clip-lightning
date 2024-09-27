@@ -12,11 +12,22 @@ CKPTS=(
 )
 
 
-# task1 coco2014
+# task2 coco2014
 CHECKPOINT_PATH1="ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
 CHECKPOINT_PATH2="ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
 OUTPUT_PATH="ckpt-cl/coco2014-task2.ckpt"
 RATIO1=1
+RATIO2=1
+
+python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
+
+
+
+# task3 pet
+CHECKPOINT_PATH1="ckpt-cl/coco2014-task2.ckpt"
+CHECKPOINT_PATH2="ckpt/pet-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
+OUTPUT_PATH="ckpt-cl/pet-task3.ckpt"
+RATIO1=2
 RATIO2=1
 
 python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
