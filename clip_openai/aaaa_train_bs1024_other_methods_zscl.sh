@@ -12,7 +12,7 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons" "wikiart")
 #DATASETS=("coco2014" "pet" "lexica" "simpsons" "wikiart")
 
-LR=4e-5
+LR=2e-5
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
