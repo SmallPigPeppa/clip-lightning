@@ -27,9 +27,6 @@ BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
-# 初始化变量以存储上一个数据集的ckpt
-PREV_CKPT=None
-
 # 函数：运行训练
 run_training() {
   local method=$1
@@ -38,7 +35,8 @@ run_training() {
   local lr_text=$4
   local old_ckpt_path=$5
 
-  python ${METHOD_MAP[$method]} fit \
+  # 构建基础的命令
+  cmd="python ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -57,7 +55,6 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ${old_ckpt_path} \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -70,20 +67,30 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt-others \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
+    --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}"
+
+  # 如果不是第一个数据集，添加 --model.old_checkpoint_path 参数
+  if [[ $old_ckpt_path != "" ]]; then
+    cmd+=" --model.old_checkpoint_path ${old_ckpt_path}"
+  fi
+
+  # 执行命令
+  eval $cmd
 }
 
 # 运行所有数据集
+PREV_CKPT=""
+
 for i in "${!DATASETS[@]}"; do
   DATASET_NAME=${DATASETS[$i]}
 
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  # 设置ckpt路径，如果是第一个数据集，ckpt为None
-  if [[ $i -eq 0 ]]; then
-    CKPT=None
-  else
+  # 设置ckpt路径，如果是第一个数据集，不设置old_checkpoint_path
+  if [[ $i -ne 0 ]]; then
     CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR}.ckpt"
+  else
+    CKPT=""
   fi
 
   # 按不同的方法运行
