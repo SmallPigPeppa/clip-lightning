@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import torch
 import os
 import argparse
