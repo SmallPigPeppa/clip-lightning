@@ -25,7 +25,8 @@ DATASETS=$(
 )
 
 
-CKPT="ckpt-cl/task6-wikiart.ckpt"
+#CKPT="ckpt-cl/task6-wikiart.ckpt"
+CKPT="ckpt-cl/task7-kream-lora.ckpt"
 
 
 # 其他参数
