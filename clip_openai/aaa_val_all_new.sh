@@ -25,7 +25,7 @@ DATASETS=$(
 )
 
 
-CKPT="ckpt-cl/task5-simpsons-new.ckpt"
+CKPT="ckpt-cl/task6-wikiart.ckpt"
 
 
 # 其他参数
