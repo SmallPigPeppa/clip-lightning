@@ -9,7 +9,7 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons" "wikiart")
+DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons" "wikiart" "kream" "sketch")
 #DATASETS=("coco2014" "pet" "lexica" "simpsons" "wikiart")
 
 LR=2e-5
