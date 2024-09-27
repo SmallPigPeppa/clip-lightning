@@ -9,7 +9,8 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons")
+#DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons")
+DATASETS=("coco2014" "pet" "lexica" "simpsons" "wikiart")
 
 LR=4e-5
 
@@ -90,7 +91,8 @@ for i in "${!DATASETS[@]}"; do
   if [[ $i -ne 0 ]]; then
     CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR}.ckpt"
   else
-    CKPT=""
+#    CKPT=""
+    CKPT="ckpt-others/$flickr30k-lr-${LR}-lr_text-${LR}.ckpt"
   fi
 
   # 按不同的方法运行
