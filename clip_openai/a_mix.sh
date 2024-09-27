@@ -45,22 +45,34 @@ CKPTS=(
 #python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 
 
-
 #
-# task5 simpsons
-CHECKPOINT_PATH1="ckpt-cl/task4-lexica.ckpt"
-CHECKPOINT_PATH2="ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5-v2.ckpt"
-OUTPUT_PATH="ckpt-cl/task5-simpsons.ckpt"
-RATIO1=2
-RATIO2=1
+##
+## task5 simpsons
+#CHECKPOINT_PATH1="ckpt-cl/task4-lexica.ckpt"
+#CHECKPOINT_PATH2="ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5-v2.ckpt"
+#OUTPUT_PATH="ckpt-cl/task5-simpsons.ckpt"
+#RATIO1=2
+#RATIO2=1
+#
+#python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
+#
+#
+## task 6 wikiart
+#CHECKPOINT_PATH1="ckpt-cl/task5-simpsons.ckpt"
+#CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
+#OUTPUT_PATH="ckpt-cl/task6-wikiart.ckpt"
+#RATIO1=2
+#RATIO2=1
+#
+#python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 
-python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 
 
-# task 6 wikiart
-CHECKPOINT_PATH1="ckpt-cl/task5-simpsons.ckpt"
-CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-OUTPUT_PATH="ckpt-cl/task6-wikiart.ckpt"
+
+# task 7 kream
+CHECKPOINT_PATH1="ckpt-cl/task6-wikiart.ckpt"
+CHECKPOINT_PATH2="ckpt/kream-1024/distill_lora_v2-lr-5e-5-lr_text-5e-5.ckpt"
+OUTPUT_PATH="ckpt-cl/tas7-kream-lora.ckpt"
 RATIO1=2
 RATIO2=1
 
