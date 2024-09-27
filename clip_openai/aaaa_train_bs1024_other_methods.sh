@@ -79,8 +79,6 @@ run_training() {
   eval $cmd
 }
 
-# 运行所有数据集
-PREV_CKPT=""
 
 for i in "${!DATASETS[@]}"; do
   DATASET_NAME=${DATASETS[$i]}
@@ -89,18 +87,15 @@ for i in "${!DATASETS[@]}"; do
 
   # 设置ckpt路径，如果是第一个数据集，不设置old_checkpoint_path
   if [[ $i -ne 0 ]]; then
-    CKPT="ckpt-others/${DATASETS[$((i-1))]}-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT="ckpt-others/${DATASETS[$((i-1))]}-1024/${method}-lr-${LR}-lr_text-${LR}.ckpt"
   else
 #    CKPT=""
-    CKPT="ckpt-others/flickr30k-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT="ckpt-others/flickr30k-1024/${method}-lr-${LR}-lr_text-${LR}.ckpt"
   fi
 
   # 按不同的方法运行
   run_training "fine-tune" ${DATASET_NAME} ${LR} ${LR} ${CKPT}
   run_training "zscl" ${DATASET_NAME} ${LR} ${LR} ${CKPT}
-
-  # 更新 PREV_CKPT 为当前数据集的 checkpoint
-  PREV_CKPT="ckpt-others/${DATASET_NAME}-lr-${LR}-lr_text-${LR}.ckpt"
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
