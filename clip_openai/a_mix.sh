@@ -57,26 +57,26 @@ CKPTS=(
 #python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 #
 #
-## task 6 wikiart
-#CHECKPOINT_PATH1="ckpt-cl/task5-simpsons.ckpt"
-#CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-#OUTPUT_PATH="ckpt-cl/task6-wikiart.ckpt"
-#RATIO1=2
-#RATIO2=1
-#
-#python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
-
-
-
-
-# task 7 kream
-CHECKPOINT_PATH1="ckpt-cl/task6-wikiart.ckpt"
-CHECKPOINT_PATH2="ckpt/kream-1024/distill_lora_v2-lr-5e-5-lr_text-5e-5.ckpt"
-OUTPUT_PATH="ckpt-cl/task7-kream-lora.ckpt"
+# task 6 wikiart
+CHECKPOINT_PATH1="ckpt-cl/task5-simpsons.ckpt"
+CHECKPOINT_PATH2="ckpt/wikiart-1024/distill-lr-5e-5-lr_text-5e-5-v1.ckpt"
+OUTPUT_PATH="ckpt-cl/task6-wikiart.ckpt"
 RATIO1=2
 RATIO2=1
 
 python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
+
+
+
+
+## task 7 kream
+#CHECKPOINT_PATH1="ckpt-cl/task6-wikiart.ckpt"
+#CHECKPOINT_PATH2="ckpt/kream-1024/distill_lora_v2-lr-5e-5-lr_text-5e-5.ckpt"
+#OUTPUT_PATH="ckpt-cl/task7-kream-lora.ckpt"
+#RATIO1=2
+#RATIO2=1
+#
+#python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
 
 
 #
