@@ -25,7 +25,7 @@ DATASETS=$(
 )
 
 
-CKPT="ckpt-cl/task4-lexica.ckpt"
+CKPT=" task4-lexica-1e-5-1.5.ckpt"
 
 
 # 其他参数
