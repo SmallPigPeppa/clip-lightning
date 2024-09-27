@@ -35,23 +35,23 @@ CKPTS=(
 
 
 
-# task4 lexical
-CHECKPOINT_PATH1="ckpt-cl/task3-pet.ckpt"
-CHECKPOINT_PATH2="ckpt/lexica-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-OUTPUT_PATH="ckpt-cl/task4-lexica.ckpt"
-RATIO1=2
-RATIO2=1
-
-python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
-
-
-
-#
-## task5 simpsons
-#CHECKPOINT_PATH1="ckpt-cl/task4-lexica.ckpt"
-#CHECKPOINT_PATH2="ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-#OUTPUT_PATH="ckpt-cl/task5-simpsons.ckpt"
+## task4 lexical
+#CHECKPOINT_PATH1="ckpt-cl/task3-pet.ckpt"
+#CHECKPOINT_PATH2="ckpt/lexica-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
+#OUTPUT_PATH="ckpt-cl/task4-lexica.ckpt"
 #RATIO1=2
 #RATIO2=1
 #
 #python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
+
+
+
+#
+# task5 simpsons
+CHECKPOINT_PATH1="ckpt-cl/task4-lexica.ckpt"
+CHECKPOINT_PATH2="ckpt/simpsons-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
+OUTPUT_PATH="ckpt-cl/task5-simpsons.ckpt"
+RATIO1=2
+RATIO2=1
+
+python a_mix.py "$CHECKPOINT_PATH1" "$CHECKPOINT_PATH2" "$OUTPUT_PATH" "$RATIO1" "$RATIO2"
