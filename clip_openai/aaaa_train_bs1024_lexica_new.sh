@@ -11,7 +11,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("lexica")
 
-CKPT="ckpt-cl/pet-task3.ckpt"
+CKPT="ckpt-cl/task3-pet.ckpt"
 
 # 学习率列表
 #LEARNING_RATES=(5e-4 2e-4 1e-4 7.5e-5 5e-5 2e-5 1e-5)

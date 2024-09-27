@@ -36,9 +36,9 @@ CKPTS=(
 
 
 # task4 lexical
-CHECKPOINT_PATH1="ckpt-cl/pet-task3.ckpt"
+CHECKPOINT_PATH1="ckpt-cl/task3-pet.ckpt"
 CHECKPOINT_PATH2="ckpt/lexica-1024/distill-lr-5e-5-lr_text-5e-5.ckpt"
-OUTPUT_PATH="ckpt-cl/lexica-task4.ckpt"
+OUTPUT_PATH="ckpt-cl/task4-lexica.ckpt"
 RATIO1=2
 RATIO2=1
 
