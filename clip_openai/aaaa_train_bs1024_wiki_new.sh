@@ -18,7 +18,6 @@ CKPT="ckpt-cl/task5-simpsons-new.ckpt"
 LEARNING_RATES=(5e-5 3e-5 2e-5 1e-5)
 
 # 拼接检查点
-CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
@@ -102,6 +101,6 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
+#/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
 
 
