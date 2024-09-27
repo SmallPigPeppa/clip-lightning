@@ -51,6 +51,7 @@ class CLIPDualEncoderModel(LightningModule):
             temperature: float = 1.0,
             weight_decay: float = 0.0,
             lr: float = 1e-3,
+            lr_text: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
             old_checkpoint_path: str = None,
@@ -101,11 +102,22 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        parameters = [{
-            "params": self.model.parameters(),
-            "lr": self.hparams.lr,
-            "weight_decay": self.hparams.weight_decay
-        }]
+        # parameters = [{
+        #     "params": self.model.parameters(),
+        #     "lr": self.hparams.lr,
+        #     "weight_decay": self.hparams.weight_decay
+        # }]
+        parameters = [
+            {
+                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
+                "lr": self.hparams.lr
+            },
+            {
+                "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
+                "lr": self.hparams.lr_text,
+                "weight_decay": self.hparams.weight_decay
+            }
+        ]
 
         if self.distill:
             parameters.append({
@@ -243,7 +255,7 @@ class CLIPDualEncoderModel(LightningModule):
             )
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.00001
+            return clip_loss + distill_loss * 0.0001
         else:
             return clip_loss
 
@@ -268,7 +280,7 @@ class CLIPDualEncoderModel(LightningModule):
                 text_features_old=frozen_z2
             )
             self.log("val/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.00001
+            return clip_loss + distill_loss * 0.0001
         else:
             return clip_loss
 
