@@ -11,11 +11,11 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("wikiart")
 
-CKPT="ckpt-cl/task5-simpsons.ckpt"
+CKPT="ckpt-cl/task6-wikiart.ckpt"
 
 # 学习率列表
 #LEARNING_RATES=(5e-4 2e-4 1e-4 7.5e-5 5e-5 2e-5 1e-5)
-LEARNING_RATES=(3e-5 2e-5 5e-5 1e-5)
+LEARNING_RATES=(1e-4 5e-5 2e-4)
 
 # 拼接检查点
 
