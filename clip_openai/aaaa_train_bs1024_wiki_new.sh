@@ -9,30 +9,16 @@ PROJECT=CLIP-1step-1024
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
-DATASETS=("flickr30k")
-DATASETS=("pet")
-DATASETS=("wikiart")
-DATASETS=("lexica")
-DATASETS=("simpsons")
-DATASETS=("wikiart")
-
+DATASETS=("wiki")
 
 CKPT="ckpt-cl/task5-simpsons-new.ckpt"
 
+# 学习率列表
+#LEARNING_RATES=(5e-4 2e-4 1e-4 7.5e-5 5e-5 2e-5 1e-5)
+LEARNING_RATES=(5e-5 3e-5 2e-5 1e-5)
 
-# 数据集学习率映射
-declare -A DATASET_LR_MAP=(
-  ["wikiart"]=5e-5
-)
-
-
-declare -A DATASET_LR_TEXT_MAP=(
-  ["wikiart"]=5e-5
-)
-
-
+# 拼接检查点
+CKPTS_COMMA_JOINED=$(IFS=','; echo "${CKPTS[*]}")
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
@@ -98,23 +84,24 @@ run_training() {
 
 # 运行所有数据集
 for DATASET_NAME in "${DATASETS[@]}"; do
-  LR=${DATASET_LR_MAP[${DATASET_NAME}]}
-  LR_TEXT=${DATASET_LR_TEXT_MAP[${DATASET_NAME}]}
 
-  echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
+  echo "Running training for dataset: ${DATASET_NAME}"
 
-  # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  # 按不同的学习率运行
+  for LR in "${LEARNING_RATES[@]}"; do
+    echo "Using learning rate: ${LR}"
 
+#  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR}
+    run_training "distill" ${DATASET_NAME} ${LR} ${LR}
+#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR}
+#  run_training "lora" ${DATASET_NAME} ${LR} ${LR}
+#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR}
+#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR}
+  done
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop a2b028e85b48907c
+/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
 
 
