@@ -18,7 +18,7 @@ DATASETS=("lexica")
 DATASETS=("simpsons")
 
 
-CKPT="ckpt-cl/lexica-task4.ckpt"
+CKPT="ckpt-cl/task4-lexica.ckpt"
 
 
 # 数据集学习率映射
