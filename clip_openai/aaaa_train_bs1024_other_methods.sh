@@ -87,15 +87,16 @@ for i in "${!DATASETS[@]}"; do
 
   # 设置ckpt路径，如果是第一个数据集，不设置old_checkpoint_path
   if [[ $i -ne 0 ]]; then
-    CKPT="ckpt-others/${DATASETS[$((i-1))]}-1024/${method}-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT_FINE_TUNE="ckpt-others/${DATASETS[$((i-1))]}-1024/fine-tune-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT_ZSCL="ckpt-others/${DATASETS[$((i-1))]}-1024/zscl-lr-${LR}-lr_text-${LR}.ckpt"
   else
-#    CKPT=""
-    CKPT="ckpt-others/flickr30k-1024/${method}-lr-${LR}-lr_text-${LR}.ckpt"
+    # 对于第一个数据集，使用 flickr30k 的 checkpoint
+    CKPT_FINE_TUNE="ckpt-others/flickr30k-1024/fine-tune-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT_ZSCL="ckpt-others/flickr30k-1024/zscl-lr-${LR}-lr_text-${LR}.ckpt"
   fi
-
   # 按不同的方法运行
-  run_training "fine-tune" ${DATASET_NAME} ${LR} ${LR} ${CKPT}
-  run_training "zscl" ${DATASET_NAME} ${LR} ${LR} ${CKPT}
+  run_training "fine-tune" ${DATASET_NAME} ${LR} ${LR} ${CKPT_FINE_TUNE}
+  run_training "zscl" ${DATASET_NAME} ${LR} ${LR} ${CKPT_ZSCL}
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
