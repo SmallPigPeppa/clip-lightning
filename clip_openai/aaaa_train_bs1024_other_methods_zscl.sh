@@ -12,7 +12,7 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons" "wikiart" "kream" "sketch")
 #DATASETS=("coco2014" "pet" "lexica" "simpsons" "wikiart")
 
-LR=1.99e-5
+LR=3.001e-5
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
@@ -103,5 +103,5 @@ for i in "${!DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 46e358198c65fd38
+/ppio_net0/code/openapi.sh stop 0a0d42b8fce5c631
 
