@@ -17,7 +17,7 @@ datasets=(
 #  "wikiart"
 #  "styles"
   "kream"
-#  "sketch"
+  "sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
 DATASETS=$(
