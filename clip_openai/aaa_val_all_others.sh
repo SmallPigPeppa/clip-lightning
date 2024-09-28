@@ -41,8 +41,8 @@ CKPTS_COMMA_JOINED=$(
   echo "${CKPTS[*]}"
 )
 
-#CKPT="ckpt-others/sketch-1024/fine-tune-lr-2e-5-lr_text-2e-5.ckpt"
-CKPT="ckpt-cl/task8-sketch-5e-5.ckpt"
+CKPT="ckpt-others/sketch-1024/fine-tune-lr-2e-5-lr_text-2e-5.ckpt"
+#CKPT="ckpt-cl/task8-sketch-5e-5.ckpt"
 
 # 其他参数
 CONFIG_FILE=config.yaml
