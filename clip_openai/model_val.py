@@ -164,6 +164,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_validation_epoch_end(self):
         dataset_all = self.trainer.datamodule.dataset_name  # assuming dataset names are in the datamodule
+        import pdb;pdb.set_trace()
         all_metrics = []
         self.model.eval()
 
