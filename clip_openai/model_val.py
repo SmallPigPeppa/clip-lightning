@@ -166,7 +166,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # if self.global_rank == 0:
         dataset_all = self.trainer.datamodule.dataset_name  # assuming dataset names are in the datamodule
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         all_metrics = []
         self.model.eval()
 
@@ -176,8 +176,6 @@ class CLIPDualEncoderModel(LightningModule):
                 recall_metric = self.get_recall_metrics_5caption(val_loader, num_caption=5)
             else:
                 recall_metric = self.get_recall_metrics_1caption(val_loader)
-                import pdb;
-                pdb.set_trace()
                 if recall_metric is None:
                     import pdb;pdb.set_trace()
 
