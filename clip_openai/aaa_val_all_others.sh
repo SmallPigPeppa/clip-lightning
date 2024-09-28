@@ -13,9 +13,9 @@ datasets=(
   "pet"
   "lexica"
   "simpsons"
-#  "patfig"
+  "patfig"
   "wikiart"
-#  "styles"
+  "styles"
   "kream"
   "sketch"
 )
