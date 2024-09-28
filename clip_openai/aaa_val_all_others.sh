@@ -30,8 +30,10 @@ DATASETS=$(
 CKPTS=(
 #  "ckpt-others/pet-1024/zscl-lr-1.99e-5-lr_text-1.99e-5.ckpt"
 #  "ckpt-others/pet-1024/zscl-lr-1.99e-5-lr_text-1.99e-5.ckpt"
-  "ckpt-others/sketch-1024/fine-tune-lr-3e-5-lr_text-3e-5.ckpt"
-  "ckpt-others/sketch-1024/fine-tune-lr-3e-5-lr_text-3e-5.ckpt"
+#  "ckpt-others/sketch-1024/fine-tune-lr-3e-5-lr_text-3e-5.ckpt"
+#  "ckpt-others/sketch-1024/fine-tune-lr-3e-5-lr_text-3e-5.ckpt"
+  "ckpt-others/sketch-1024/fine-tune-lr-2e-5-lr_text-2e-5.ckpt"
+  "ckpt-others/sketch-1024/fine-tune-lr-2e-5-lr_text-2e-5.ckpt"
 )
 # 拼接检查点
 CKPTS_COMMA_JOINED=$(
