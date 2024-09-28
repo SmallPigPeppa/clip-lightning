@@ -16,7 +16,7 @@ datasets=(
 #  "patfig"
 #  "wikiart"
 #  "styles"
-#  "kream"
+  "kream"
   "sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
