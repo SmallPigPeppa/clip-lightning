@@ -143,7 +143,7 @@ class ImageRetrievalDataModule(LightningDataModule):
 
 
     def val_dataloader(self, dataset_name=None):
-        # dataset_name = dataset_name or self.dataset_name[0]  # Default to the first dataset if none is provided
+        dataset_name = dataset_name or self.dataset_name[0]  # Default to the first dataset if none is provided
         return DataLoader(
             self.datasets[dataset_name]["val"],
             batch_size=self.batch_size,
