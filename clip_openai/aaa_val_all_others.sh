@@ -8,15 +8,15 @@ MODEL_NAME=ViT-B/16
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-  "flickr30k"
-  "coco2014"
-  "pet"
-  "lexica"
-  "simpsons"
-  "patfig"
-  "wikiart"
-  "styles"
-  "kream"
+#  "flickr30k"
+#  "coco2014"
+#  "pet"
+#  "lexica"
+#  "simpsons"
+#  "patfig"
+#  "wikiart"
+#  "styles"
+#  "kream"
   "sketch"
 )
 #datasets=("patfig" "wikiart" "styles" "kream" "sketch")
@@ -41,6 +41,8 @@ CKPTS_COMMA_JOINED=$(
   echo "${CKPTS[*]}"
 )
 
+CKPT="ckpt-others/sketch-1024/fine-tune-lr-2e-5-lr_text-2e-5.ckpt"
+
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
@@ -58,7 +60,7 @@ python cli_val.py validate \
   --model.result_path metrics_evaluation.xlsx \
   --model.model_name ${MODEL_NAME} \
   --model.download_root ./ \
-  --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
+  --model.old_checkpoint_path ${CKPT} \
   --trainer.accelerator gpu \
   --trainer.precision 16 \
   --trainer.max_epochs 1 \
