@@ -31,7 +31,7 @@ CKPTS=(
   "ckpt-others/pet-1024/zscl-lr-1.99e-5-lr_text-1.99e-5.ckpt"
   "ckpt-others/pet-1024/zscl-lr-1.99e-5-lr_text-1.99e-5.ckpt"
 )
-
+#  --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
 # 拼接检查点
 CKPTS_COMMA_JOINED=$(
   IFS=','
@@ -55,7 +55,6 @@ python cli_val.py validate \
   --model.result_path metrics_evaluation.xlsx \
   --model.model_name ${MODEL_NAME} \
   --model.download_root ./ \
-  --model.old_checkpoint_path ${CKPTS_COMMA_JOINED} \
   --trainer.accelerator gpu \
   --trainer.precision 16 \
   --trainer.max_epochs 1 \
