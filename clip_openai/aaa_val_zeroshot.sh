@@ -9,13 +9,13 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 datasets=(
 #  "cifar100"
-   "stl10"
    "flowers"
    "pets"
    "cars"
    "food101"
    "dtd"
    "aircraft"
+   "stl10"
 #   "cifar10"
 )
 
