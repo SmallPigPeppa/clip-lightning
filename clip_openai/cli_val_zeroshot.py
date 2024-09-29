@@ -1,5 +1,5 @@
 from lightning.pytorch import cli
-from clip_openai.zeroshot_others.data_module import ZeroshotDataModule
+from zeroshot_others.data_module import ZeroshotDataModule
 from model_val_zeroshot import CLIPDualEncoderModel
 
 import os
