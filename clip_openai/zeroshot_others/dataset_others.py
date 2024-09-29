@@ -321,6 +321,8 @@ def get_dataset(data_path, dataset_name):
         _, dataset_val = get_dtd(data_path)
     elif dataset_name == 'sun397':
         _, dataset_val = get_sun397(data_path)
+    elif dataset_name == 'food101':
+        _, dataset_val = get_food101(data_path)
     else:
         raise ValueError(f"Unknown dataset name: {dataset_name}")
 
