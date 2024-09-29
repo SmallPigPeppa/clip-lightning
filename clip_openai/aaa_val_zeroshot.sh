@@ -20,6 +20,7 @@ DATASETS=$(
 
 # 拼接检查点
 CKPT_DIR=/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/c-clip
+CKPT_DIR=/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-1e-5
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
