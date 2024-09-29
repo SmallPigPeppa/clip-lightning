@@ -30,7 +30,7 @@ def get_validation_loader(dataset_name, batch_size_zs=32, num_workers=8 ):
     # 检查数据集是否可用
     if dataset_name in dataset_mapping:
         hf_dataset_name = dataset_mapping[dataset_name]
-        dataset = load_dataset(hf_dataset_name, split='test')
+        dataset = load_dataset(hf_dataset_name, split='test', 'with_background_category')
     else:
         raise ValueError(f"Unknown zero shot dataset or dataset not available in Hugging Face datasets: {dataset_name}")
 
