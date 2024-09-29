@@ -6,8 +6,8 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 
 datasets=(
-#  "cifar100"
-#  "stl10"
+  "cifar100"
+  "stl10"
 #  "flowers"
   "pets"
   "cars"
