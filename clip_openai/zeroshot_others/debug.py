@@ -1,5 +1,6 @@
 from torchvision import datasets
-data_path='/ppio_net0/torch_ds'
+
+data_path = '/ppio_net0/torch_ds'
 # dataset_train = datasets.SUN397(root=data_path, download=True, transform=None)
 dataset_test = datasets.STL10(root=data_path, split='test', download=True, transform=None)
 # dataset_test = datasets.OxfordIIITPet(root=data_path, split='test', download=True, target_types='category',transform=None)
@@ -9,6 +10,7 @@ dataset_test = datasets.STL10(root=data_path, split='test', download=True, trans
 
 
 from dataset_others import *
+
 get_food101(data_path)
 get_aircraft(data_path)
 get_flowers(data_path)
@@ -17,3 +19,5 @@ get_pets(data_path)
 get_stl10(data_path)
 get_cifar10(data_path)
 get_cars(data_path)
+
+a = datasets.RenderedSST2(root=data_path, split='test', download=True, transform=None)
