@@ -62,4 +62,4 @@ def get_validation_loader(dataset_name, batch_size_zs=32, num_workers=8 ):
 
 
 if __name__ == '__main__':
-    a = get_validation_loader(dataset_name='cifar100')
+    a = get_validation_loader(dataset_name='caltech101')
