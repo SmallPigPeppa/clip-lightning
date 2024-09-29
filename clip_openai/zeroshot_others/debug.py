@@ -9,6 +9,11 @@ dataset_test = datasets.STL10(root=data_path, split='test', download=True, trans
 
 
 from dataset_others import *
-get_food101(data_path=data_path)
-get_aircraft(data_path=data_path)
+get_food101(data_path)
+get_aircraft(data_path)
 get_flowers(data_path)
+get_dtd(data_path)
+get_pets(data_path)
+get_stl10(data_path)
+get_cifar10(data_path)
+get_cars(data_path)
