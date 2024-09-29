@@ -1,5 +1,3 @@
-from logging import logMultiprocessing
-
 import numpy as np
 import torch
 from lightning import LightningModule
@@ -9,7 +7,6 @@ from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata_imagenet import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
-from typing import Union, List
 import pandas as pd
 import wandb
 from packaging import version

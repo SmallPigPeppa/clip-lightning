@@ -1,6 +1,4 @@
-import os.path
-
-import numpy as np
+import os
 from model_openai import SimpleTokenizer
 import torch
 from lightning import LightningModule
