@@ -69,7 +69,7 @@ class CLIPDualEncoderModel(LightningModule):
         return top1
 
     def validation_step(self, batch, *args, **kwargs):
-        return 0
+        pass
 
     def on_validation_epoch_end(self):
         dataset_all = self.trainer.datamodule.dataset_name
