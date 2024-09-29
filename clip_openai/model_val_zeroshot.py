@@ -116,8 +116,13 @@ class CLIPDualEncoderModel(LightningModule):
     def log_metrics_to_wandb(self, all_metrics):
         table_data = []
         for row in all_metrics:
-            table_data.append([row["dataset"]] + [row[f"task{i}"] for i in range(1, 9)])
+            # 从 task0 开始记录
+            table_data.append([row["dataset"]] + [row[f"task{i}"] for i in range(0, 9)])
 
-        table = wandb.Table(columns=["Dataset", "task1", "task2", "task3", "task4", "task5", "task6", "task7", "task8"],
-                            data=table_data)
+        # 将 task0 也加入列名
+        table = wandb.Table(
+            columns=["Dataset", "task0", "task1", "task2", "task3", "task4", "task5", "task6", "task7", "task8"],
+            data=table_data
+        )
         wandb.log({"zero_shot_results": table})
+
