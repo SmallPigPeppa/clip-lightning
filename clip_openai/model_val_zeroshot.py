@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 from model_openai import SimpleTokenizer
 import torch
@@ -10,15 +12,12 @@ import wandb
 
 
 def get_metadata(dataset_name):
-    """根据不同的数据集返回classnames和templates"""
-    if dataset_name == "CIFAR100":
-        # 具体的 CIFAR100 的类别名和模板
-        from zero_shot.zero_shot_metadata_cifar100 import CIFAR100_CLASSNAMES, CIFAR100_TEMPLATES
-        return CIFAR100_CLASSNAMES, CIFAR100_TEMPLATES
-    elif dataset_name == "STL10":
-        # 具体的 STL10 的类别名和模板
-        from zero_shot.zero_shot_metadata_stl10 import STL10_CLASSNAMES, STL10_TEMPLATES
-        return STL10_CLASSNAMES, STL10_TEMPLATES
+    if dataset_name == "cifar100":
+        from zero_shot.zero_shot_metadata_cifar100 import classes, templates
+        return classes, templates
+    elif dataset_name == "stl10":
+        from zero_shot.zero_shot_metadata_stl10 import classes, templates
+        return classes, templates
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
 
@@ -28,7 +27,9 @@ class CLIPDualEncoderModel(LightningModule):
             self,
             model_name: str = 'RN50',
             download_root: str = None,
+            ckpt_dir: str = None,
             batch_size: int = 32,
+
             *args,
             **kwargs,
     ) -> None:
@@ -38,7 +39,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.tokenizer = SimpleTokenizer()
 
     def load_task_checkpoint(self, checkpoint_path):
-        """加载不同任务的 checkpoint"""
+        checkpoint_path = os.path.join(self.hparams.ckpt_dir, checkpoint_path)
         checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
         self.model.load_state_dict(checkpoint['model'], strict=True)
         print(f"Loaded checkpoint: {checkpoint_path}")
@@ -96,7 +97,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_metrics_to_wandb(all_metrics)
 
     def log_metrics_to_wandb(self, all_metrics):
-        """将结果以表格形式记录到 wandb"""
         table_data = []
         for row in all_metrics:
             table_data.append([row["dataset"]] + [row[f"task{i}"] for i in range(1, 9)])
