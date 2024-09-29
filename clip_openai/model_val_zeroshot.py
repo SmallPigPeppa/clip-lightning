@@ -72,8 +72,12 @@ class CLIPDualEncoderModel(LightningModule):
         pass
 
     def on_validation_epoch_end(self):
+        # 获取所有数据集名称
         dataset_all = self.trainer.datamodule.dataset_name
+
+        # 任务的checkpoint列表，task0不会加载ckpt，因此为None
         task_checkpoints = [
+            None,  # task0，不加载任何 checkpoint
             "task1.ckpt", "task2.ckpt", "task3.ckpt", "task4.ckpt",
             "task5.ckpt", "task6.ckpt", "task7.ckpt", "task8.ckpt"
         ]
@@ -81,20 +85,32 @@ class CLIPDualEncoderModel(LightningModule):
         all_metrics = []
 
         for dataset_name in dataset_all:
+            # 获取对应数据集的 classnames 和 templates
             classnames, templates = get_metadata(dataset_name)
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader(dataset_name)
 
+            # 保存当前数据集的评估结果
             metrics_row = {"dataset": dataset_name}
 
             for task_idx, task_ckpt in enumerate(task_checkpoints):
-                self.load_task_checkpoint(task_ckpt)
+                if task_ckpt is not None:
+                    # 对于 task1-task8，加载不同的 checkpoint
+                    self.load_task_checkpoint(task_ckpt)
+                else:
+                    # task0 不加载 checkpoint，使用初始化的模型
+                    print("Evaluating task0 with the initialized model (no checkpoint loaded)")
+
+                # 切换到评估模式
                 self.model.eval()
 
+                # 评估 zero-shot 性能，计算 top1 accuracy
                 top1_accuracy = self.get_zero_shot_metrics(zero_shot_loader, classnames, templates)
-                metrics_row[f"task{task_idx + 1}"] = top1_accuracy
+                metrics_row[f"task{task_idx}"] = top1_accuracy  # 任务编号从0开始，task0, task1, ...
 
+            # 将当前数据集的评估结果添加到总体列表
             all_metrics.append(metrics_row)
 
+        # 记录到W&B或其他日志系统
         self.log_metrics_to_wandb(all_metrics)
 
     def log_metrics_to_wandb(self, all_metrics):
