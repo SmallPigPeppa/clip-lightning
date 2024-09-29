@@ -19,7 +19,7 @@ def get_validation_loader(dataset_name, batch_size_zs=32, num_workers=8 ):
     dataset_mapping = {
         'cifar10': 'cifar10',
         'cifar100': 'cifar100',
-        'caltech101': 'caltech101',
+        'caltech101': 'SaulLu/Caltech-101',
         'sun397': 'sun397',
         'flowers': 'oxford_flowers102',
         'pets': 'oxford_iiit_pet',
