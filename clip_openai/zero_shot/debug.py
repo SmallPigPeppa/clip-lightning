@@ -1,5 +1,4 @@
 from datasets import load_dataset
-from lightning.app.storage.copier import num_workers
 from torch.utils.data import DataLoader
 from torchvision import transforms
 import os
