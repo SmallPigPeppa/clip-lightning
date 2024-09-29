@@ -16,6 +16,15 @@ def get_metadata(dataset_name):
     elif dataset_name == "stl10":
         from zero_shot.zero_shot_metadata_stl10 import classes, templates
         return classes, templates
+    elif dataset_name == "flowers":
+        from zero_shot.zero_shot_metadata_flowers102 import classes, templates
+        return classes, templates
+    elif dataset_name == "pets":
+        from zero_shot.zero_shot_metadata_pets import classes, templates
+        return classes, templates
+    elif dataset_name == "cars":
+        from zero_shot.zero_shot_metadata_cars import classes, templates
+        return classes, templates
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
 
