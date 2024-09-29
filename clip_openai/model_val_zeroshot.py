@@ -8,10 +8,24 @@ from timm.utils import accuracy
 from tqdm import tqdm
 import wandb
 
+"""
+from dataset_others import *
+get_food101(data_path)
+get_aircraft(data_path)
+get_flowers(data_path)
+get_dtd(data_path)
+get_pets(data_path)
+get_stl10(data_path)
+get_cifar10(data_path)
+get_cars(data_path)
+"""
 
 def get_metadata(dataset_name):
     if dataset_name == "cifar100":
         from zero_shot.zero_shot_metadata_cifar100 import classes, templates
+        return classes, templates
+    elif dataset_name == "cifar10":
+        from zero_shot.zero_shot_metadata_cifar10 import classes, templates
         return classes, templates
     elif dataset_name == "stl10":
         from zero_shot.zero_shot_metadata_stl10 import classes, templates
@@ -24,6 +38,15 @@ def get_metadata(dataset_name):
         return classes, templates
     elif dataset_name == "cars":
         from zero_shot.zero_shot_metadata_cars import classes, templates
+        return classes, templates
+    elif dataset_name == "food101":
+        from zero_shot.zero_shot_metadata_food101 import classes, templates
+        return classes, templates
+    elif dataset_name == "aircraft":
+        from zero_shot.zero_shot_metadata_aircraft import classes, templates
+        return classes, templates
+    elif dataset_name == "dtd":
+        from zero_shot.zero_shot_metadata_dtd import classes, templates
         return classes, templates
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
