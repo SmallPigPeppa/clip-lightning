@@ -2,6 +2,7 @@ from torchvision import datasets, transforms
 import torch
 import os
 
+
 def get_statistics(dataset):
     loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
     mean = 0.
@@ -29,6 +30,7 @@ def get_cifar10(data_path):
     ])
 
     transform_test = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
@@ -50,6 +52,7 @@ def get_cifar100(data_path):
 
     transform_test = transforms.Compose(
         [
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
         ]
@@ -70,7 +73,7 @@ def get_stl10(data_path):
     )
     transform_test = transforms.Compose(
         [
-            transforms.Resize((96, 96)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4823, 0.4466), (0.247, 0.243, 0.261)),
         ]
@@ -80,59 +83,6 @@ def get_stl10(data_path):
     return dataset_train, dataset_test
 
 
-def get_caltech101(data_path):
-    transform_train = transforms.Compose(
-        [
-            transforms.RandomResizedCrop(size=224, scale=(0.08, 1.0)),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: x.expand(3, -1, -1) if x.size(0) == 1 else x),  # 这一行确保所有输入图像都是三通道的
-            transforms.Normalize((0.5332, 0.5152, 0.4886), (0.2391, 0.2344, 0.2376)),
-        ]
-    )
-    transform_test = transforms.Compose(
-        [
-            transforms.Resize((256, 256)),
-            transforms.CenterCrop(size=224),
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: x.expand(3, -1, -1) if x.size(0) == 1 else x),  # 这一行确保所有输入图像都是三通道的
-            transforms.Normalize((0.5332, 0.5152, 0.4886), (0.2391, 0.2344, 0.2376)),
-        ]
-    )
-    dataset = datasets.Caltech101(root=data_path, target_type='category', download=True, transform=None)  # 先不进行预处理
-    dataset_train, dataset_test = split_dataset(dataset)  # 划分训练集和测试集
-    dataset_train.dataset.transform = transform_train  # 对训练集进行预处理
-    dataset_test.dataset.transform = transform_test  # 对测试集进行预处理
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-    #
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
-
-    return dataset_train, dataset_test
-
-
-# def to_3_channels(x):
-#     return torch.stack([x] * 3)
-
-
-def get_fashion_mnist(data_path):
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: x.expand(3, -1, -1) if x.size(0) == 1 else x),  # 这一行确保所有输入图像都是三通道的,
-            transforms.Normalize((0.2860, 0.2860, 0.2860), (0.3205, 0.3205, 0.3205))
-        ]
-    )
-    dataset_train = datasets.FashionMNIST(data_path, download=True, train=True, transform=transform)
-    dataset_test = datasets.FashionMNIST(data_path, download=True, train=False, transform=transform)
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-    #
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
-
-    return dataset_train, dataset_test
 
 
 def get_flowers(data_path):
@@ -154,12 +104,6 @@ def get_flowers(data_path):
     )
     dataset_train = datasets.Flowers102(root=data_path, split='train', download=True, transform=transform_train)
     dataset_test = datasets.Flowers102(root=data_path, split='test', download=True, transform=transform_test)
-
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-    #
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
 
     return dataset_train, dataset_test
 
@@ -185,12 +129,8 @@ def get_pets(data_path):
                                            transform=transform_train)
     dataset_test = datasets.OxfordIIITPet(root=data_path, split='test', download=True, target_types='category',
                                           transform=transform_test)
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-    #
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
     return dataset_train, dataset_test
+
 
 def get_cars(data_path):
     transform_train = transforms.Compose(
@@ -211,11 +151,6 @@ def get_cars(data_path):
     )
     dataset_train = datasets.StanfordCars(root=data_path, split='train', download=False, transform=transform_train)
     dataset_test = datasets.StanfordCars(root=data_path, split='test', download=False, transform=transform_test)
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
     return dataset_train, dataset_test
 
 
@@ -230,27 +165,17 @@ def get_aircraft(data_path):
     )
     transform_test = transforms.Compose(
         [
-            transforms.Resize((64, 64)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize((0.4880, 0.5145, 0.5339), (0.1854, 0.1825, 0.2013)),
         ]
     )
     dataset_train = datasets.FGVCAircraft(root=data_path, split='train', download=True, transform=transform_train)
     dataset_test = datasets.FGVCAircraft(root=data_path, split='test', download=True, transform=transform_test)
-    # mean_train, std_train = get_statistics(dataset_train)
-    # mean_test, std_test = get_statistics(dataset_test)
-    #
-    # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    # print(f'Test dataset: mean={mean_test}, std={std_test}')
     return dataset_train, dataset_test
 
 
 def get_rafdb(data_path):
-    # train_mean = [0.57520399, 0.44951904, 0.40121641]
-    # train_std = [0.20838688, 0.19108407, 0.18262798]
-    # test_mean = [0.57697346, 0.44934572, 0.40011644]
-    # test_std = [0.2081054, 0.18985509, 0.18132337]
-
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(size=32, scale=(0.08, 1.0)),
         transforms.RandomHorizontalFlip(),
@@ -259,7 +184,7 @@ def get_rafdb(data_path):
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize((32, 32)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize((0.57520399, 0.44951904, 0.40121641), (0.20838688, 0.19108407, 0.18262798))
     ])
@@ -268,6 +193,7 @@ def get_rafdb(data_path):
     dataset_test = datasets.ImageFolder(os.path.join(data_path, 'RAF-DB', 'test'), transform=test_transform)
 
     return dataset_train, dataset_test
+
 
 def get_pcam(data_path):
     transform_train = transforms.Compose(
@@ -280,7 +206,7 @@ def get_pcam(data_path):
     )
     transform_test = transforms.Compose(
         [
-            transforms.Resize((96, 96)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4823, 0.4466), (0.247, 0.243, 0.261)),
         ]
@@ -344,3 +270,32 @@ def get_sun397(data_path):
     return dataset_train, dataset_test
 
 
+def get_dataset(data_path, dataset_name):
+    dataset_name = dataset_name.lower()  # 转换为小写，以避免大小写差异导致的错误
+
+    if dataset_name == 'cifar10':
+        _, dataset_val = get_cifar10(data_path)
+    elif dataset_name == 'cifar100':
+        _, dataset_val = get_cifar100(data_path)
+    elif dataset_name == 'stl10':
+        _, dataset_val = get_stl10(data_path)
+    elif dataset_name == 'flowers':
+        _, dataset_val = get_flowers(data_path)
+    elif dataset_name == 'pets':
+        _, dataset_val = get_pets(data_path)
+    elif dataset_name == 'cars':
+        _, dataset_val = get_cars(data_path)
+    elif dataset_name == 'aircraft':
+        _, dataset_val = get_aircraft(data_path)
+    elif dataset_name == 'rafdb':
+        _, dataset_val = get_rafdb(data_path)
+    elif dataset_name == 'pcam':
+        _, dataset_val = get_pcam(data_path)
+    elif dataset_name == 'dtd':
+        _, dataset_val = get_dtd(data_path)
+    elif dataset_name == 'sun397':
+        _, dataset_val = get_sun397(data_path)
+    else:
+        raise ValueError(f"Unknown dataset name: {dataset_name}")
+
+    return dataset_val
