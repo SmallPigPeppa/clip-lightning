@@ -68,6 +68,11 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier  # 释放内存
         return top1
 
+    def validation_step(self, batch, *args, **kwargs):
+        self.log("val/clip_loss", 0., sync_dist=True)
+
+        return 0
+
     def on_validation_epoch_end(self):
         dataset_all = self.trainer.datamodule.dataset_name
         task_checkpoints = [
