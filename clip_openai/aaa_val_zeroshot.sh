@@ -29,7 +29,6 @@ python cli_val_zeroshot.py validate \
   --data.num_workers 8 \
   --data.config ${CONFIG_FILE} \
   --data.root_dir ${ROOT_DIR} \
-  --model.result_path metrics_evaluation.xlsx \
   --model.model_name ${MODEL_NAME} \
   --model.download_root ./ \
   --model.ckpt_dir ${CKPT_DIR} \
