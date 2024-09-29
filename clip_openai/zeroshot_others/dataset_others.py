@@ -269,6 +269,32 @@ def get_sun397(data_path):
     print(f'Test dataset: mean={mean_test}, std={std_test}')
     return dataset_train, dataset_test
 
+def get_food101(data_path):
+    transform_train = transforms.Compose(
+        [
+            transforms.RandomResizedCrop(size=224, scale=(0.08, 1.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            # transforms.Normalize((0.4832, 0.4449, 0.3951), (0.2160, 0.2131, 0.2136)),
+        ]
+    )
+    transform_test = transforms.Compose(
+        [
+            transforms.Resize((256, 256)),
+            transforms.CenterCrop(size=224),
+            transforms.ToTensor(),
+            # transforms.Normalize((0.4832, 0.4449, 0.3951), (0.2160, 0.2131, 0.2136)),
+        ]
+    )
+    dataset_train = datasets.Food101(root=data_path, download=True, transform=transform_train)
+    dataset_test = datasets.Food101(root=data_path, download=True, transform=transform_test)
+    mean_train, std_train = get_statistics(dataset_train)
+    mean_test, std_test = get_statistics(dataset_test)
+
+    print(f'Train dataset: mean={mean_train}, std={std_train}')
+    print(f'Test dataset: mean={mean_test}, std={std_test}')
+    return dataset_train, dataset_test
+
 
 def get_dataset(data_path, dataset_name):
     dataset_name = dataset_name.lower()  # 转换为小写，以避免大小写差异导致的错误
