@@ -8,7 +8,7 @@ from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from model_openai import my_load
 from zero_shot.zero_shot_classifier import ZeroShotClassifier
 from model_openai import SimpleTokenizer
-from zero_shot.zero_shot_metadata import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
+from zero_shot.zero_shot_metadata_imagenet import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
 from peft import get_peft_model, LoraConfig, TaskType
