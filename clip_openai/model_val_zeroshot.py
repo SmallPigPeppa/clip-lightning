@@ -86,7 +86,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # 任务的checkpoint列表，task0不会加载ckpt，因此为None
         task_checkpoints = [
-            None,  # task0，不加载任何 checkpoint
+            "task0.ckpt",  # task0，不加载任何 checkpoint
             "task1.ckpt", "task2.ckpt", "task3.ckpt", "task4.ckpt",
             "task5.ckpt", "task6.ckpt", "task7.ckpt", "task8.ckpt"
         ]
@@ -102,7 +102,7 @@ class CLIPDualEncoderModel(LightningModule):
             metrics_row = {"dataset": dataset_name}
 
             for task_idx, task_ckpt in enumerate(task_checkpoints):
-                if task_ckpt is not None:
+                if task_idx > 0:
                     # 对于 task1-task8，加载不同的 checkpoint
                     self.load_task_checkpoint(task_ckpt)
                 else:
@@ -134,4 +134,3 @@ class CLIPDualEncoderModel(LightningModule):
             data=table_data
         )
         wandb.log({"zero_shot_results": table})
-
