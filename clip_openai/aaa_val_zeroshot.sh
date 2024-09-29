@@ -7,10 +7,10 @@ MODEL_NAME=ViT-B/16
 
 datasets=(
   "cifar100"
-  "stl10"
-#  "flowers"
-  "pets"
-  "cars"
+#  "stl10"
+##  "flowers"
+#  "pets"
+#  "cars"
 )
 DATASETS=$(
   IFS=','
@@ -21,6 +21,7 @@ DATASETS=$(
 # 拼接检查点
 CKPT_DIR=/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/c-clip
 CKPT_DIR=/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-1e-5
+CKPT_DIR=/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-2e-5
 # 其他参数
 CONFIG_FILE=config.yaml
 ROOT_DIR=/ppio_net0/torch_ds
