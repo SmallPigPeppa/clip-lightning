@@ -283,17 +283,17 @@ def get_food101(data_path):
             transforms.Resize((256, 256)),
             transforms.CenterCrop(size=224),
             transforms.ToTensor(),
-            # transforms.Normalize((0.4832, 0.4449, 0.3951), (0.2160, 0.2131, 0.2136)),
+            transforms.Normalize((0.5545, 0.4432, 0.3324), (0.2222, 0.2340, 0.2303)),
         ]
     )
-    # dataset_train = datasets.Food101(root=data_path, download=True, transform=transform_train)
+    dataset_train = datasets.Food101(root=data_path, download=True, transform=transform_train)
     dataset_test = datasets.Food101(root=data_path, download=True, transform=transform_test)
     # mean_train, std_train = get_statistics(dataset_train)
-    mean_test, std_test = get_statistics(dataset_test)
+    # mean_test, std_test = get_statistics(dataset_test)
 
     # print(f'Train dataset: mean={mean_train}, std={std_train}')
-    print(f'Test dataset: mean={mean_test}, std={std_test}')
-    # return dataset_train, dataset_test
+    # print(f'Test dataset: mean={mean_test}, std={std_test}')
+    return dataset_train, dataset_test
 
 
 def get_dataset(data_path, dataset_name):

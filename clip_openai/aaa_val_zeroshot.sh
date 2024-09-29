@@ -9,14 +9,14 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 datasets=(
 #  "cifar100"
-   "stl10"
+#   "stl10"
    "flowers"
    "pets"
    "cars"
    "food101"
 #   "dtd"
    "aircraft"
-   "cifar10"
+#   "cifar10"
 )
 
 # 将 datasets 数组转换为逗号分隔的字符串
