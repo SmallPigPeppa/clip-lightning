@@ -1,7 +1,7 @@
 from typing import Optional
 from torch.utils.data import DataLoader
 from lightning import LightningDataModule
-from dataset_others import get_dataset
+from .dataset_others import get_dataset
 
 
 class ZeroshotDataModule(LightningDataModule):
