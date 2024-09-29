@@ -69,8 +69,6 @@ class CLIPDualEncoderModel(LightningModule):
         return top1
 
     def validation_step(self, batch, *args, **kwargs):
-        self.log("val/clip_loss", 0., sync_dist=True)
-
         return 0
 
     def on_validation_epoch_end(self):
