@@ -92,6 +92,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             )
         else:
             # 主函数部分
+            import pdb;pdb.set_trace()
             dataset_config = DATASET_MAPPINGS[self.dataset_name]
 
             # 获取数据增强的配置
