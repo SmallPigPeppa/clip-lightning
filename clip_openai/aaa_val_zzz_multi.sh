@@ -20,7 +20,6 @@ datasets=(
 #  "sketch"
 #  "shahnegar"
   "clothes"
-
 )
 
 # 将 datasets 数组转换为逗号分隔的字符串
