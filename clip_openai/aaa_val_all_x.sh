@@ -8,8 +8,8 @@ MODEL_NAME=ViT-B/16
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-  "flickr30k"
-#  "coco2014"
+#  "flickr30k"
+  "coco2014"
 #  "pet"
 #  "lexica"
   #"simpsons"
@@ -27,8 +27,9 @@ DATASETS=$(
 
 CKPTS=(
 #  "ckpt/flickr30k-1024/distill_lora_v2-lr-8.6e-6-lr_text-1.3e-4.ckpt"
-  "ckpt/flickr30k-1024/vanilla-lr-8.6e-6-lr_text-1.3e-4.ckpt"
+#  "ckpt/flickr30k-1024/vanilla-lr-8.6e-6-lr_text-1.3e-4.ckpt"
 #  "ckpt/coco2014-1024/distill_lora_v2-lr-5e-7-lr_text-4e-5.ckpt"
+  "ckpt/coco2014-1024/vanilla-lr-1e-8-lr_text-5e-4.ckpt"
 #  "ckpt-cl/task2-coco2014.ckpt"
 #  "ckpt/pet-1024/distill-lr-3e-5-lr_text-3e-5.ckpt"
 #  "ckpt-x/lexica-1024/distill_x-lr-5e-5-lr_text-5e-5.ckpt"
