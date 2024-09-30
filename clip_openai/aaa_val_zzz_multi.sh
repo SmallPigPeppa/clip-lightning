@@ -19,7 +19,8 @@ datasets=(
 #  "styles"
 #  "kream"
 #  "sketch"
-  "shahnegar"
+#  "shahnegar"
+  "hausavg"
 #  "clothes"
 )
 
