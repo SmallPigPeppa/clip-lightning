@@ -121,21 +121,21 @@ class ImageRetrievalDataModule(LightningDataModule):
                 # 检查是否已经存在索引文件
                 cache_file = get_cache_file_path(dataset_name, train_ratio, val_ratio)
                 if os.path.exists(cache_file):
-                    # 文件存在，加载已有的索引
+                    # File exists, load the existing indices
                     train_indices, val_indices = load_split_indices(cache_file)
-                    print(f"使用缓存的划分索引：{cache_file}")
+                    print(f"Using cached split indices: {cache_file}")
                 else:
-                    # 文件不存在，随机划分并保存索引
-                    print("没有找到缓存文件，第一次随机划分数据集。")
+                    # File does not exist, randomly split and save the indices
+                    print("Cache file not found, performing first-time random split of the dataset.")
                     indices = np.arange(total_len)
                     np.random.shuffle(indices)
 
-                    train_indices = indices[:train_len].tolist()  # 转换为 Python 列表
+                    train_indices = indices[:train_len].tolist()  # Convert to Python list
                     val_indices = indices[train_len:train_len + val_len].tolist()
 
-                    # 保存到文件
+                    # Save to file
                     save_split_indices(cache_file, train_indices, val_indices)
-                    print(f"随机划分已保存到缓存文件：{cache_file}")
+                    print(f"Random split saved to cache file: {cache_file}")
 
                 # 创建子集
                 train_dataset = Subset(full_dataset, train_indices)
