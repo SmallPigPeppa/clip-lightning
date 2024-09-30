@@ -36,13 +36,13 @@ declare -A DATASET_LR_TEXT_MAP=(
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
-  ["vanilla"]="cli_vanilla_zeroshot_hf_x.py"
-  ["lora"]="cli_vanilla_zeroshot_lora_best_x.py"
-  ["lora_v2"]="cli_vanilla_zeroshot_lora_best_v2_x.py"
-  ["distill"]="cli_distill_zeroshot_x.py"
-  ["distill_v4"]="cli_distill_zeroshot_v4_x.py"
-  ["distill_lora"]="cli_distill_zeroshot_lora_best_x.py"
-  ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2_x.py"
+  ["vanilla_x"]="cli_vanilla_zeroshot_hf_x.py"
+  ["lora_x"]="cli_vanilla_zeroshot_lora_best_x.py"
+  ["lora_v2_x"]="cli_vanilla_zeroshot_lora_best_v2_x.py"
+  ["distill_x"]="cli_distill_zeroshot_x.py"
+  ["distill_v4_x"]="cli_distill_zeroshot_v4_x.py"
+  ["distill_lora_x"]="cli_distill_zeroshot_lora_best_x.py"
+  ["distill_lora_v2_x"]="cli_distill_zeroshot_lora_best_v2_x.py"
 )
 
 # 其他参数
@@ -108,7 +108,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2_x" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
