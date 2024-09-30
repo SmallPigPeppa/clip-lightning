@@ -11,6 +11,7 @@ MODEL_NAME=ViT-B/16
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "pet" "lexica" "simpsons" "wikiart" "kream" "sketch")
 #DATASETS=("coco2014" "pet" "lexica" "simpsons" "wikiart")
+DATASETS=("pet" "lexica" "simpsons" "wikiart" "kream" "sketch")
 
 LR=1e-5
 
@@ -66,7 +67,7 @@ run_training() {
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt-others \
+    --model_checkpoint.dirpath ckpt-ft \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}"
 
@@ -87,14 +88,12 @@ for i in "${!DATASETS[@]}"; do
 
   # 设置ckpt路径，如果是第一个数据集，不设置old_checkpoint_path
   if [[ $i -ne 0 ]]; then
-    CKPT_FINE_TUNE="ckpt-others/${DATASETS[$((i-1))]}-1024/fine-tune-lr-${LR}-lr_text-${LR}.ckpt"
-    CKPT_ZSCL="ckpt-others/${DATASETS[$((i-1))]}-1024/zscl-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT_FINE_TUNE="ckpt-ft/${DATASETS[$((i-1))]}-1024/fine-tune-lr-${LR}-lr_text-${LR}.ckpt"
+    CKPT_ZSCL="ckpt-ft/${DATASETS[$((i-1))]}-1024/zscl-lr-${LR}-lr_text-${LR}.ckpt"
   else
     # 对于第一个数据集，使用 flickr30k 的 checkpoint
-#    CKPT_FINE_TUNE="ckpt-others/flickr30k-1024/fine-tune-lr-${LR}-lr_text-${LR}.ckpt"
-#    CKPT_ZSCL="ckpt-others/flickr30k-1024/zscl-lr-${LR}-lr_text-${LR}.ckpt"
-    CKPT_FINE_TUNE=""
-    CKPT_ZSCL=""
+    CKPT_FINE_TUNE="ckpt/coco2014-1024/task2-vanilla-lr-1e-8-lr_text-5e-4.ckpt"
+    CKPT_ZSCL="ckpt/coco2014-1024/task2-vanilla-lr-1e-8-lr_text-5e-4.ckpt"
   fi
   # 按不同的方法运行
   run_training "fine-tune" ${DATASET_NAME} ${LR} ${LR} ${CKPT_FINE_TUNE}
