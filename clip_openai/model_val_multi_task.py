@@ -197,3 +197,6 @@ class CLIPDualEncoderModel(LightningModule):
                    [f"task{i}_text2image_R@1" for i in range(9)])
         table = wandb.Table(columns=columns, data=table_data)
         wandb.log({"recall_results": table})
+
+    def validation_step(self, batch, *args, **kwargs):
+        pass
