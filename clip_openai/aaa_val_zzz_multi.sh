@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 datasets=(
-#  "flickr30k"
+  "flickr30k"
 #  "coco2014"
 #  "pet"
 #  "lexica"
@@ -19,7 +19,7 @@ datasets=(
 #  "kream"
 #  "sketch"
 #  "shahnegar"
-  "clothes"
+#  "clothes"
 )
 
 # 将 datasets 数组转换为逗号分隔的字符串
