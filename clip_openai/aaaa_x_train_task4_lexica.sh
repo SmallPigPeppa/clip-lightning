@@ -36,13 +36,13 @@ declare -A DATASET_LR_TEXT_MAP=(
 
 # 脚本方法映射
 declare -A METHOD_MAP=(
-  ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
-  ["lora_v2"]="cli_vanilla_zeroshot_lora_best_v2.py"
-  ["distill"]="cli_distill_zeroshot.py"
-  ["distill_v4"]="cli_distill_zeroshot_v4.py"
-  ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
-  ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
+  ["vanilla"]="cli_vanilla_zeroshot_hf_x.py"
+  ["lora"]="cli_vanilla_zeroshot_lora_best_x.py"
+  ["lora_v2"]="cli_vanilla_zeroshot_lora_best_v2_x.py"
+  ["distill"]="cli_distill_zeroshot_x.py"
+  ["distill_v4"]="cli_distill_zeroshot_v4_x.py"
+  ["distill_lora"]="cli_distill_zeroshot_lora_best_x.py"
+  ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2_x.py"
 )
 
 # 其他参数
