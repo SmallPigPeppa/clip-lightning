@@ -153,6 +153,7 @@ class CLIPDualEncoderModel(LightningModule):
         # 循环数据集
         for dataset_name in dataset_all:
             self.model = my_load(name=self.hparams.model_name, download_root=self.hparams.download_root)
+            self.model.to(self.device)
             val_loader = self.trainer.datamodule.val_dataloader(dataset_name)
 
             # 创建保存结果的字典
