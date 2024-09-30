@@ -29,10 +29,10 @@ DATASETS=$(IFS=','; echo "${datasets[*]}")
 
 # 检查点目录列表
 ckpt_dirs=(
-  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/c-clip"
-#  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-1e-5"
-#  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-2e-5"
-#  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-3e-5"
+#  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/c-clip"
+  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-1e-5"
+  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-2e-5"
+  "/ppio_net0/code/clip-lightning/clip_openai/ckpt-zeroshot/ft-3e-5"
 )
 
 # 其他参数
