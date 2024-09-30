@@ -8,7 +8,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 datasets=(
-   "clothes"
+#   "clothes"
 #  "flickr30k"
 #  "coco2014"
 #  "pet"
@@ -19,7 +19,7 @@ datasets=(
 #  "styles"
 #  "kream"
 #  "sketch"
-#  "shahnegar"
+  "shahnegar"
 #  "clothes"
 )
 
