@@ -102,7 +102,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             if isinstance(dataset_config['splits']['train'], (int, float)):
                 # 创建数据集实例（无分割信息）
                 full_dataset = ImageRetrievalDatasetHF(
-                    dataset_name=self.dataset_name,
+                    dataset_name=dataset_name,
                     root_dir=self.root_dir,
                     tokenizer=self.tokenizer,
                     max_length=self.max_length,
@@ -119,7 +119,7 @@ class ImageRetrievalDataModule(LightningDataModule):
                 val_len = int(total_len * val_ratio)
 
                 # 检查是否已经存在索引文件
-                cache_file = get_cache_file_path(self.dataset_name, train_ratio, val_ratio)
+                cache_file = get_cache_file_path(dataset_name, train_ratio, val_ratio)
                 if os.path.exists(cache_file):
                     # 文件存在，加载已有的索引
                     train_indices, val_indices = load_split_indices(cache_file)
