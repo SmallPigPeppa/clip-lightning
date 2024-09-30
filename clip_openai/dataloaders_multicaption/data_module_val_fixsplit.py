@@ -139,10 +139,10 @@ class ImageRetrievalDataModule(LightningDataModule):
 
                 # 创建子集
                 train_dataset = Subset(full_dataset, train_indices)
-                self.val_dataset = Subset(full_dataset, val_indices)
+                val_dataset = Subset(full_dataset, val_indices)
 
                 # 为验证集设置正确的变换
-                self.val_dataset.dataset.transforms = val_transforms
+                val_dataset.dataset.transforms = val_transforms
             else:
                 # 使用预定义的分割
                 val_dataset = ImageRetrievalDatasetHF(
