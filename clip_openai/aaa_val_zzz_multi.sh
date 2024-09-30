@@ -8,8 +8,8 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 datasets=(
+   "clothes"
 #  "flickr30k"
-  "clothes"
 #  "coco2014"
 #  "pet"
 #  "lexica"
