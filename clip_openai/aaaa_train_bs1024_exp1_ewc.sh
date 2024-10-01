@@ -96,7 +96,7 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "modx" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
   run_training "ewc" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
