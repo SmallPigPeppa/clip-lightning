@@ -115,9 +115,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.model_old.eval()
         # Initialize the fisher_information dict
         fisher_information = {}
-        param_names = [name for name, param in self.model_old.named_parameters() if param.requires_grad]
-        for name in param_names:
-            fisher_information[name] = torch.zeros_like(param)
+        for name, param in self.model_old.named_parameters():
+            if param.requires_grad:
+                fisher_information[name] = torch.zeros_like(param)
 
         n_samples = 0
         self.model_old.to(self.device)
@@ -143,7 +143,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.fisher_information = fisher_information
         # Store old parameters
-        self.params_old = {name: param.clone().detach() for name, param in self.model_old.named_parameters()}
+        self.params_old = {name: param.clone().detach() for name, param in self.model_old.named_parameters() if param.requires_grad}
 
     def ewc_loss(self):
         loss = 0.0
@@ -164,7 +164,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.use_ewc:
             ewc_loss = self.ewc_loss()
-            self.log("train/distill_loss", ewc_loss, sync_dist=True)
+            self.log("train/ewc_loss", ewc_loss, sync_dist=True)
             return clip_loss + ewc_loss
         else:
             return clip_loss
@@ -176,7 +176,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.use_ewc:
             ewc_loss = self.ewc_loss()
-            self.log("val/distill_loss", ewc_loss, sync_dist=True)
+            self.log("val/ewc_loss", ewc_loss, sync_dist=True)
             return clip_loss + ewc_loss
         else:
             return clip_loss
