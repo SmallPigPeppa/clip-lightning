@@ -143,18 +143,24 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.fisher_information = fisher_information
         # Store old parameters
-        self.params_old = {name: param.clone().detach() for name, param in self.model_old.named_parameters() if param.requires_grad}
+        self.params_old = {
+            name: param.clone().detach()
+            for name, param in self.model_old.named_parameters()
+            if param.requires_grad
+        }
 
     def ewc_loss(self):
         loss = 0.0
         for name, param in self.model.named_parameters():
-            if param.requires_grad:
+            if param.requires_grad and name in self.params_old:
                 # Get the old parameter
                 theta_i_old = self.params_old[name].to(self.device)
                 # Get the Fisher Information
                 F_i = self.fisher_information[name].to(self.device)
                 # Compute the loss
                 loss += (F_i * (param - theta_i_old).pow(2)).sum()
+            elif param.requires_grad:
+                print(f"Parameter {name} not found in self.params_old. Skipping in EWC loss.")
         return (self.ewc_lambda / 2) * loss
 
     def training_step(self, batch, *args, **kwargs):
