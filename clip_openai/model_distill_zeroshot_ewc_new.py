@@ -170,7 +170,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.use_ewc:
             ewc_loss = self.ewc_loss()
-            self.log("train/ewc_loss", ewc_loss, sync_dist=True)
+            self.log("train/distill_loss", ewc_loss, sync_dist=True)
             return clip_loss + ewc_loss
         else:
             return clip_loss
@@ -182,7 +182,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         if self.use_ewc:
             ewc_loss = self.ewc_loss()
-            self.log("val/ewc_loss", ewc_loss, sync_dist=True)
+            self.log("val/distill_loss", ewc_loss, sync_dist=True)
             return clip_loss + ewc_loss
         else:
             return clip_loss
