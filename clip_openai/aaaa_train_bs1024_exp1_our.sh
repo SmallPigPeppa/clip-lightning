@@ -104,5 +104,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop
+/ppio_net0/code/openapi.sh stop a2b028e85b48907c
 
