@@ -29,7 +29,7 @@ def get_lora_model_vision(model):
     target_modules = find_target_modules(model)
     lora_config = LoraConfig(
         inference_mode=False,
-        r=8,  # Rank of the low-rank decomposition
+        r=16,  # Rank of the low-rank decomposition
         lora_alpha=32,  # Scaling factor
         lora_dropout=0.1,  # Dropout rate for LoRA
         target_modules=target_modules,
@@ -47,7 +47,7 @@ def get_lora_model_text(model):
     # Initialize LoRA configuration with target modules
     lora_config = LoraConfig(
         inference_mode=False,
-        r=8,  # Rank of the low-rank decomposition
+        r=16,  # Rank of the low-rank decomposition
         lora_alpha=32,  # Scaling factor
         task_type='text',  # Task type
         lora_dropout=0.1,  # Dropout rate for LoRA
