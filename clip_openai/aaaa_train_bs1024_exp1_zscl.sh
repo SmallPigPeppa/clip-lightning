@@ -9,51 +9,15 @@ PROJECT=CLIP-1step-1024-params
 MODEL_NAME=ViT-B/16
 
 # 数据集列表
-DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-#DATASETS=("coco2014")
 DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=8.6e-6
-  ["coco2014"]=1e-5
-  ["wikiart"]=1e-5
-  ["patfig"]=1e-5
-  ["pet"]=1e-5
-  ["simpsons"]=1e-5
-  ["lexica"]=1e-5
-  ["styles"]=1e-5
-  ["kream"]=1e-5
-  ["sketch"]=1e-5
-  ["emoji"]=1e-5
-  ["fashion"]=1e-5
-  ["nouns"]=1e-5
-  ["shahnegar"]=1e-5
-  ["artbench"]=1e-5
-  ["hausavg"]=1e-5
-  ["food"]=1e-5
-  ["clothes"]=1e-5
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
   ["flickr30k"]=1.3e-4
-  ["coco2014"]=2e-4
-  ["wikiart"]=2e-4
-  ["patfig"]=2e-4
-  ["pet"]=2e-4
-  ["simpsons"]=2e-4
-  ["lexica"]=2e-4
-  ["styles"]=2e-4
-  ["kream"]=2e-4
-  ["sketch"]=2e-4
-  ["emoji"]=2e-4
-  ["fashion"]=2e-4
-  ["nouns"]=2e-4
-  ["shahnegar"]=2e-4
-  ["artbench"]=2e-4
-  ["hausavg"]=2e-4
-  ["food"]=2e-4
-  ["clothes"]=2e-4
 )
 
 
@@ -68,6 +32,8 @@ declare -A METHOD_MAP=(
   ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
   ["distill_lora_v2"]="cli_distill_zeroshot_lora_best_v2.py"
   ["distill_lora_v3"]="cli_distill_zeroshot_lora_best_v3.py"
+  ["zscl"]="cli_distill_zeroshot_zscl.py"
+  ["modx"]="cli_distill_zeroshot_modx.py"
 )
 
 # 其他参数
@@ -114,7 +80,7 @@ run_training() {
     --trainer.logger.log_model False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt \
+    --model_checkpoint.dirpath ckpt-exp1 \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-1024/${method}-lr-${lr}-lr_text-${lr_text}
 }
@@ -128,12 +94,11 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "modx" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v3" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
