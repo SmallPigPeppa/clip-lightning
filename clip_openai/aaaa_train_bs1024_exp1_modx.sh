@@ -94,8 +94,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 
   # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
 #  run_training "vanilla" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "modx" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "modx" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
@@ -104,5 +104,5 @@ for DATASET_NAME in "${DATASETS[@]}"; do
   echo "Completed training for dataset: ${DATASET_NAME}"
 done
 
-/ppio_net0/code/openapi.sh stop 14ee9a05e41fc7a4
+/ppio_net0/code/openapi.sh stop 4ba89aed10a162b3
 
