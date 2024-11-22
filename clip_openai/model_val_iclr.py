@@ -249,6 +249,7 @@ class CLIPDualEncoderModel(LightningModule):
                 row_data.append(metric.get(metric_name, 0))
             table.add_data(*row_data)
 
+        wandb.init()
         wandb.log({"metrics_table": table})
 
     def get_recall_metrics_5caption(self, dataloader, num_caption=5):
