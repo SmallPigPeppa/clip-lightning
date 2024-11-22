@@ -85,7 +85,7 @@ class CLIPDualEncoderModel(LightningModule):
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
             recall_eval_interval: int = 5,
-            prompt_length: int = 1,
+            prompt_length: int = 29,
             *args,
             **kwargs,
     ) -> None:
