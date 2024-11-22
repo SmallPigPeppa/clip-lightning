@@ -21,11 +21,11 @@ DATASETS=("flickr30k")
 #)
 
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=1e-10
+  ["flickr30k"]=3e-1
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=1e-10
+  ["flickr30k"]=3e-1
 )
 
 
@@ -47,7 +47,7 @@ declare -A METHOD_MAP=(
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ZERO_SHOT_EVAL_INTERVAL=20
+ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
 BATCH_SIZE=128
 BATCH_SIZE_ZS=32

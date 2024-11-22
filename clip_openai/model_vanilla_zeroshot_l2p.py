@@ -19,7 +19,8 @@ import math
 class PromptModule(nn.Module):
     def __init__(self, prompt_length, embed_dim):
         super(PromptModule, self).__init__()
-        self.prompt_embeddings = nn.Parameter(torch.zeros(prompt_length, embed_dim))
+        # self.prompt_embeddings = nn.Parameter(torch.zeros(prompt_length, embed_dim))
+        self.prompt_embeddings = nn.Parameter(torch.randn(prompt_length, embed_dim))
 
     def forward(self, x):
         batch_size = x.size(0)
@@ -100,56 +101,19 @@ class CLIPDualEncoderModel(LightningModule):
         embed_dim_text = self.model.transformer.width
         embed_dim_visual = self.model.visual.transformer.width
 
-        # self.prompt_module_text = PromptModule(self.hparams.prompt_length, embed_dim_text)
-        # self.prompt_module_visual = PromptModule(self.hparams.prompt_length, embed_dim_visual)
+        self.prompt_module_text = PromptModule(self.hparams.prompt_length, embed_dim_text)
+        self.prompt_module_visual = PromptModule(self.hparams.prompt_length, embed_dim_visual)
 
-        # # 冻结原始模型参数
-        # for param in self.model.parameters():
-        #     param.requires_grad = False
-        #
-        # # 使 Prompt 模块的参数可训练
-        # for param in self.prompt_module_text.parameters():
-        #     param.requires_grad = True
-        #
-        # for param in self.prompt_module_visual.parameters():
-        #     param.requires_grad = True
-
-    def initialize_old_modules(self):
-        if self.hparams.old_checkpoint_path is not None:
-            if ',' in self.hparams.old_checkpoint_path:
-                self.hparams.old_checkpoint_path = self.hparams.old_checkpoint_path.split(',')
-                # 初始化一个字典来存储所有检查点的参数和计数
-                avg_params = None
-                count = 0
-
-                for chkpt_path in self.hparams.old_checkpoint_path:
-                    checkpoint = torch.load(chkpt_path, map_location=torch.device('cpu'))
-                    model_params = checkpoint['model']
-
-                    if avg_params is None:
-                        avg_params = {k: v.clone().detach() for k, v in model_params.items()}
-                    else:
-                        for k in avg_params.keys():
-                            avg_params[k] += model_params[k]
-
-                    count += 1
-
-                # 计算均值
-                for k in avg_params.keys():
-                    avg_params[k] /= count
-
-                # 加载均值参数
-                self.model.load_state_dict(avg_params, strict=True)
-                print("Model weights loaded successfully and old parts averaged.")
-            else:
-                checkpoint = torch.load(self.hparams.old_checkpoint_path, map_location=torch.device('cpu'))
-                self.model.load_state_dict(checkpoint['model'], strict=True)
-                print("Model weights loaded successfully and old parts copied.")
-
-        self.model_old = copy.deepcopy(self.model)
-        # 冻结旧模块的所有参数
-        for param in self.model_old.parameters():
+        # 冻结原始模型参数
+        for param in self.model.parameters():
             param.requires_grad = False
+
+        # 使 Prompt 模块的参数可训练
+        for param in self.prompt_module_text.parameters():
+            param.requires_grad = True
+
+        for param in self.prompt_module_visual.parameters():
+            param.requires_grad = True
 
     def forward(self, inputs):
         # 编码图像
@@ -271,8 +235,8 @@ class CLIPDualEncoderModel(LightningModule):
     '''
 
     def encode_image_with_prompt(self, image):
-        image_features = self.model.encode_image(image)
-        return image_features
+        # image_features = self.model.encode_image(image)
+        # return image_features
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
@@ -313,22 +277,22 @@ class CLIPDualEncoderModel(LightningModule):
 
     def configure_optimizers(self):
         # 只优化 Prompt 模块的参数
-        # parameters = [
-        #     {
-        #         "params": self.prompt_module_visual.parameters(),
-        #         "lr": self.hparams.lr
-        #     },
-        #     {
-        #         "params": self.prompt_module_text.parameters(),
-        #         "lr": self.hparams.lr_text,
-        #         "weight_decay": self.hparams.weight_decay
-        #     }
-        # ]
-        parameters = [{
-            "params": self.model.parameters(),
-            "lr": self.hparams.lr,
-            "weight_decay": self.hparams.weight_decay
-        }]
+        parameters = [
+            {
+                "params": self.prompt_module_visual.parameters(),
+                "lr": self.hparams.lr
+            },
+            {
+                "params": self.prompt_module_text.parameters(),
+                "lr": self.hparams.lr_text,
+                "weight_decay": self.hparams.weight_decay
+            }
+        ]
+        # parameters = [{
+        #     "params": self.model.parameters(),
+        #     "lr": self.hparams.lr,
+        #     "weight_decay": self.hparams.weight_decay
+        # }]
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
@@ -477,42 +441,42 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-    def on_save_checkpoint(self, checkpoint):
-        if self.trainer.current_epoch != self.trainer.max_epochs - 1:
-            pass
-        elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            # 保存 Prompt 模块的参数
-            if self.trainer.is_global_zero:
-                print('************************')
-
-                # 创建一个新的 state_dict 用于保存权重
-                new_state_dict = {}
-
-                # 保存模型的参数
-                for name, param in self.model.named_parameters():
-                    new_state_dict[name] = param.data
-
-                # 保存 Prompt 模块的参数
-                for name, param in self.prompt_module_text.named_parameters():
-                    new_state_dict[f"prompt_module_text.{name}"] = param.data
-
-                for name, param in self.prompt_module_visual.named_parameters():
-                    new_state_dict[f"prompt_module_visual.{name}"] = param.data
-
-                # 将处理后的权重保存到检查点
-                checkpoint['model'] = new_state_dict
-
-                print('Saved model parameters with prompt modules:')
-                for name in new_state_dict.keys():
-                    print(name)
-
-                print('************************')
-
-                # 比较新模型参数名与旧模型参数名
-                print('Parameter Comparison with Old Model:')
-                for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
-                                                                    self.model_old.named_parameters()):
-                    if new_name != old_name:
-                        print(f"New: {new_name} | Old: {old_name}")
-
-                print('************************')
+    # def on_save_checkpoint(self, checkpoint):
+    #     if self.trainer.current_epoch != self.trainer.max_epochs - 1:
+    #         pass
+    #     elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
+    #         # 保存 Prompt 模块的参数
+    #         if self.trainer.is_global_zero:
+    #             print('************************')
+    #
+    #             # 创建一个新的 state_dict 用于保存权重
+    #             new_state_dict = {}
+    #
+    #             # 保存模型的参数
+    #             for name, param in self.model.named_parameters():
+    #                 new_state_dict[name] = param.data
+    #
+    #             # 保存 Prompt 模块的参数
+    #             for name, param in self.prompt_module_text.named_parameters():
+    #                 new_state_dict[f"prompt_module_text.{name}"] = param.data
+    #
+    #             for name, param in self.prompt_module_visual.named_parameters():
+    #                 new_state_dict[f"prompt_module_visual.{name}"] = param.data
+    #
+    #             # 将处理后的权重保存到检查点
+    #             checkpoint['model'] = new_state_dict
+    #
+    #             print('Saved model parameters with prompt modules:')
+    #             for name in new_state_dict.keys():
+    #                 print(name)
+    #
+    #             print('************************')
+    #
+    #             # 比较新模型参数名与旧模型参数名
+    #             print('Parameter Comparison with Old Model:')
+    #             for (new_name, param), (old_name, old_param) in zip(new_state_dict.items(),
+    #                                                                 self.model_old.named_parameters()):
+    #                 if new_name != old_name:
+    #                     print(f"New: {new_name} | Old: {old_name}")
+    #
+    #             print('************************')
