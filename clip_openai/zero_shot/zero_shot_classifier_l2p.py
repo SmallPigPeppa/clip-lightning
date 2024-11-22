@@ -65,8 +65,8 @@ class ZeroShotClassifier(LightningModule):
         self.tokenizer = tokenizer
         self.classnames = classnames
         self.templates = templates
-        # self.prompt_module_text = prompt_module_text
-        # self.prompt_module_visual = prompt_module_visual
+        self.prompt_module_text = prompt_module_text
+        self.prompt_module_visual = prompt_module_visual
         self.num_classes_per_batch = num_classes_per_batch
         self.max_length = max_length
         self.zeroshot_weights = None

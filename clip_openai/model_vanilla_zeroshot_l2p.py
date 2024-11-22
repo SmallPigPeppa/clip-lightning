@@ -100,19 +100,19 @@ class CLIPDualEncoderModel(LightningModule):
         embed_dim_text = self.model.transformer.width
         embed_dim_visual = self.model.visual.transformer.width
 
-        self.prompt_module_text = PromptModule(self.hparams.prompt_length, embed_dim_text)
-        self.prompt_module_visual = PromptModule(self.hparams.prompt_length, embed_dim_visual)
+        # self.prompt_module_text = PromptModule(self.hparams.prompt_length, embed_dim_text)
+        # self.prompt_module_visual = PromptModule(self.hparams.prompt_length, embed_dim_visual)
 
-        # 冻结原始模型参数
-        for param in self.model.parameters():
-            param.requires_grad = False
-
-        # 使 Prompt 模块的参数可训练
-        for param in self.prompt_module_text.parameters():
-            param.requires_grad = True
-
-        for param in self.prompt_module_visual.parameters():
-            param.requires_grad = True
+        # # 冻结原始模型参数
+        # for param in self.model.parameters():
+        #     param.requires_grad = False
+        #
+        # # 使 Prompt 模块的参数可训练
+        # for param in self.prompt_module_text.parameters():
+        #     param.requires_grad = True
+        #
+        # for param in self.prompt_module_visual.parameters():
+        #     param.requires_grad = True
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
