@@ -434,7 +434,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.zero_shot_classifier = ZeroShotClassifier(
             model=self.model,
             prompt_module_text=self.prompt_module_text,
-            prompt_module_visual=self.prompt_module_image,
+            prompt_module_visual=self.prompt_module_visual,
             tokenizer=self.tokenizer,
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
