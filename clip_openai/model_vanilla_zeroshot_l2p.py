@@ -162,32 +162,73 @@ class CLIPDualEncoderModel(LightningModule):
 
         return image_features, text_features
 
+    '''
+    def encode_text(self, text):
+    x = self.token_embedding(text)  # [batch_size, n_ctx, d_model]
+
+    x = x + self.positional_embedding
+    x = x.permute(1, 0, 2)  # NLD -> LND
+    x = self.transformer(x)
+    x = x.permute(1, 0, 2)  # LND -> NLD
+    x = self.ln_final(x)
+
+    # x.shape = [batch_size, n_ctx, transformer.width]
+    # take features from the eot embedding (eot_token is the highest number in each sequence)
+    x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.text_projection
+    '''
+
     def encode_text_with_prompt(self, text_tokens):
+        """
+        编码带有 Prompt 的文本序列。
+        :param text_tokens: 输入的文本 tokens，形状为 [batch_size, n_ctx]
+        :return: 文本特征，形状为 [batch_size, d_model]
+        """
         # 获取词嵌入
         x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
 
         # 添加 Prompt
-        x = self.prompt_module_text(x)
+        x = self.prompt_module_text(x)  # 假设 prompt_module_text 会在序列前添加 prompt
 
-        # 位置编码
-        pos_embed = self.model.positional_embedding[:x.size(1), :].unsqueeze(0).to(x.device)
+        # 原始序列长度和添加 Prompt 后的长度
+        original_length = text_tokens.size(1)
+        extended_length = x.size(1)  # 添加 Prompt 后的序列长度
+
+        # 插值位置编码
+        original_pos_embed = self.model.positional_embedding[:original_length, :]  # [n_ctx, d_model]
+        # 使用线性插值扩展位置编码
+        interpolated_pos_embed = F.interpolate(
+            original_pos_embed.unsqueeze(0).permute(0, 2, 1),  # 转换为 [1, d_model, n_ctx]
+            size=extended_length,  # 插值到 extended_length
+            mode='linear',
+            align_corners=False
+        ).squeeze(0).permute(1, 0).to(x.device)  # [extended_length, d_model]
+
+        # 添加位置编码
+        pos_embed = interpolated_pos_embed.unsqueeze(0)  # [1, extended_length, d_model]
         x = x + pos_embed
 
         x = x.permute(1, 0, 2)  # NLD -> LND
 
+        # Transformer
         x = self.model.transformer(x)
 
         x = x.permute(1, 0, 2)  # LND -> NLD
 
-        # 取 Prompt 之后的第一个 token（假设文本的 CLS token 在位置 0）
-        x = x[:, self.hparams.prompt_length, :]
+        # 计算 eot_token 的位置
+        # 原始 eot_token 的位置是 text_tokens.argmax(dim=-1)
+        # 加上 Prompt 的长度偏移 self.hparams.prompt_length
+        eot_positions = text_tokens.argmax(dim=-1) + self.hparams.prompt_length
 
+        # 提取 eot_token 的特征
+        x = x[torch.arange(x.size(0)), eot_positions]  # [batch_size, d_model]
+
+        # 归一化
         x = self.model.ln_final(x)
 
+        # 线性投影到特征空间
         text_features = x @ self.model.text_projection
 
         return text_features
-
     '''
         def forward(self, x: torch.Tensor):
             x = self.conv1(x)  # shape = [*, width, grid, grid]
