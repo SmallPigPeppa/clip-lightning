@@ -221,7 +221,7 @@ class CLIPDualEncoderModel(LightningModule):
         class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
         x = torch.cat([class_embedding, x], dim=1)
 
-        print('self.model.visual.positional_embedding',self.model.visual.positional_embedding.shape)
+        # print('self.model.visual.positional_embedding',self.model.visual.positional_embedding.shape)
         # 调整位置嵌入以适配新 token 数
         pos_embed = resize_pos_embed(
             self.model.visual.positional_embedding,
@@ -229,6 +229,8 @@ class CLIPDualEncoderModel(LightningModule):
             num_prefix_tokens=1
         ).to(x.device, x.dtype)
 
+        print('x', x.shape)
+        print('pos_embed', pos_embed.shape)
         # 添加位置嵌入
         x = x + pos_embed
 
