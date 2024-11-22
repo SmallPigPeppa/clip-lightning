@@ -22,11 +22,11 @@ DATASETS=("flickr30k")
 #)
 
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=8e-1
+  ["flickr30k"]=1e-2
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=8e-1
+  ["flickr30k"]=1e-2
 )
 
 
