@@ -313,18 +313,22 @@ class CLIPDualEncoderModel(LightningModule):
 
     def configure_optimizers(self):
         # 只优化 Prompt 模块的参数
-        parameters = [
-            {
-                "params": self.prompt_module_visual.parameters(),
-                "lr": self.hparams.lr
-            },
-            {
-                "params": self.prompt_module_text.parameters(),
-                "lr": self.hparams.lr_text,
-                "weight_decay": self.hparams.weight_decay
-            }
-        ]
-
+        # parameters = [
+        #     {
+        #         "params": self.prompt_module_visual.parameters(),
+        #         "lr": self.hparams.lr
+        #     },
+        #     {
+        #         "params": self.prompt_module_text.parameters(),
+        #         "lr": self.hparams.lr_text,
+        #         "weight_decay": self.hparams.weight_decay
+        #     }
+        # ]
+        parameters = [{
+            "params": self.model.parameters(),
+            "lr": self.hparams.lr,
+            "weight_decay": self.hparams.weight_decay
+        }]
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
