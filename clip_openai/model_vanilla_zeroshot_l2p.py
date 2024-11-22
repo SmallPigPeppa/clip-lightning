@@ -195,9 +195,9 @@ class CLIPDualEncoderModel(LightningModule):
         :return: 文本特征，形状为 [batch_size, d_model]
         """
 
-        image_features = self.model.encode_image(text_tokens)
+        text_features = self.model.encode_text(text_tokens)
 
-        return image_features
+        return text_features
         # 获取词嵌入
         x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
 
