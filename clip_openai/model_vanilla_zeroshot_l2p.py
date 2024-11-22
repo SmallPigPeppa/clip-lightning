@@ -12,6 +12,7 @@ from zero_shot.zero_shot_metadata_imagenet import IMAGENET_CLASSNAMES, OPENAI_IM
 from timm.utils import accuracy
 from tqdm import tqdm
 import copy
+import math
 
 
 # 定义 L2P 的 Prompt 模块
@@ -25,6 +26,43 @@ class PromptModule(nn.Module):
         prompt = self.prompt_embeddings.unsqueeze(0).expand(batch_size, -1, -1)
         x = torch.cat([prompt, x], dim=1)
         return x
+
+def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
+    """
+    Resize positional embeddings with bicubic interpolation.
+
+    Args:
+        pos_embed (torch.Tensor): 原始位置嵌入 (1, N, D)。
+        new_num_tokens (int): 新的 token 数量。
+        num_prefix_tokens (int): 前缀 token 的数量（如 CLS token）。
+
+    Returns:
+        torch.Tensor: 调整后的位置嵌入。
+    """
+    # 拆分前缀嵌入和网格嵌入
+    pos_prefix = pos_embed[:, :num_prefix_tokens, :]
+    pos_grid = pos_embed[:, num_prefix_tokens:, :]
+
+    # 计算原始网格大小（假设正方形）
+    num_grid_tokens = pos_grid.size(1)
+    grid_size_old = int(math.sqrt(num_grid_tokens))
+    grid_size_new = int(math.sqrt(new_num_tokens - num_prefix_tokens))
+
+    # 调整形状以适配插值 (1, C, H, W)
+    pos_grid = pos_grid.reshape(1, grid_size_old, grid_size_old, -1).permute(0, 3, 1, 2)
+
+    # 使用插值调整网格大小
+    pos_grid = F.interpolate(pos_grid, size=(grid_size_new, grid_size_new), mode='bicubic', align_corners=False)
+
+    # 恢复到原始形状 (1, N_new, D)
+    pos_grid = pos_grid.permute(0, 2, 3, 1).reshape(1, grid_size_new**2, -1)
+
+    # 合并前缀和网格嵌入
+    pos_embed_new = torch.cat([pos_prefix, pos_grid], dim=1)
+
+    return pos_embed_new
+
+
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -160,7 +198,15 @@ class CLIPDualEncoderModel(LightningModule):
         class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
         x = torch.cat([class_embedding, x], dim=1)
 
-        x = x + self.model.visual.positional_embedding[:x.size(1), :].unsqueeze(0).to(x.dtype)
+        # 调整位置嵌入以适配新 token 数
+        pos_embed = resize_pos_embed(
+            self.model.visual.positional_embedding,
+            new_num_tokens=x.size(1),
+            num_prefix_tokens=1
+        ).to(x.device, x.dtype)
+
+        # 添加位置嵌入
+        x = x + pos_embed
 
         x = x.permute(1, 0, 2)  # NLD -> LND
 
