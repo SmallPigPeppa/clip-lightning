@@ -304,7 +304,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return {
             "optimizer": optimizer,
-            "lr_scheduler": lr_scheduler,
+            # "lr_scheduler": lr_scheduler,
         }
 
     def _compute_losses(self, image_features, text_features):
