@@ -93,7 +93,7 @@ class CLIPDualEncoderModel(LightningModule):
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
-        self.initialize_old_modules()
+        # self.initialize_old_modules()
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
