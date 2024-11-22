@@ -11,65 +11,20 @@ from model_openai import SimpleTokenizer
 from zero_shot.zero_shot_metadata_imagenet import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
 from timm.utils import accuracy
 from tqdm import tqdm
-from peft import get_peft_model, LoraConfig, TaskType
-from transformers.pytorch_utils import Conv1D
 import copy
 
 
-def find_target_modules(model):
-    target_modules = []
-    for name, module in model.named_modules():
-        if isinstance(module, (nn.Linear, nn.Embedding)):
-            target_modules.append(name)
-    return target_modules
-
-
-def get_lora_model_vision(model):
-    # Define the target modules where LoRA should be applied
-    target_modules = find_target_modules(model)
-    lora_config = LoraConfig(
-        inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
-        lora_dropout=0.1,  # Dropout rate for LoRA
-        target_modules=target_modules,
-    )
-    # Apply LoRA to the model
-    lora_model = get_peft_model(model, lora_config)
-
-    return lora_model
-
-
-def get_lora_model_text(model):
-    # Define the target modules where LoRA should be applied
-    target_modules = find_target_modules(model)
-
-    # Initialize LoRA configuration with target modules
-    lora_config = LoraConfig(
-        inference_mode=False,
-        r=16,  # Rank of the low-rank decomposition
-        lora_alpha=32,  # Scaling factor
-        task_type='text',  # Task type
-        lora_dropout=0.1,  # Dropout rate for LoRA
-        target_modules=target_modules  # Specify the target modules
-    )
-
-    # Apply LoRA to the model
-    lora_model = get_peft_model(model, lora_config)
-
-    return lora_model
-
-
-class NewModel(nn.Module):
-    def __init__(self, original_conv1):
-        super(NewModel, self).__init__()
-        # 直接使用 deep copy 复制 conv1 层
-        self.conv1 = copy.deepcopy(original_conv1)
+# 定义 L2P 的 Prompt 模块
+class PromptModule(nn.Module):
+    def __init__(self, prompt_length, embed_dim):
+        super(PromptModule, self).__init__()
+        self.prompt_embeddings = nn.Parameter(torch.randn(prompt_length, embed_dim))
 
     def forward(self, x):
-        x = self.conv1(x)
+        batch_size = x.size(0)
+        prompt = self.prompt_embeddings.unsqueeze(0).expand(batch_size, -1, -1)
+        x = torch.cat([prompt, x], dim=1)
         return x
-
 
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
@@ -89,6 +44,7 @@ class CLIPDualEncoderModel(LightningModule):
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
             recall_eval_interval: int = 5,
+            prompt_length: int = 5,
             *args,
             **kwargs,
     ) -> None:
@@ -99,22 +55,23 @@ class CLIPDualEncoderModel(LightningModule):
 
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
-        # Apply LoRA to the model
-        self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
-        # lora: model.visual conv1
-        # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
-        # lora_config = LoraConfig(
-        #     inference_mode=False,
-        #     r=16,  # Rank of the low-rank decomposition
-        #     lora_alpha=32,  # Scaling factor
-        #     lora_dropout=0.1,  # Dropout rate for LoRA
-        #     target_modules=['conv1'],
-        # )
-        # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
+        # 初始化文本和视觉部分的 Prompt 模块
+        embed_dim_text = self.model.transformer.width
+        embed_dim_visual = self.model.visual.transformer.width
 
-        for param in self.model.visual.conv1.parameters():
+        self.prompt_module_text = PromptModule(self.hparams.prompt_length, embed_dim_text)
+        self.prompt_module_visual = PromptModule(self.hparams.prompt_length, embed_dim_visual)
+
+        # 冻结原始模型参数
+        for param in self.model.parameters():
             param.requires_grad = False
+
+        # 使 Prompt 模块的参数可训练
+        for param in self.prompt_module_text.parameters():
+            param.requires_grad = True
+
+        for param in self.prompt_module_visual.parameters():
+            param.requires_grad = True
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
@@ -149,29 +106,84 @@ class CLIPDualEncoderModel(LightningModule):
                 print("Model weights loaded successfully and old parts copied.")
 
         self.model_old = copy.deepcopy(self.model)
-        # Set requires_grad to False for all parameters in the old modules
+        # 冻结旧模块的所有参数
         for param in self.model_old.parameters():
             param.requires_grad = False
 
     def forward(self, inputs):
-        image_features = self.model.encode_image(inputs["image"])
-        text_features = self.model.encode_text(inputs["caption"])
+        # 编码图像
+        image = inputs["image"]
+        image_features = self.encode_image_with_prompt(image)
+
+        # 编码文本
+        text = inputs["caption"]
+        text_features = self.encode_text_with_prompt(text)
+
         return image_features, text_features
 
+    def encode_text_with_prompt(self, text_tokens):
+        # 获取词嵌入
+        x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
+
+        # 添加 Prompt
+        x = self.prompt_module_text(x)
+
+        # 位置编码
+        pos_embed = self.model.positional_embedding[:x.size(1), :].unsqueeze(0).to(x.device)
+        x = x + pos_embed
+
+        x = x.permute(1, 0, 2)  # NLD -> LND
+
+        x = self.model.transformer(x)
+
+        x = x.permute(1, 0, 2)  # LND -> NLD
+
+        # 取 Prompt 之后的第一个 token（假设文本的 CLS token 在位置 0）
+        x = x[:, self.hparams.prompt_length, :]
+
+        x = self.model.ln_final(x)
+
+        text_features = x @ self.model.text_projection
+
+        return text_features
+
+    def encode_image_with_prompt(self, image):
+        x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
+        x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
+        x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
+
+        # 添加 Prompt
+        x = self.prompt_module_visual(x)
+
+        # 添加类嵌入
+        class_embedding = self.model.visual.class_embedding.to(x.dtype)
+        class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
+        x = torch.cat([class_embedding, x], dim=1)
+
+        x = x + self.model.visual.positional_embedding[:x.size(1), :].unsqueeze(0).to(x.dtype)
+
+        x = x.permute(1, 0, 2)  # NLD -> LND
+
+        x = self.model.visual.transformer(x)
+
+        x = x.permute(1, 0, 2)  # LND -> NLD
+
+        x = self.model.visual.ln_post(x[:, 0, :])
+
+        if self.model.visual.proj is not None:
+            x = x @ self.model.visual.proj
+
+        return x
+
     def configure_optimizers(self):
-        # parameters = [{
-        #     "params": self.model.parameters(),
-        #     "lr": self.hparams.lr,
-        #     "weight_decay": self.hparams.weight_decay
-        # }]
+        # 只优化 Prompt 模块的参数
         parameters = [
             {
-                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
+                "params": self.prompt_module_visual.parameters(),
                 "lr": self.hparams.lr
             },
             {
-                "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
-                # 其他部分设置 4 倍学习率
+                "params": self.prompt_module_text.parameters(),
                 "lr": self.hparams.lr_text,
                 "weight_decay": self.hparams.weight_decay
             }
@@ -193,11 +205,11 @@ class CLIPDualEncoderModel(LightningModule):
 
     def _compute_losses(self, image_features, text_features):
 
-        # normalized features
+        # 归一化特征
         image_features = image_features / image_features.norm(dim=1, keepdim=True)
         text_features = text_features / text_features.norm(dim=1, keepdim=True)
 
-        # cosine similarity as logits
+        # 计算余弦相似度作为 logits
         logit_scale = self.model.logit_scale.exp()
         logits_per_image = logit_scale * image_features @ text_features.t()
         logits_per_text = logits_per_image.t()
@@ -225,36 +237,26 @@ class CLIPDualEncoderModel(LightningModule):
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
         self.log("val/clip_loss", clip_loss, sync_dist=True)
 
-        # self.val_img_feats.append(image_embeddings)
-        # self.val_text_feats.append(text_embeddings)
-
         return clip_loss
 
     def on_train_start(self):
-        # recall metric
+        # 计算 Recall 指标
         val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
         self.log_dict(recall_metric, sync_dist=True)
-        # # Zero-shot metric evaluation before training starts
-        # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        # self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
-        # recall metric
+        # 计算 Recall 指标
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
 
-        # zero-shot metric
+        # 计算 Zero-shot 指标
         if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
             zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
             zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
             self.log_dict(zero_shot_metric, sync_dist=True)
-
-
-
 
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
@@ -264,14 +266,13 @@ class CLIPDualEncoderModel(LightningModule):
             for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
                 images = inputs["image"].to(self.device)
                 targets = inputs["caption"].to(self.device)
-                image_features = self.model.encode_image(images)
-                text_features = self.model.encode_text(targets)
+                image_features = self.encode_image_with_prompt(images)
+                text_features = self.encode_text_with_prompt(targets)
                 val_img_feats.append(image_features)
                 val_text_feats.append(text_features)
 
         all_image_features = torch.cat(val_img_feats)
         all_text_features = torch.cat(val_text_feats)
-
 
         metrics = self.recall_score(
             image_features=all_image_features,
@@ -294,44 +295,8 @@ class CLIPDualEncoderModel(LightningModule):
             preds = torch.where(ranking == ground_truth)[1]
             preds = preds.detach().cpu().numpy()
             for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # 将 Recall 转换为百分比
 
-        return metrics
-
-
-    def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
-        self.zero_shot_classifier = ZeroShotClassifier(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            classnames=IMAGENET_CLASSNAMES,
-            templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size_zs,
-        ).to(self.device)
-
-        self.zero_shot_classifier.compute_weights()
-
-        top1, top5, n = 0., 0., 0.
-
-        with torch.no_grad():
-            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
-                images = images.to(self.device)
-                targets = targets.to(self.device)
-                logits = self.zero_shot_classifier(images)
-                # Measure accuracy
-                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
-                top1 += acc1.item() * images.size(0)
-                top5 += acc5.item() * images.size(0)
-                n += images.size(0)
-
-        top1 = top1 / n
-        top5 = top5 / n
-        metrics = {
-            "zero_shot/top1_accuracy": top1,
-            "zero_shot/top5_accuracy": top5
-        }
-        # Release the zero-shot classifier model to free up GPU memory
-        del self.zero_shot_classifier
         return metrics
 
     def get_zero_shot_metrics(self, dataloader):
@@ -353,7 +318,7 @@ class CLIPDualEncoderModel(LightningModule):
                 images = images.to(self.device)
                 targets = targets.to(self.device)
                 logits = self.zero_shot_classifier(images)
-                # Measure accuracy
+                # 计算准确率
                 acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
                 top1 += acc1.item() * images.size(0)
                 top5 += acc5.item() * images.size(0)
@@ -365,42 +330,38 @@ class CLIPDualEncoderModel(LightningModule):
             "zero_shot/top1_accuracy": top1,
             "zero_shot/top5_accuracy": top5
         }
-        # Release the zero-shot classifier model to free up GPU memory
+        # 释放内存
         del self.zero_shot_classifier
         return metrics
-
-
-
 
     def on_save_checkpoint(self, checkpoint):
-        # 处理视觉模块中的 conv1 和 transformer
         if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            # conv1 = copy.deepcopy(self.model.visual.conv1)
-            # self.model.visual.conv1 = conv1.merge_and_unload().conv1
-            self.model.visual.transformer.merge_and_unload()
-            self.model.transformer.merge_and_unload()
-
-            # 仅在主进程中输出
+            # 保存 Prompt 模块的参数
             if self.trainer.is_global_zero:
                 print('************************')
 
                 # 创建一个新的 state_dict 用于保存权重
                 new_state_dict = {}
 
-                # 遍历当前模型的参数，处理名称
+                # 保存模型的参数
                 for name, param in self.model.named_parameters():
-                    # 如果参数名称中包含 'base_model.model'，则去掉
-                    new_name = name.replace("base_model.model.", "")
-                    new_state_dict[new_name] = param.data
+                    new_state_dict[name] = param.data
 
-                # 保存处理后的权重到检查点
+                # 保存 Prompt 模块的参数
+                for name, param in self.prompt_module_text.named_parameters():
+                    new_state_dict[f"prompt_module_text.{name}"] = param.data
+
+                for name, param in self.prompt_module_visual.named_parameters():
+                    new_state_dict[f"prompt_module_visual.{name}"] = param.data
+
+                # 将处理后的权重保存到检查点
                 checkpoint['model'] = new_state_dict
 
-                print('Saved model parameters with modified names:')
-                for new_name in new_state_dict.keys():
-                    print(new_name)
+                print('Saved model parameters with prompt modules:')
+                for name in new_state_dict.keys():
+                    print(name)
 
                 print('************************')
 

@@ -19,7 +19,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 from transformers.pytorch_utils import Conv1D
 
 
-def find_target_modules(model):
+def  find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Linear, nn.Embedding)):
