@@ -271,7 +271,7 @@ class CLIPDualEncoderModel(LightningModule):
     '''
 
     def encode_image_with_prompt(self, image):
-        image_features = self.model.encode_image(x)
+        image_features = self.model.encode_image(image)
         return image_features
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
