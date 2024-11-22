@@ -20,13 +20,13 @@ declare -A DATASET_LR_TEXT_MAP=(
   ["flickr30k"]=1.3e-4
 )
 
-#declare -A DATASET_LR_MAP=(
-#  ["flickr30k"]=1e-3
-#)
-#
-#declare -A DATASET_LR_TEXT_MAP=(
-#  ["flickr30k"]=1e-3
-#)
+declare -A DATASET_LR_MAP=(
+  ["flickr30k"]=1e-2
+)
+
+declare -A DATASET_LR_TEXT_MAP=(
+  ["flickr30k"]=1e-2
+)
 
 
 
