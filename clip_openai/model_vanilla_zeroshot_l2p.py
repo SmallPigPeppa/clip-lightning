@@ -189,6 +189,22 @@ class CLIPDualEncoderModel(LightningModule):
         # 添加 Prompt
         x = self.prompt_module_text(x)  # 假设 prompt_module_text 会在序列前添加 prompt
 
+
+        # mask
+        # 获取原始 attn_mask
+        attn_mask = self.model.transformer.attn_mask  # 假设 attn_mask 是 [77, 77]
+
+        # 获取新的序列长度
+        new_length = x.size(1)  # [batch_size, extended_length, d_model]
+
+        # 如果序列长度发生了变化，调整 attn_mask
+        if attn_mask.size(0) != new_length:
+            attn_mask = F.pad(attn_mask, (0, new_length - attn_mask.size(0), 0, new_length - attn_mask.size(1)),
+                              value=float("-inf"))
+
+        # 替换到模型
+        self.model.transformer.attn_mask = attn_mask
+
         # 原始序列长度和添加 Prompt 后的长度
         original_length = text_tokens.size(1)
         extended_length = x.size(1)  # 添加 Prompt 后的序列长度
