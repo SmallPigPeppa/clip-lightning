@@ -11,8 +11,8 @@ MODEL_NAME=ViT-L/14@336px
 # 数据集列表，拼接成逗号分隔的字符串
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
-  "flickr30k"
-#  "coco2014"
+#  "flickr30k"
+  "coco2014"
 #  "pet"
 #  "lexica"
 #  "simpsons"
