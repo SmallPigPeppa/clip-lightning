@@ -122,7 +122,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         args = argparse.Namespace(
             data_set='IMNET',  # Specify ImageNet dataset
             data_path=os.path.join(self.root_dir, 'imagenet'),  # Path to your ImageNet dataset
-            input_size=224,  # Example of image size, adjust according to your needs
+            input_size=384,  # Example of image size, adjust according to your needs
             eval_crop_ratio=0.875  # Example of crop percentage, adjust according to your needs
             # Add other relevant parameters as needed
         )
