@@ -27,7 +27,6 @@ class PromptModule(nn.Module):
         x = torch.cat([prompt, x], dim=1)
         return x
 
-
 def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     """
     Resize positional embeddings with bicubic interpolation.
@@ -47,26 +46,25 @@ def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     # 计算原始网格大小（假设为正方形）
     num_grid_tokens = pos_grid.size(0)
     grid_size_old = int(math.sqrt(num_grid_tokens))
-    grid_size_new = int(math.sqrt(num_grid_tokens + new_num_tokens))
+    # grid_size_new = int(math.sqrt(new_num_tokens - num_prefix_tokens))
+    # 向上取整计算新的网格大小
+    grid_size_new = math.ceil(math.sqrt(new_num_tokens - num_prefix_tokens))
 
     # 调整形状以适配插值 (C, H, W)
     pos_grid = pos_grid.reshape(grid_size_old, grid_size_old, -1).permute(2, 0, 1)
 
     # 使用插值调整网格大小
-    pos_grid = F.interpolate(
-        pos_grid.unsqueeze(0),
-        size=(grid_size_new, grid_size_new),
-        mode='bicubic',
-        align_corners=False
-    )
+    pos_grid = F.interpolate(pos_grid.unsqueeze(0), size=(grid_size_new, grid_size_new), mode='bicubic', align_corners=False)
 
     # 恢复到原始形状 (N_new, D)
-    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new ** 2, -1)
+    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new**2, -1)
 
     # 合并前缀和网格嵌入
     pos_embed_new = torch.cat([pos_prefix, pos_grid], dim=0)
 
     return pos_embed_new
+
+
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -212,7 +210,6 @@ class CLIPDualEncoderModel(LightningModule):
     
             return x
     '''
-
     def encode_image_with_prompt(self, image):
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
