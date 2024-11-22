@@ -233,7 +233,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         print('x', x.shape)
         print('pos_embed', pos_embed.shape)
-        # 添加位置嵌入
+        pos_embed = pos_embed[:x.size(1), :].unsqueeze(0).to(x.device)
         x = x + pos_embed
 
         x = x.permute(1, 0, 2)  # NLD -> LND
