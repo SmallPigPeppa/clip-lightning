@@ -39,7 +39,7 @@ def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     Returns:
         torch.Tensor: 调整后的位置嵌入。
     """
-    import pdb;pdb.set_trace()
+    # import pdb;pdb.set_trace()
     # 拆分前缀嵌入和网格嵌入
     pos_prefix = pos_embed[:, :num_prefix_tokens, :]
     pos_grid = pos_embed[:, num_prefix_tokens:, :]
