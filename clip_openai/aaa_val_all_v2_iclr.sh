@@ -9,7 +9,7 @@ MODEL_NAME=ViT-B/16
 datasets=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
 datasets=(
   "flickr30k"
-  "coco2014"
+#  "coco2014"
 #  "pet"
 #  "lexica"
 #  "simpsons"
