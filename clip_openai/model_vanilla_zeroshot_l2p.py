@@ -186,6 +186,28 @@ class CLIPDualEncoderModel(LightningModule):
 
         return text_features
 
+    '''
+        def forward(self, x: torch.Tensor):
+            x = self.conv1(x)  # shape = [*, width, grid, grid]
+            x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
+            x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
+            x = torch.cat(
+                [self.class_embedding + torch.zeros(x.shape[0], 1, x.shape[-1], device=self.device),
+                 x], dim=1)  # shape = [*, grid ** 2 + 1, width]
+            x = x + self.positional_embedding
+            x = self.ln_pre(x)
+    
+            x = x.permute(1, 0, 2)  # NLD -> LND
+            x = self.transformer(x)
+            x = x.permute(1, 0, 2)  # LND -> NLD
+    
+            x = self.ln_post(x[:, 0, :])
+    
+            if self.proj is not None:
+                x = x @ self.proj
+    
+            return x
+    '''
     def encode_image_with_prompt(self, image):
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
@@ -199,6 +221,7 @@ class CLIPDualEncoderModel(LightningModule):
         class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
         x = torch.cat([class_embedding, x], dim=1)
 
+        print('self.model.visual.positional_embedding',self.model.visual.positional_embedding.shape)
         # 调整位置嵌入以适配新 token 数
         pos_embed = resize_pos_embed(
             self.model.visual.positional_embedding,
