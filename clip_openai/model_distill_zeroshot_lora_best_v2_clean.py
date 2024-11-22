@@ -1,4 +1,3 @@
-import itertools
 import numpy as np
 import torch
 import torch.nn as nn
@@ -118,40 +117,15 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.distill = True
         self.initialize_old_modules()
-
         self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
-        # # lora: model.visual conv1
-        # conv1 = NewModel(copy.deepcopy(self.model.visual.conv1))
-        # lora_config = LoraConfig(
-        #     inference_mode=False,
-        #     r=16,  # Rank of the low-rank decomposition
-        #     lora_alpha=32,  # Scaling factor
-        #     lora_dropout=0.1,  # Dropout rate for LoRA
-        #     target_modules=['conv1'],
-        # )
-        # self.model.visual.conv1 = get_peft_model(conv1, lora_config)
-
-        print('********************************************')
-        for name, param in self.model.named_parameters():
-            print(name)
-
-        for param in self.model.visual.conv1.parameters():
-            param.requires_grad = False
-
-        # self.model.visual.class_embedding.requires_grad = False
-        # self.model.visual.positional_embedding.requires_grad = False
-        # self.model.token_embedding.requires_grad = False
-        # self.model.positional_embedding.requires_grad = False
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
             if ',' in self.hparams.old_checkpoint_path:
                 self.hparams.old_checkpoint_path = self.hparams.old_checkpoint_path.split(',')
-                # 初始化一个字典来存储所有检查点的参数和计数
                 avg_params = None
                 count = 0
-
                 for chkpt_path in self.hparams.old_checkpoint_path:
                     checkpoint = torch.load(chkpt_path, map_location=torch.device('cpu'))
                     model_params = checkpoint['model']
@@ -163,12 +137,8 @@ class CLIPDualEncoderModel(LightningModule):
                             avg_params[k] += model_params[k]
 
                     count += 1
-
-                # 计算均值
                 for k in avg_params.keys():
                     avg_params[k] /= count
-
-                # 加载均值参数
                 self.model.load_state_dict(avg_params, strict=True)
                 print("Model weights loaded successfully and old parts averaged.")
             else:
@@ -190,6 +160,7 @@ class CLIPDualEncoderModel(LightningModule):
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
 
+
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
@@ -202,15 +173,11 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        # parameters = [{
-        #     "params": self.model.parameters(),
-        #     "lr": self.hparams.lr,
-        #     "weight_decay": self.hparams.weight_decay
-        # }]
         parameters = [
             {
-                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
-                "lr": self.hparams.lr
+                "params": self.model.visual.parameters(),
+                "lr": self.hparams.lr,
+                "weight_decay": self.hparams.weight_decay
             },
             {
                 "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
@@ -225,13 +192,7 @@ class CLIPDualEncoderModel(LightningModule):
                 "lr": self.hparams.lr,
                 "weight_decay": self.hparams.weight_decay
             })
-            # parameters.append({
-            #     "params": self.distill_predictor2.parameters(),
-            #     "lr": self.hparams.lr * 2.,  # 可以根据需要调整学习率
-            #     "weight_decay": self.hparams.weight_decay
-            # })
         else:
-            # 如果不进行蒸馏，冻结参数
             for param in self.distill_predictor.parameters():
                 param.requires_grad = False
 
@@ -250,7 +211,6 @@ class CLIPDualEncoderModel(LightningModule):
         }
 
     def _compute_losses(self, image_features, text_features):
-
         # normalized features
         image_features = image_features / image_features.norm(dim=1, keepdim=True)
         text_features = text_features / text_features.norm(dim=1, keepdim=True)
@@ -271,7 +231,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
-    def simclr_distill_loss_func(
+    def ckc_loss_func(
             self,
             p1: torch.Tensor,
             p2: torch.Tensor,
@@ -322,8 +282,8 @@ class CLIPDualEncoderModel(LightningModule):
             p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
-                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                                   self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
 
             self.log("train/distill_loss", distill_loss, sync_dist=True)
@@ -344,8 +304,8 @@ class CLIPDualEncoderModel(LightningModule):
             p2 = self.distill_predictor(text_embeddings)
 
             distill_loss = (
-                                   self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+                                   self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
+                                   + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
                            ) / 2
             self.log("val/distill_loss", distill_loss, sync_dist=True)
             return clip_loss + distill_loss
@@ -455,9 +415,6 @@ class CLIPDualEncoderModel(LightningModule):
         if self.trainer.current_epoch != self.trainer.max_epochs - 1:
             pass
         elif self.trainer.current_epoch == self.trainer.max_epochs - 1:
-            # conv1 = copy.deepcopy(self.model.visual.conv1)
-            # self.model.visual.conv1 = conv1.merge_and_unload().conv1
-
             self.model.visual.transformer.merge_and_unload()
             self.model.transformer.merge_and_unload()
 
@@ -492,11 +449,3 @@ class CLIPDualEncoderModel(LightningModule):
 
                 print('************************')
 
-    # def on_before_optimizer_step(self, optimizer) -> None:
-    #     print("**************on_before_opt enter1*********")
-    #     for name, param in self.model.named_parameters():
-    #         if param.grad is not None:
-    #             print(name)
-    #         # if param.requires_grad :
-    #         #     print(name)
-    #     print("***************on_before_opt exit1*********")

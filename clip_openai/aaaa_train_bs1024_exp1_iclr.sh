@@ -6,8 +6,8 @@ ROOT_DIR=/ppio_net0/torch_ds
 PROJECT=ICLR-backbone
 
 # 模型名称
-#MODEL_NAME=ViT-B/16
-MODEL_NAME=ViT-L/14
+MODEL_NAME=ViT-B/16
+#MODEL_NAME=ViT-L/14
 
 # 数据集列表
 DATASETS=("flickr30k")
