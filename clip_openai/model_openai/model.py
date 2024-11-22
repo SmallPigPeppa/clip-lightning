@@ -181,12 +181,6 @@ class ResidualAttentionBlock(LightningModule):
 
     def attention(self, x: torch.Tensor):
         self.attn_mask = self.attn_mask.to(self.device) if self.attn_mask is not None else None
-
-        if self.attn_mask is not None:
-            seq_len = x.size(1)
-            if self.attn_mask.size(0) != seq_len:
-                self.attn_mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).to(x.device) * float("-inf")
-
         return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
 
     def forward(self, x: torch.Tensor):

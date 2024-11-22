@@ -162,6 +162,17 @@ class CLIPDualEncoderModel(LightningModule):
 
         return image_features, text_features
 
+    def update_attn_mask(self, new_length):
+        """
+        根据新序列长度动态调整所有 ResidualAttentionBlock 的 attn_mask。
+        :param new_length: 新的序列长度（添加 Prompt 后的长度）。
+        """
+        for block in self.model.transformer.resblocks:
+            # 动态生成新的 attn_mask
+            new_attn_mask = torch.triu(torch.ones(new_length, new_length), diagonal=1).to(
+                block.attn_mask.device) * float("-inf")
+            block.attn_mask = new_attn_mask
+
     '''
     def encode_text(self, text):
     x = self.token_embedding(text)  # [batch_size, n_ctx, d_model]
@@ -208,6 +219,8 @@ class CLIPDualEncoderModel(LightningModule):
         # 原始序列长度和添加 Prompt 后的长度
         original_length = text_tokens.size(1)
         extended_length = x.size(1)  # 添加 Prompt 后的序列长度
+
+        self.update_attn_mask(extended_length)
 
         # 插值位置编码
         original_pos_embed = self.model.positional_embedding[:original_length, :]  # [n_ctx, d_model]
