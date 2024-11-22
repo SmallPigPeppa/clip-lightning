@@ -167,8 +167,20 @@ class ZeroShotClassifier(LightningModule):
         x = self.model.visual.transformer(x)
 
         x = x.permute(1, 0, 2)  # LND -> NLD
+        #
+        # x = self.model.visual.ln_post(x[:, 0, :])
+        #
+        # if self.model.visual.proj is not None:
+        #     x = x @ self.model.visual.proj
+        # 获取 Prompt 的特征
+        prompt_length = self.prompt_module_visual.prompt_embeddings.size(0)
+        prompt_features = x[:, 1:1 + prompt_length, :]  # 提取 Prompt token 的输出
 
-        x = self.model.visual.ln_post(x[:, 0, :])
+        # 对 Prompt 特征进行平均池化
+        avg_prompt_features = prompt_features.mean(dim=1)  # [batch_size, d_model]
+
+        # 使用池化后的 Prompt 特征
+        x = self.model.visual.ln_post(avg_prompt_features)
 
         if self.model.visual.proj is not None:
             x = x @ self.model.visual.proj
