@@ -439,6 +439,7 @@ class CLIPDualEncoderModel(LightningModule):
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
             num_classes_per_batch=self.hparams.batch_size_zs,
+            prompt_length=self.hparams.prompt_length
         ).to(self.device)
 
         self.zero_shot_classifier.compute_weights()

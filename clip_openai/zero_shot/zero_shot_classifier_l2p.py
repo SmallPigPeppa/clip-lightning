@@ -5,6 +5,8 @@ from tqdm import tqdm
 import copy
 import torch.nn.functional as F
 import math
+
+
 def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     """
     Resize positional embeddings with bicubic interpolation.
@@ -32,15 +34,17 @@ def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     pos_grid = pos_grid.reshape(grid_size_old, grid_size_old, -1).permute(2, 0, 1)
 
     # 使用插值调整网格大小
-    pos_grid = F.interpolate(pos_grid.unsqueeze(0), size=(grid_size_new, grid_size_new), mode='bicubic', align_corners=False)
+    pos_grid = F.interpolate(pos_grid.unsqueeze(0), size=(grid_size_new, grid_size_new), mode='bicubic',
+                             align_corners=False)
 
     # 恢复到原始形状 (N_new, D)
-    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new**2, -1)
+    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new ** 2, -1)
 
     # 合并前缀和网格嵌入
     pos_embed_new = torch.cat([pos_prefix, pos_grid], dim=0)
 
     return pos_embed_new
+
 
 class ZeroShotClassifier(LightningModule):
     def __init__(
@@ -53,6 +57,8 @@ class ZeroShotClassifier(LightningModule):
             prompt_module_visual: Optional[torch.nn.Module] = None,
             num_classes_per_batch: Optional[int] = 10,
             max_length: int = 77,
+            prompt_length: int = 5
+
     ):
         super().__init__()
         self.model = copy.deepcopy(model).eval()
@@ -64,6 +70,7 @@ class ZeroShotClassifier(LightningModule):
         self.num_classes_per_batch = num_classes_per_batch
         self.max_length = max_length
         self.zeroshot_weights = None
+        self.prompt_length = prompt_length
 
     def tokenize(self, text):
         sot_token = self.tokenizer.encoder["<|startoftext|>"]
@@ -75,7 +82,6 @@ class ZeroShotClassifier(LightningModule):
         else:
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
-
 
     def encode_text_with_prompt(self, text_tokens):
         """
@@ -92,7 +98,6 @@ class ZeroShotClassifier(LightningModule):
         # 原始序列长度和添加 Prompt 后的长度
         original_length = text_tokens.size(1)
         extended_length = x.size(1)  # 添加 Prompt 后的序列长度
-
 
         # 插值位置编码
         original_pos_embed = self.model.positional_embedding[:original_length, :]  # [n_ctx, d_model]
@@ -118,7 +123,7 @@ class ZeroShotClassifier(LightningModule):
         # 计算 eot_token 的位置
         # 原始 eot_token 的位置是 text_tokens.argmax(dim=-1)
         # 加上 Prompt 的长度偏移 self.hparams.prompt_length
-        eot_positions = text_tokens.argmax(dim=-1) + self.hparams.prompt_length
+        eot_positions = text_tokens.argmax(dim=-1) + self.prompt_length
 
         # 提取 eot_token 的特征
         x = x[torch.arange(x.size(0)), eot_positions]  # [batch_size, d_model]
