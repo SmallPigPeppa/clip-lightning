@@ -43,7 +43,7 @@ ROOT_DIR=/ppio_net0/torch_ds
 python cli_val_iclr.py validate \
   --data.dataset_name ${DATASETS} \
   --data.max_length 77 \
-  --data.batch_size 128 \
+  --data.batch_size 64 \
   --data.batch_size_zs 32 \
   --data.num_workers 8 \
   --data.config ${CONFIG_FILE} \
