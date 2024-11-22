@@ -301,8 +301,8 @@ class CLIPDualEncoderModel(LightningModule):
             num_prefix_tokens=1
         ).to(x.device, x.dtype)
 
-        print('x', x.shape)
-        print('pos_embed', pos_embed.shape)
+        # print('x', x.shape)
+        # print('pos_embed', pos_embed.shape)
         pos_embed = pos_embed[:x.size(1), :].unsqueeze(0).to(x.device)
         x = x + pos_embed
 
