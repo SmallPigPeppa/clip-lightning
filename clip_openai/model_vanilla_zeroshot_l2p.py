@@ -27,6 +27,7 @@ class PromptModule(nn.Module):
         x = torch.cat([prompt, x], dim=1)
         return x
 
+
 def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     """
     Resize positional embeddings with bicubic interpolation.
@@ -54,17 +55,16 @@ def resize_pos_embed(pos_embed, new_num_tokens, num_prefix_tokens=1):
     pos_grid = pos_grid.reshape(grid_size_old, grid_size_old, -1).permute(2, 0, 1)
 
     # 使用插值调整网格大小
-    pos_grid = F.interpolate(pos_grid.unsqueeze(0), size=(grid_size_new, grid_size_new), mode='bicubic', align_corners=False)
+    pos_grid = F.interpolate(pos_grid.unsqueeze(0), size=(grid_size_new, grid_size_new), mode='bicubic',
+                             align_corners=False)
 
     # 恢复到原始形状 (N_new, D)
-    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new**2, -1)
+    pos_grid = pos_grid.squeeze(0).permute(1, 2, 0).reshape(grid_size_new ** 2, -1)
 
     # 合并前缀和网格嵌入
     pos_embed_new = torch.cat([pos_prefix, pos_grid], dim=0)
 
     return pos_embed_new
-
-
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -200,7 +200,6 @@ class CLIPDualEncoderModel(LightningModule):
         # 添加 Prompt
         x = self.prompt_module_text(x)  # 假设 prompt_module_text 会在序列前添加 prompt
 
-
         # 原始序列长度和添加 Prompt 后的长度
         original_length = text_tokens.size(1)
         extended_length = x.size(1)  # 添加 Prompt 后的序列长度
@@ -243,6 +242,7 @@ class CLIPDualEncoderModel(LightningModule):
         text_features = x @ self.model.text_projection
 
         return text_features
+
     '''
         def forward(self, x: torch.Tensor):
             x = self.conv1(x)  # shape = [*, width, grid, grid]
@@ -265,6 +265,7 @@ class CLIPDualEncoderModel(LightningModule):
     
             return x
     '''
+
     def encode_image_with_prompt(self, image):
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
@@ -432,6 +433,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.tokenizer = SimpleTokenizer()
         self.zero_shot_classifier = ZeroShotClassifier(
             model=self.model,
+            prompt_module_text=self.prompt_module_text,
+            prompt_module_visual=self.prompt_module_image,
             tokenizer=self.tokenizer,
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
