@@ -89,6 +89,11 @@ class ZeroShotClassifier(LightningModule):
         :param text_tokens: 输入的文本 tokens，形状为 [batch_size, n_ctx]
         :return: 文本特征，形状为 [batch_size, d_model]
         """
+
+        text_features = self.model.encode_text(text_tokens)
+
+        return text_features
+
         # 获取词嵌入
         x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
 

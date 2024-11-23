@@ -13,21 +13,21 @@ MODEL_NAME=ViT-B/16
 DATASETS=("flickr30k")
 
 # 数据集学习率映射
-declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=8.6e-6
-)
-
-declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=1.3e-4
-)
-
 #declare -A DATASET_LR_MAP=(
-#  ["flickr30k"]=1e-2
+#  ["flickr30k"]=8.6e-6
 #)
 #
 #declare -A DATASET_LR_TEXT_MAP=(
-#  ["flickr30k"]=1e-2
+#  ["flickr30k"]=1.3e-4
 #)
+
+declare -A DATASET_LR_MAP=(
+  ["flickr30k"]=1e-2
+)
+
+declare -A DATASET_LR_TEXT_MAP=(
+  ["flickr30k"]=1e-2
+)
 
 
 
@@ -48,7 +48,7 @@ declare -A METHOD_MAP=(
 
 # 其他参数
 CONFIG_FILE=config.yaml
-ZERO_SHOT_EVAL_INTERVAL=400
+ZERO_SHOT_EVAL_INTERVAL=5
 MAX_EPOCHS=40
 BATCH_SIZE=32
 BATCH_SIZE_ZS=32
