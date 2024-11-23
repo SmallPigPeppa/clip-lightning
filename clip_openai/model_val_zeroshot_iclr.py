@@ -110,8 +110,8 @@ class CLIPDualEncoderModel(LightningModule):
         # 任务的checkpoint列表，task0不会加载ckpt，因此为None
         task_checkpoints = [
             None,  # task0，不加载任何 checkpoint
-            "task1.ckpt", "task2.ckpt", "task3.ckpt", "task4.ckpt",
-            "task5.ckpt", "task6.ckpt", "task7.ckpt", "task8.ckpt"
+            # "task1.ckpt", "task2.ckpt", "task3.ckpt", "task4.ckpt",
+            # "task5.ckpt", "task6.ckpt", "task7.ckpt", "task8.ckpt"
         ]
 
         all_metrics = []
@@ -151,11 +151,11 @@ class CLIPDualEncoderModel(LightningModule):
         table_data = []
         for row in all_metrics:
             # 从 task0 开始记录
-            table_data.append([row["dataset"]] + [row[f"task{i}"] for i in range(0, 9)])
+            table_data.append([row["dataset"]] + [row[f"task{i}"] for i in range(0, 1)])
 
         # 将 task0 也加入列名
         table = wandb.Table(
-            columns=["Dataset", "task0", "task1", "task2", "task3", "task4", "task5", "task6", "task7", "task8"],
+            columns=["Dataset", "task0",],
             data=table_data
         )
         wandb.init()
