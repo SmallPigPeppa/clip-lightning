@@ -7,6 +7,7 @@ export HF_HOME=/ppio_net0/huggingface
 MODEL_NAME=ViT-B/16
 MODEL_NAME=ViT-L/14
 MODEL_NAME=ViT-B/32
+MODEL_NAME=ViT-L/14@336px
 
 # 数据集列表
 datasets=(
