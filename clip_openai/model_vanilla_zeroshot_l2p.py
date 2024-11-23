@@ -159,9 +159,9 @@ class CLIPDualEncoderModel(LightningModule):
         :return: 文本特征，形状为 [batch_size, d_model]
         """
 
-        # text_features = self.model.encode_text(text_tokens)
-        #
-        # return text_features
+        text_features = self.model.encode_text(text_tokens)
+
+        return text_features
         # 获取词嵌入
         x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
 
@@ -300,8 +300,8 @@ class CLIPDualEncoderModel(LightningModule):
             optimizer,
             warmup_epochs=self.hparams.lr_warmup_epochs,
             max_epochs=self.trainer.max_epochs,
-            warmup_start_lr=1 * self.hparams.lr,
-            eta_min=1 * self.hparams.lr
+            warmup_start_lr=0.01 * self.hparams.lr,
+            eta_min=0.01 * self.hparams.lr
         )
 
         return {
