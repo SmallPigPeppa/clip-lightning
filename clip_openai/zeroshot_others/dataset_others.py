@@ -51,8 +51,13 @@ def get_cifar100(data_path):
     )
 
     transform_test = transforms.Compose(
+        # [
+        #     transforms.Resize((224, 224)),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
+        # ]
         [
-            transforms.Resize((224, 224)),
+            transforms.Resize((336, 336)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
         ]
