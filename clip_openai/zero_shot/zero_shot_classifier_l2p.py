@@ -142,51 +142,32 @@ class ZeroShotClassifier(LightningModule):
         return text_features
 
     def encode_image_with_prompt(self, image):
+        # image_features = self.model.encode_image(image)
+        # return image_features
         x = self.model.visual.conv1(image)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
 
         # 添加 Prompt
         x = self.prompt_module_visual(x)
+        x = torch.cat(
+            [self.model.visual.class_embedding + torch.zeros(x.shape[0], 1, x.shape[-1], device=self.device),
+             x], dim=1)
 
-        # 添加类嵌入
-        class_embedding = self.model.visual.class_embedding.to(x.dtype)
-        class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
-        x = torch.cat([class_embedding, x], dim=1)
-
-        # print('self.model.visual.positional_embedding',self.model.visual.positional_embedding.shape)
-        # 调整位置嵌入以适配新 token 数
         pos_embed = resize_pos_embed(
             self.model.visual.positional_embedding,
             new_num_tokens=x.size(1),
             num_prefix_tokens=1
         ).to(x.device, x.dtype)
 
-        # print('x', x.shape)
-        # print('pos_embed', pos_embed.shape)
         pos_embed = pos_embed[:x.size(1), :].unsqueeze(0).to(x.device)
         x = x + pos_embed
 
+        x = self.model.visual.ln_pre(x)
         x = x.permute(1, 0, 2)  # NLD -> LND
-
         x = self.model.visual.transformer(x)
-
         x = x.permute(1, 0, 2)  # LND -> NLD
-        #
-        # x = self.model.visual.ln_post(x[:, 0, :])
-        #
-        # if self.model.visual.proj is not None:
-        #     x = x @ self.model.visual.proj
-        # 获取 Prompt 的特征
-        prompt_length = self.prompt_module_visual.prompt_embeddings.size(0)
-        prompt_features = x[:, 1:1 + prompt_length, :]  # 提取 Prompt token 的输出
-
-        # 对 Prompt 特征进行平均池化
-        avg_prompt_features = prompt_features.mean(dim=1)  # [batch_size, d_model]
-
-        # 使用池化后的 Prompt 特征
-        x = self.model.visual.ln_post(avg_prompt_features)
-
+        x = self.model.visual.ln_post(x[:, 0, :])
         if self.model.visual.proj is not None:
             x = x @ self.model.visual.proj
 
