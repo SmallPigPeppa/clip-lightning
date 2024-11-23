@@ -158,4 +158,5 @@ class CLIPDualEncoderModel(LightningModule):
             columns=["Dataset", "task0", "task1", "task2", "task3", "task4", "task5", "task6", "task7", "task8"],
             data=table_data
         )
+        wandb.init()
         wandb.log({"zero_shot_results": table})
