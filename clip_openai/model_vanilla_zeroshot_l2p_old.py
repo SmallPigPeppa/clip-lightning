@@ -221,16 +221,16 @@ class CLIPDualEncoderModel(LightningModule):
                  x], dim=1)  # shape = [*, grid ** 2 + 1, width]
             x = x + self.positional_embedding
             x = self.ln_pre(x)
-
+    
             x = x.permute(1, 0, 2)  # NLD -> LND
             x = self.transformer(x)
             x = x.permute(1, 0, 2)  # LND -> NLD
-
+    
             x = self.ln_post(x[:, 0, :])
-
+    
             if self.proj is not None:
                 x = x @ self.proj
-
+    
             return x
     '''
 
@@ -245,13 +245,9 @@ class CLIPDualEncoderModel(LightningModule):
         x = self.prompt_module_visual(x)
 
         # 添加类嵌入
-        # class_embedding = self.model.visual.class_embedding.to(x.dtype)
-        # class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
-        # x = torch.cat([class_embedding, x], dim=1)
-        #
-        x = torch.cat(
-            [self.model.visual.class_embedding + torch.zeros(x.shape[0], 1, x.shape[-1], device=self.device),
-             x], dim=1)
+        class_embedding = self.model.visual.class_embedding.to(x.dtype)
+        class_embedding = class_embedding.unsqueeze(0).unsqueeze(0).expand(x.size(0), -1, -1)
+        x = torch.cat([class_embedding, x], dim=1)
 
         # print('self.model.visual.positional_embedding',self.model.visual.positional_embedding.shape)
         # 调整位置嵌入以适配新 token 数
@@ -266,11 +262,14 @@ class CLIPDualEncoderModel(LightningModule):
         pos_embed = pos_embed[:x.size(1), :].unsqueeze(0).to(x.device)
         x = x + pos_embed
 
-        x = self.model.visual.ln_pre(x)
         x = x.permute(1, 0, 2)  # NLD -> LND
+
         x = self.model.visual.transformer(x)
+
         x = x.permute(1, 0, 2)  # LND -> NLD
+
         x = self.model.visual.ln_post(x[:, 0, :])
+
         if self.model.visual.proj is not None:
             x = x @ self.model.visual.proj
 
