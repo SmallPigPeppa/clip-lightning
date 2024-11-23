@@ -159,9 +159,9 @@ class CLIPDualEncoderModel(LightningModule):
         :return: 文本特征，形状为 [batch_size, d_model]
         """
 
-        text_features = self.model.encode_text(text_tokens)
-
-        return text_features
+        # text_features = self.model.encode_text(text_tokens)
+        #
+        # return text_features
         # 获取词嵌入
         x = self.model.token_embedding(text_tokens)  # [batch_size, n_ctx, d_model]
 
@@ -171,7 +171,6 @@ class CLIPDualEncoderModel(LightningModule):
         # 原始序列长度和添加 Prompt 后的长度
         original_length = text_tokens.size(1)
         extended_length = x.size(1)  # 添加 Prompt 后的序列长度
-
         self.update_attn_mask(extended_length)
 
         # 插值位置编码
@@ -195,6 +194,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         x = x.permute(1, 0, 2)  # LND -> NLD
 
+        x = self.model.ln_final(x)
+
         # 计算 eot_token 的位置
         # 原始 eot_token 的位置是 text_tokens.argmax(dim=-1)
         # 加上 Prompt 的长度偏移 self.hparams.prompt_length
@@ -204,7 +205,7 @@ class CLIPDualEncoderModel(LightningModule):
         x = x[torch.arange(x.size(0)), eot_positions]  # [batch_size, d_model]
 
         # 归一化
-        x = self.model.ln_final(x)
+
 
         # 线性投影到特征空间
         text_features = x @ self.model.text_projection
