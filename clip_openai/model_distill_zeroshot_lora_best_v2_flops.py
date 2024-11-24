@@ -11,6 +11,16 @@ import copy
 from peft import get_peft_model, LoraConfig
 
 
+def cognition_align(old, new):
+    n, m = old.shape
+    index = torch.max(old, 1)[1]  ### 找到对比矩阵中每一行的最大值索引
+    for i in range(n):
+        if index[i] != i:  ### 如果最大值索引不是当前行的索引值，则说明过去模型对当前该样本数据认知错误，为此将这一行替换为当前训练模型的对应矩阵行，排除其对当前训练模型的影响。
+            old[i] = new[i]
+
+    return old, new
+
+
 def find_target_modules(model):
     target_modules = []
     for name, module in model.named_modules():
@@ -111,8 +121,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.distill = True
         self.initialize_old_modules()
-        # self.model.transformer = get_lora_model_text(self.model.transformer)
-        # self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+        self.model.transformer = get_lora_model_text(self.model.transformer)
+        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
@@ -265,44 +275,44 @@ class CLIPDualEncoderModel(LightningModule):
         loss = -mean_log_prob_pos.mean()
         return loss
 
-    def training_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("train/clip_loss", clip_loss, sync_dist=True)
-
-        if self.distill:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
-
-            distill_loss = (
-                                   self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
-                           ) / 2
-
-            self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss
-        else:
-            return clip_loss
-
-    def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
-
-        if self.distill:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
-
-            distill_loss = (
-                                   self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
-                                   + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
-                           ) / 2
-            self.log("val/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss
-        else:
-            return clip_loss
+    # def training_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("train/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.distill:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         distill_loss = (
+    #                                self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #                                + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #                        ) / 2
+    #
+    #         self.log("train/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss
+    #     else:
+    #         return clip_loss
+    #
+    # def validation_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.distill:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         distill_loss = (
+    #                                self.ckc_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #                                + self.ckc_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #                        ) / 2
+    #         self.log("val/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss
+    #     else:
+    #         return clip_loss
 
 
     # def zscl_distill(self, image_features, text_features, image_features_old, text_features_old, temperature=1.0,
@@ -380,6 +390,88 @@ class CLIPDualEncoderModel(LightningModule):
     #         return clip_loss + distill_loss * 2.0
     #     else:
     #         return clip_loss
+
+
+
+
+
+    def modx_distill(self, image_features, text_features, image_features_old, text_features_old):
+        ### 构造新旧模型在当前样本上的对比矩阵
+        per_image = image_features @ text_features.t()
+        per_text = text_features @ image_features.t()
+
+        img_text_old = image_features_old @ text_features_old.t()
+        text_img_old = text_features_old @ image_features_old.t()
+
+        ### 套用 cognition_align 模块剔除错误认知信息
+        logits_img_text_old, logits_per_image = cognition_align(img_text_old, per_image)
+        logits_text_img_old, logits_per_text = cognition_align(text_img_old, per_text)
+
+        off_dia_per_image = logits_per_image
+        off_dia_img_text_old = logits_img_text_old
+
+        off_dia_per_text = logits_per_text
+        off_dia_text_img_old = logits_text_img_old
+
+        ### 使用KL散度函数对非对角线信息分布进行对齐
+        loss_dia_img = F.kl_div(off_dia_per_image.softmax(dim=-1).log(), off_dia_img_text_old.softmax(dim=-1),
+                                reduction='sum')
+        loss_dia_text = F.kl_div(off_dia_per_text.softmax(dim=-1).log(), off_dia_text_img_old.softmax(dim=-1),
+                                 reduction='sum')
+
+        loss_distill = (loss_dia_img + loss_dia_text) / 2
+        return loss_distill
+
+    def training_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("train/clip_loss", clip_loss, sync_dist=True)
+
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            # distill_loss = (
+            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+            #                ) / 2
+            distill_loss = self.modx_distill(
+                image_features=image_embeddings,
+                text_features=text_embeddings,
+                image_features_old=frozen_z1,
+                text_features_old=frozen_z2
+            )
+
+            self.log("train/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss * 0.005
+        else:
+            return clip_loss
+
+    def validation_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("val/clip_loss", clip_loss, sync_dist=True)
+
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            p1 = self.distill_predictor(image_embeddings)
+            p2 = self.distill_predictor(text_embeddings)
+
+            # distill_loss = (
+            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+            #                ) / 2
+            distill_loss = self.modx_distill(
+                image_features=image_embeddings,
+                text_features=text_embeddings,
+                image_features_old=frozen_z1,
+                text_features_old=frozen_z2
+            )
+            self.log("val/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss * 0.005
+        else:
+            return clip_loss
 
 
 
