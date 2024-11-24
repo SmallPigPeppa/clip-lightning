@@ -109,7 +109,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
-        self.distill = True
+        self.distill = False
         self.initialize_old_modules()
         self.model.transformer = get_lora_model_text(self.model.transformer)
         self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
