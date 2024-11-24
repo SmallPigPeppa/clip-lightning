@@ -19,8 +19,8 @@ import math
 class PromptModule(nn.Module):
     def __init__(self, prompt_length, embed_dim):
         super(PromptModule, self).__init__()
-        # self.prompt_embeddings = nn.Parameter(torch.zeros(prompt_length, embed_dim))
-        self.prompt_embeddings = nn.Parameter(torch.randn(prompt_length, embed_dim))
+        self.prompt_embeddings = nn.Parameter(torch.zeros(prompt_length, embed_dim))
+        # self.prompt_embeddings = nn.Parameter(torch.randn(prompt_length, embed_dim))
 
     def forward(self, x):
         batch_size = x.size(0)
