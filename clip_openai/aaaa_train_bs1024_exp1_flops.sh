@@ -15,10 +15,12 @@ DATASETS=("coco2014")
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=8.6e-6
+    ["coco2014"]=8.6e-6
 )
 
 declare -A DATASET_LR_TEXT_MAP=(
   ["flickr30k"]=1.3e-4
+    ["coco2014"]=8.6e-6
 )
 
 
