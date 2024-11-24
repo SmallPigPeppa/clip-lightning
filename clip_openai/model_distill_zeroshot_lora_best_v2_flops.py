@@ -354,42 +354,42 @@ class CLIPDualEncoderModel(LightningModule):
     #
     #     return distill_loss
     #
-    # def training_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-    #     self.log("train/clip_loss", clip_loss, sync_dist=True)
-    #
-    #     if self.distill:
-    #         frozen_z1, frozen_z2 = self.forward_old(batch)
-    #         distill_loss = self.zscl_distill(
-    #             image_features=image_embeddings,
-    #             text_features=text_embeddings,
-    #             image_features_old=frozen_z1,
-    #             text_features_old=frozen_z2
-    #         )
-    #
-    #         self.log("train/distill_loss", distill_loss, sync_dist=True)
-    #         return clip_loss + distill_loss * 2.0
-    #     else:
-    #         return clip_loss
-    #
-    # def validation_step(self, batch, *args, **kwargs):
-    #     image_embeddings, text_embeddings = self.forward(batch)
-    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
-    #
-    #     if self.distill:
-    #         frozen_z1, frozen_z2 = self.forward_old(batch)
-    #         distill_loss = self.zscl_distill(
-    #             image_features=image_embeddings,
-    #             text_features=text_embeddings,
-    #             image_features_old=frozen_z1,
-    #             text_features_old=frozen_z2
-    #         )
-    #         self.log("val/distill_loss", distill_loss, sync_dist=True)
-    #         return clip_loss + distill_loss * 2.0
-    #     else:
-    #         return clip_loss
+    def training_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("train/clip_loss", clip_loss, sync_dist=True)
+
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            distill_loss = self.zscl_distill(
+                image_features=image_embeddings,
+                text_features=text_embeddings,
+                image_features_old=frozen_z1,
+                text_features_old=frozen_z2
+            )
+
+            self.log("train/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss * 2.0
+        else:
+            return clip_loss
+
+    def validation_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        self.log("val/clip_loss", clip_loss, sync_dist=True)
+
+        if self.distill:
+            frozen_z1, frozen_z2 = self.forward_old(batch)
+            distill_loss = self.zscl_distill(
+                image_features=image_embeddings,
+                text_features=text_embeddings,
+                image_features_old=frozen_z1,
+                text_features_old=frozen_z2
+            )
+            self.log("val/distill_loss", distill_loss, sync_dist=True)
+            return clip_loss + distill_loss * 2.0
+        else:
+            return clip_loss
 
 
 
@@ -422,56 +422,56 @@ class CLIPDualEncoderModel(LightningModule):
         loss_distill = (loss_dia_img + loss_dia_text) / 2
         return loss_distill
 
-    def training_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("train/clip_loss", clip_loss, sync_dist=True)
-
-        if self.distill:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
-
-            # distill_loss = (
-            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-            #                ) / 2
-            distill_loss = self.modx_distill(
-                image_features=image_embeddings,
-                text_features=text_embeddings,
-                image_features_old=frozen_z1,
-                text_features_old=frozen_z2
-            )
-
-            self.log("train/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.005
-        else:
-            return clip_loss
-
-    def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
-
-        if self.distill:
-            frozen_z1, frozen_z2 = self.forward_old(batch)
-            p1 = self.distill_predictor(image_embeddings)
-            p2 = self.distill_predictor(text_embeddings)
-
-            # distill_loss = (
-            #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
-            #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
-            #                ) / 2
-            distill_loss = self.modx_distill(
-                image_features=image_embeddings,
-                text_features=text_embeddings,
-                image_features_old=frozen_z1,
-                text_features_old=frozen_z2
-            )
-            self.log("val/distill_loss", distill_loss, sync_dist=True)
-            return clip_loss + distill_loss * 0.005
-        else:
-            return clip_loss
+    # def training_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("train/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.distill:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         # distill_loss = (
+    #         #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #         #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #         #                ) / 2
+    #         distill_loss = self.modx_distill(
+    #             image_features=image_embeddings,
+    #             text_features=text_embeddings,
+    #             image_features_old=frozen_z1,
+    #             text_features_old=frozen_z2
+    #         )
+    #
+    #         self.log("train/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss * 0.005
+    #     else:
+    #         return clip_loss
+    #
+    # def validation_step(self, batch, *args, **kwargs):
+    #     image_embeddings, text_embeddings = self.forward(batch)
+    #     clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+    #     self.log("val/clip_loss", clip_loss, sync_dist=True)
+    #
+    #     if self.distill:
+    #         frozen_z1, frozen_z2 = self.forward_old(batch)
+    #         p1 = self.distill_predictor(image_embeddings)
+    #         p2 = self.distill_predictor(text_embeddings)
+    #
+    #         # distill_loss = (
+    #         #                        self.simclr_distill_loss_func(p1, p2, frozen_z1, frozen_z2)
+    #         #                        + self.simclr_distill_loss_func(frozen_z1, frozen_z2, p1, p2)
+    #         #                ) / 2
+    #         distill_loss = self.modx_distill(
+    #             image_features=image_embeddings,
+    #             text_features=text_embeddings,
+    #             image_features_old=frozen_z1,
+    #             text_features_old=frozen_z2
+    #         )
+    #         self.log("val/distill_loss", distill_loss, sync_dist=True)
+    #         return clip_loss + distill_loss * 0.005
+    #     else:
+    #         return clip_loss
 
 
 
