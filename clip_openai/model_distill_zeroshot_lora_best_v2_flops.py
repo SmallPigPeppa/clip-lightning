@@ -111,8 +111,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
         self.distill = True
         self.initialize_old_modules()
-        self.model.transformer = get_lora_model_text(self.model.transformer)
-        self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
+        # self.model.transformer = get_lora_model_text(self.model.transformer)
+        # self.model.visual.transformer = get_lora_model_vision(self.model.visual.transformer)
 
     def initialize_old_modules(self):
         if self.hparams.old_checkpoint_path is not None:
