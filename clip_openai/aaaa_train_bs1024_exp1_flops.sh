@@ -10,6 +10,7 @@ MODEL_NAME=ViT-B/16
 
 # 数据集列表
 DATASETS=("flickr30k")
+DATASETS=("coco2014")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
