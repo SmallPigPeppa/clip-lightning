@@ -315,44 +315,44 @@ class CLIPDualEncoderModel(LightningModule):
     #         return clip_loss
 
 
-    # def zscl_distill(self, image_features, text_features, image_features_old, text_features_old, temperature=1.0,
-    #                  alpha=0.5):
-    #     # 归一化图像和文本特征
-    #     image_features = image_features / image_features.norm(dim=1, keepdim=True)
-    #     text_features = text_features / text_features.norm(dim=1, keepdim=True)
-    #
-    #     # 计算新模型的 logits（图像和文本）
-    #     logit_scale = self.model.logit_scale.exp()
-    #     logits_per_image = logit_scale * image_features @ text_features.t()
-    #     logits_per_text = logits_per_image.t()
-    #
-    #     # 归一化旧模型的图像和文本特征
-    #     image_features_old = image_features_old / image_features_old.norm(dim=1, keepdim=True)
-    #     text_features_old = text_features_old / text_features_old.norm(dim=1, keepdim=True)
-    #
-    #     # 计算旧模型的 logits（图像和文本）
-    #     logit_scale_old = self.model.logit_scale.exp()
-    #     logits_per_image_old = logit_scale_old * image_features_old @ text_features_old.t()
-    #     logits_per_text_old = logits_per_image_old.t()
-    #
-    #     # 蒸馏损失（使用 KL 散度）——针对图像 logits 和文本 logits 分别计算
-    #     # 使用软化的 softmax 作为输入，温度参数可以控制 logits 的平滑度
-    #     distill_loss_image = F.kl_div(
-    #         F.log_softmax(logits_per_image / temperature, dim=1),
-    #         F.softmax(logits_per_image_old / temperature, dim=1),
-    #         reduction='batchmean'
-    #     ) * (temperature ** 2)  # KL 散度标准化
-    #
-    #     distill_loss_text = F.kl_div(
-    #         F.log_softmax(logits_per_text / temperature, dim=1),
-    #         F.softmax(logits_per_text_old / temperature, dim=1),
-    #         reduction='batchmean'
-    #     ) * (temperature ** 2)  # KL 散度标准化
-    #
-    #     # 总蒸馏损失可以是图像和文本部分的加权和
-    #     distill_loss = alpha * distill_loss_image + (1 - alpha) * distill_loss_text
-    #
-    #     return distill_loss
+    def zscl_distill(self, image_features, text_features, image_features_old, text_features_old, temperature=1.0,
+                     alpha=0.5):
+        # 归一化图像和文本特征
+        image_features = image_features / image_features.norm(dim=1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=1, keepdim=True)
+
+        # 计算新模型的 logits（图像和文本）
+        logit_scale = self.model.logit_scale.exp()
+        logits_per_image = logit_scale * image_features @ text_features.t()
+        logits_per_text = logits_per_image.t()
+
+        # 归一化旧模型的图像和文本特征
+        image_features_old = image_features_old / image_features_old.norm(dim=1, keepdim=True)
+        text_features_old = text_features_old / text_features_old.norm(dim=1, keepdim=True)
+
+        # 计算旧模型的 logits（图像和文本）
+        logit_scale_old = self.model.logit_scale.exp()
+        logits_per_image_old = logit_scale_old * image_features_old @ text_features_old.t()
+        logits_per_text_old = logits_per_image_old.t()
+
+        # 蒸馏损失（使用 KL 散度）——针对图像 logits 和文本 logits 分别计算
+        # 使用软化的 softmax 作为输入，温度参数可以控制 logits 的平滑度
+        distill_loss_image = F.kl_div(
+            F.log_softmax(logits_per_image / temperature, dim=1),
+            F.softmax(logits_per_image_old / temperature, dim=1),
+            reduction='batchmean'
+        ) * (temperature ** 2)  # KL 散度标准化
+
+        distill_loss_text = F.kl_div(
+            F.log_softmax(logits_per_text / temperature, dim=1),
+            F.softmax(logits_per_text_old / temperature, dim=1),
+            reduction='batchmean'
+        ) * (temperature ** 2)  # KL 散度标准化
+
+        # 总蒸馏损失可以是图像和文本部分的加权和
+        distill_loss = alpha * distill_loss_image + (1 - alpha) * distill_loss_text
+
+        return distill_loss
     #
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
