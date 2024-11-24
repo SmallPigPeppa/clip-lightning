@@ -97,8 +97,8 @@ for DATASET_NAME in "${DATASETS[@]}"; do
 #  run_training "modx" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "zscl" ${DATASET_NAME} ${LR} ${LR_TEXT}
 #  run_training "distill" ${DATASET_NAME} ${LR} ${LR_TEXT}
-  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
-#  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+#  run_training "lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
+  run_training "distill_lora_v2" ${DATASET_NAME} ${LR} ${LR_TEXT}
 
 
   echo "Completed training for dataset: ${DATASET_NAME}"
