@@ -3,7 +3,7 @@
 # 设置 Hugging Face home 目录
 export HF_HOME=/ppio_net0/huggingface
 # 模型名称
-MODEL_NAME=ViT-B/16
+#MODEL_NAME=ViT-B/16
 MODEL_NAME=RN50
 
 # 数据集列表
