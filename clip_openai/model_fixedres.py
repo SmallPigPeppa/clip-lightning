@@ -140,7 +140,8 @@ class CLIPDualEncoderModel(LightningModule):
         # recall metric
         val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
-        self.log_dict(recall_metric, sync_dist=True)
+        # self.log_dict(recall_metric, sync_dist=True)
+        self.log_dict(recall_metric)
 
         # # Zero-shot metric evaluation before training starts
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
