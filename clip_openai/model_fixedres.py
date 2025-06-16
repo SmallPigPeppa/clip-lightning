@@ -50,24 +50,6 @@ class CLIPDualEncoderModel(LightningModule):
         text_features = self.model.encode_text(inputs["caption"])
         return image_features, text_features
 
-    # def forward(self, inputs, random_select=True):
-    #     image_features = self.model.encode_image(inputs["image"])
-    #     # import pdb; pdb.set_trace()
-    #     # Check the 'multi_caption' flag
-    #     if inputs["multi_caption"][0]:
-    #         if random_select:
-    #             selected_caption = random.choice(inputs["caption"])
-    #             text_features = self.model.encode_text(selected_caption)
-    #         else:
-    #             text_features = [self.model.encode_text(captions) for captions in inputs["caption"]]
-    #             text_features = torch.stack(text_features)
-    #             text_features = text_features.permute(1, 0, 2)  # batsize,5,dim
-    #
-    #     else:
-    #         # Single caption scenario
-    #         text_features = self.model.encode_text(inputs["caption"])
-    #
-    #     return image_features, text_features
 
     def configure_optimizers(self):
         parameters = [
@@ -155,7 +137,8 @@ class CLIPDualEncoderModel(LightningModule):
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
-            self.log_dict(recall_metric, sync_dist=True)
+            # self.log_dict(recall_metric, sync_dist=True)
+            self.log_dict(recall_metric)
 
         # # zero-shot metric
         # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
