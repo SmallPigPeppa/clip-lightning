@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env
 
 
 # 设置 Hugging Face home 目录
@@ -44,7 +44,7 @@ run_training() {
   local dataset_name=$2
   local lr=$3
 
-  python ${METHOD_MAP[$method]} fit \
+  python3 ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
