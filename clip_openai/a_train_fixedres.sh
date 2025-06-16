@@ -51,7 +51,6 @@ run_training() {
     --data.config ${CONFIG_FILE} \
     --data.dataset_name ${dataset_name} \
     --data.root_dir ${ROOT_DIR} \
-    --model.alpha 0.1 \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 512 \
     --model.temperature 0.1 \
