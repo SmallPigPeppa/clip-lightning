@@ -3,5 +3,7 @@ wandb>=0.12.10
 lightning-bolts
 timm
 ftfy
+jsonargparse
+typeshed-client
 git+https://github.com/SmallPigPeppa/pytorch-lightning.git@npu_support_fp16_mixed
 

@@ -37,9 +37,10 @@ ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=60
 BATCH_SIZE=512
 BATCH_SIZE_ZS=32
-NUM_WORKERS=8
+#NUM_WORKERS=8
 NUM_GPUS=2
 TOTAL_BATCH_SIZE=$((BATCH_SIZE * NUM_GPUS))
+NUM_WORKERS=$(python3 -c "import os; print(os.cpu_count() // 2)")
 
 # 函数：运行训练
 run_training() {
