@@ -5,8 +5,6 @@ from dataloaders.data_module_dil_json_zeroshot_hf_all import ImageRetrievalDataM
 from model_fixedres import CLIPDualEncoderModel
 
 
-
-
 class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments(
