@@ -62,7 +62,7 @@ class CLIPDualEncoderModel(LightningModule):
         scheduler_vis = {
             "scheduler": LinearWarmupCosineAnnealingLR(
                 optimizer_vis,
-                warmup_epochs=self.hparams.vis_warmup_epochs,
+                warmup_epochs=self.hparams.lr_warmup_epochs,
                 max_epochs=self.trainer.max_epochs,
                 warmup_start_lr=0.01 * self.hparams.lr_visual,
                 eta_min=0.01 * self.hparams.lr_visual,
@@ -74,7 +74,7 @@ class CLIPDualEncoderModel(LightningModule):
         scheduler_txt = {
             "scheduler": LinearWarmupCosineAnnealingLR(
                 optimizer_txt,
-                warmup_epochs=self.hparams.txt_warmup_epochs,
+                warmup_epochs=self.hparams.lr_warmup_epochs,
                 max_epochs=self.trainer.max_epochs,
                 warmup_start_lr=0.01 * self.hparams.lr_text,
                 eta_min=0.01 * self.hparams.lr_text,
