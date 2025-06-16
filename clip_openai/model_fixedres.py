@@ -125,14 +125,16 @@ class CLIPDualEncoderModel(LightningModule):
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("train/clip_loss", clip_loss, sync_dist=True)
+        # self.log("train/clip_loss", clip_loss, sync_dist=True)
+        self.log("train/clip_loss", clip_loss)
 
         return clip_loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        self.log("val/clip_loss", clip_loss, sync_dist=True)
+        # self.log("val/clip_loss", clip_loss, sync_dist=True)
+        self.log("val/clip_loss", clip_loss)
 
         return clip_loss
 
@@ -236,3 +238,4 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
+
