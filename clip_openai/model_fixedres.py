@@ -48,31 +48,44 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        parameters = [
-            {
-                "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
-                "lr": self.hparams.lr_visual
-            },
-            {
-                "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
-                "lr": self.hparams.lr_text,
-                "weight_decay": self.hparams.weight_decay
-            }
-        ]
+        # split parameters
+        vis_params = self.model.visual.parameters()
+        txt_params = [p for n, p in self.model.named_parameters() if "visual" not in n]
 
-        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
-        lr_scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=self.hparams.lr_warmup_epochs,
-            max_epochs=self.trainer.max_epochs,
-            warmup_start_lr=0.01 * self.hparams.lr,
-            eta_min=0.01 * self.hparams.lr
-        )
+        # two AdamW optimizers with different base LRs
+        optimizer_vis = torch.optim.AdamW(vis_params, lr=self.hparams.lr_visual,
+                                          weight_decay=self.hparams.weight_decay)
+        optimizer_txt = torch.optim.AdamW(txt_params, lr=self.hparams.lr_text,
+                                          weight_decay=self.hparams.weight_decay)
 
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": lr_scheduler,
+        # separate LR schedulers for each optimizer
+        scheduler_vis = {
+            "scheduler": LinearWarmupCosineAnnealingLR(
+                optimizer_vis,
+                warmup_epochs=self.hparams.vis_warmup_epochs,
+                max_epochs=self.trainer.max_epochs,
+                warmup_start_lr=0.01 * self.hparams.lr_visual,
+                eta_min=0.01 * self.hparams.lr_visual,
+            ),
+            "interval": "epoch",
+            "frequency": 1,
+            "name": "lr_visual"
         }
+        scheduler_txt = {
+            "scheduler": LinearWarmupCosineAnnealingLR(
+                optimizer_txt,
+                warmup_epochs=self.hparams.txt_warmup_epochs,
+                max_epochs=self.trainer.max_epochs,
+                warmup_start_lr=0.01 * self.hparams.lr_text,
+                eta_min=0.01 * self.hparams.lr_text,
+            ),
+            "interval": "epoch",
+            "frequency": 1,
+            "name": "lr_text"
+        }
+
+        # return both optimizers and their schedulers
+        return [optimizer_vis, optimizer_txt], [scheduler_vis, scheduler_txt]
 
     def _compute_losses(self, image_features, text_features):
         image_features = image_features.to(self.device)
