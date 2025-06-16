@@ -15,8 +15,6 @@ import random
 from typing import Union, List
 
 
-
-
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -44,12 +42,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats = []
         self.val_text_feats = []
 
-
     def forward(self, inputs):
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
         return image_features, text_features
-
 
     def configure_optimizers(self):
         parameters = [
@@ -63,7 +59,6 @@ class CLIPDualEncoderModel(LightningModule):
                 "weight_decay": self.hparams.weight_decay
             }
         ]
-
 
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
         lr_scheduler = LinearWarmupCosineAnnealingLR(
@@ -80,14 +75,14 @@ class CLIPDualEncoderModel(LightningModule):
         }
 
     def _compute_losses(self, image_features, text_features):
-
+        image_features = image_features.to(self.device)
+        text_features = text_features.to(self.device)
         # normalized features
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
         text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
-
         # cosine similarity as logits
-        logit_scale = self.model.logit_scale.exp()
+        logit_scale = self.model.logit_scale.exp().to(self.device)
         logits_per_image = logit_scale * image_features @ text_features.t()
         logits_per_text = logit_scale * text_features @ image_features.t()
 
@@ -101,8 +96,6 @@ class CLIPDualEncoderModel(LightningModule):
         loss = (image_loss + text_loss) / 2
 
         return loss
-
-
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
@@ -221,4 +214,3 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
-
