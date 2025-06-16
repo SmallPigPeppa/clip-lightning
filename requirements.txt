@@ -1,4 +1,6 @@
 jsonargparse[signatures]>=4.26.1
 wandb>=0.12.10
-git+https://github.com/SmallPigPeppa/pytorch-lightning.git@npu_support_fp16_mixed
 lightning-bolts
+timm
+git+https://github.com/SmallPigPeppa/pytorch-lightning.git@npu_support_fp16_mixed
+
