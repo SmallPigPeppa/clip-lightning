@@ -4,6 +4,7 @@
 export HF_HOME=/ppio_net0/huggingface
 # 模型名称
 MODEL_NAME=ViT-B/16
+MODEL_NAME=RN50
 
 # 数据集列表
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
