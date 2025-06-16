@@ -154,11 +154,11 @@ class CLIPDualEncoderModel(LightningModule):
             recall_metric = self.get_recall_metrics(val_loader)
             self.log_dict(recall_metric, sync_dist=True)
 
-        # zero-shot metric
-        if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-            zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-            zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-            self.log_dict(zero_shot_metric, sync_dist=True)
+        # # zero-shot metric
+        # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
+        #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
+        #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
+        #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_recall_metrics(self, dataloader):
         val_img_feats = []
