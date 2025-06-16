@@ -68,6 +68,7 @@ run_training() {
     --trainer.logger.project ${PROJECT} \
     --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr-${lr} \
     --trainer.logger.log_model False \
+    --trainer.logger.offline True \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
