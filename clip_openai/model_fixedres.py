@@ -40,18 +40,15 @@ class CLIPDualEncoderModel(LightningModule):
         super().__init__(*args, **kwargs)
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
-        self.initialize_old_modules()
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.val_img_feats = []
         self.val_text_feats = []
-        for param in self.model.visual.conv1.parameters():
-            param.requires_grad = False
 
 
-    def forward(self, inputs):
-        image_features = self.model.encode_image(inputs["image"])
-        text_features = self.model.encode_text(inputs["caption"])
-        return image_features, text_features
+    # def forward(self, inputs):
+    #     image_features = self.model.encode_image(inputs["image"])
+    #     text_features = self.model.encode_text(inputs["caption"])
+    #     return image_features, text_features
 
     def forward(self, inputs, random_select=True):
         image_features = self.model.encode_image(inputs["image"])
