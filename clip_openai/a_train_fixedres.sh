@@ -60,6 +60,7 @@ run_training() {
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
     --trainer.accelerator npu \
+    --trainer.devices 1 \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
     --trainer.log_every_n_steps 1 \
