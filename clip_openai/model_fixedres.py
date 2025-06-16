@@ -48,9 +48,9 @@ class CLIPDualEncoderModel(LightningModule):
         return image_features, text_features
 
     def configure_optimizers(self):
-        # 两个子网络的学习率
         lr_visual = self.hparams.lr_visual
         lr_text = self.hparams.lr_text
+        min_lr = min(lr_visual, lr_text)
 
         parameters = [
             {
@@ -65,9 +65,6 @@ class CLIPDualEncoderModel(LightningModule):
         ]
 
         optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
-
-        # 取两者中的小学习率
-        min_lr = min(lr_visual, lr_text)
 
         lr_scheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
