@@ -21,8 +21,8 @@ DATASETS=("flickr30k")
 
 # 数据集学习率映射
 declare -A DATASET_LR_MAP=(
-  ["flickr30k"]=2e-5
-  ["coco2014"]=2e-5
+  ["flickr30k"]=1e-5
+  ["coco2014"]=1e-5
 )
 
 
@@ -34,7 +34,7 @@ declare -A METHOD_MAP=(
 # 其他参数
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
-MAX_EPOCHS=60
+MAX_EPOCHS=80
 BATCH_SIZE=512
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
