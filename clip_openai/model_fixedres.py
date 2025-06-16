@@ -23,7 +23,7 @@ class CLIPDualEncoderModel(LightningModule):
             projection_dims: int = 1024,
             temperature: float = 1.0,
             weight_decay: float = 0.0,
-            lr: float = 1e-3,
+            lr_visual: float = 1e-3,
             lr_text: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
@@ -51,7 +51,7 @@ class CLIPDualEncoderModel(LightningModule):
         parameters = [
             {
                 "params": self.model.visual.parameters(),  # 为 visual 部分设置单独的学习率
-                "lr": self.hparams.lr
+                "lr": self.hparams.lr_visual
             },
             {
                 "params": [param for name, param in self.model.named_parameters() if "visual" not in name],
