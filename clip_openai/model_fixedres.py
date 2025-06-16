@@ -52,6 +52,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def forward(self, inputs, random_select=True):
         image_features = self.model.encode_image(inputs["image"])
+        import pdb; pdb.set_trace()
         # Check the 'multi_caption' flag
         if inputs["multi_caption"][0]:
             if random_select:
