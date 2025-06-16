@@ -6,8 +6,8 @@ ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 PROJECT=CLIP-MSUN
 
 # 模型名称
-MODEL_NAME=ViT-B/16
-#MODEL_NAME=RN50
+#MODEL_NAME=ViT-B/16
+MODEL_NAME=RN50
 
 # 数据集列表
 
