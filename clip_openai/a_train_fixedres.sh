@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/ppio_net0/huggingface
-ROOT_DIR=/ppio_net0/torch_ds
-PROJECT=CLIP-1step-512
+export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/hf_cache
+ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
+PROJECT=CLIP-MSUN
 
 # 模型名称
 MODEL_NAME=ViT-B/16
@@ -59,7 +59,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --trainer.accelerator gpu \
+    --trainer.accelerator npu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
     --trainer.log_every_n_steps 1 \
