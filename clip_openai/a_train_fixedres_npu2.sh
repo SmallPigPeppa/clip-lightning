@@ -79,6 +79,7 @@ run_training() {
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
+    --model_checkpoint.every_n_epochs 20 \
     --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${TOTAL_BATCH_SIZE}
