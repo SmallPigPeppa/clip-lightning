@@ -60,7 +60,8 @@ run_training() {
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 512 \
     --model.temperature 0.1 \
-    --model.lr ${lr} \
+    --model.lr_visual ${lr} \
+    --model.lr_text ${lr} \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
     --model.download_root ${MODEL_DIR} \
