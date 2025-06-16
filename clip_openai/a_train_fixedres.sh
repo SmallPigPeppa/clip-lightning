@@ -35,7 +35,7 @@ BATCH_SIZE=512
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 NUM_GPUS=16
-
+TOTAL_BATCH_SIZE=$((BATCH_SIZE * NUM_GPUS))
 
 # 函数：运行训练
 run_training() {
@@ -68,14 +68,14 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr${lr}-bs${BATCH_SIZE * NUM_GPUS} \
+    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${BATCH_SIZE * NUM_GPUS}
+    --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }
 
 # 运行所有数据集
