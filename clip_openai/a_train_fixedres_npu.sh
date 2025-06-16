@@ -1,9 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env
+
 
 # 设置 Hugging Face home 目录
 export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/hf_cache
 export WANDB_BASE_URL=https://api.bandw.top
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
+MODEL_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/openclip_cache
+CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 
 # 模型名称
@@ -31,7 +34,7 @@ declare -A METHOD_MAP=(
 # 其他参数
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
-MAX_EPOCHS=40
+MAX_EPOCHS=60
 BATCH_SIZE=512
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
@@ -44,7 +47,7 @@ run_training() {
   local dataset_name=$2
   local lr=$3
 
-  python ${METHOD_MAP[$method]} fit \
+  python3 ${METHOD_MAP[$method]} fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -60,7 +63,7 @@ run_training() {
     --model.lr ${lr} \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
-    --model.download_root ./ \
+    --model.download_root ${MODEL_DIR} \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
     --trainer.accelerator npu \
     --trainer.devices ${NUM_GPUS} \
@@ -74,7 +77,7 @@ run_training() {
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt \
+    --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }

@@ -5,6 +5,8 @@
 export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/hf_cache
 export WANDB_BASE_URL=https://api.bandw.top
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
+MODEL_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/openclip_cache
+CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 
 # 模型名称
@@ -61,7 +63,7 @@ run_training() {
     --model.lr ${lr} \
     --model.lr_warmup_epochs 5 \
     --model.weight_decay 0.1 \
-    --model.download_root ./ \
+    --model.download_root ${MODEL_DIR} \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
     --trainer.accelerator gpu \
     --trainer.devices ${NUM_GPUS} \
@@ -75,7 +77,7 @@ run_training() {
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
-    --model_checkpoint.dirpath ckpt \
+    --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }
