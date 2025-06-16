@@ -36,6 +36,7 @@ BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 NUM_GPUS=16
 
+
 # 函数：运行训练
 run_training() {
   local method=$1
@@ -67,14 +68,14 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr-${lr} \
+    --trainer.logger.name ${dataset_name}-${MODEL_NAME}-${method}-lr${lr}-bs${BATCH_SIZE * NUM_GPUS} \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ckpt \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset_name}-512/${method}-lr-${lr}
+    --model_checkpoint.filename ${dataset_name}-${method}-lr${lr}-bs${BATCH_SIZE * NUM_GPUS}
 }
 
 # 运行所有数据集
