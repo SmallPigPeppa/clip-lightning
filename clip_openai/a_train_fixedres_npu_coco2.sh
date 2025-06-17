@@ -31,6 +31,7 @@ declare -A METHOD_MAP=(
   ["fixedres"]="cli_fixedres.py"
 )
 
+
 # 其他参数
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
