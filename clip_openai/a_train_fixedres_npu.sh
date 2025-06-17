@@ -6,7 +6,7 @@ export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/hf_cache
 export WANDB_BASE_URL=https://api.bandw.top
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/datasets
 MODEL_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/openclip_cache
-CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/ckpt/clip_msun
+CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 
 # 模型名称
