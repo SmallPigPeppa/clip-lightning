@@ -166,7 +166,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.task_datasets[self.current_task],
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            # pin_memory=True,
+            pin_memory=True,
             drop_last=False,
             shuffle=True,
         )
@@ -176,7 +176,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             self.val_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            # pin_memory=True,
+            pin_memory=True,
         )
 
     def zero_shot_dataloader(self):
