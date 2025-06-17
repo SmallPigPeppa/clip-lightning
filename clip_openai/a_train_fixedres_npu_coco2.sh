@@ -16,7 +16,7 @@ MODEL_NAME=RN50
 # 数据集列表
 
 DATASETS=("flickr30k")
-#DATASETS=("coco2014")
+DATASETS=("coco2014")
 
 
 # 数据集学习率映射
@@ -38,8 +38,9 @@ MAX_EPOCHS=80
 BATCH_SIZE=512
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
-NUM_GPUS=16
+NUM_GPUS=2
 TOTAL_BATCH_SIZE=$((BATCH_SIZE * NUM_GPUS))
+#NUM_WORKERS=$((8 * NUM_GPUS))
 
 # 函数：运行训练
 run_training() {

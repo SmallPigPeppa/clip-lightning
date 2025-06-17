@@ -2,11 +2,11 @@
 
 
 # 设置 Hugging Face home 目录
-export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/hf_cache
+export HF_HOME=/mnt/bn/liuwenzhuo-hl-data/hf_cache
 export WANDB_BASE_URL=https://api.bandw.top
-ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
-MODEL_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/openclip_cache
-CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/clip_msun
+ROOT_DIR=/mnt/bn/liuwenzhuo-hl-data/datasets
+MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
+CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 
 # 模型名称
