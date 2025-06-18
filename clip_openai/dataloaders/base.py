@@ -49,7 +49,7 @@ class ImageRetrievalDataset(Dataset):
             caption_i = [self.tokenize(t) for t in caption_i]
         else:
             caption_i = self.captions[index]
-            caption_i = self.tokenize(caption_i)
+            caption_i = [self.tokenize(caption_i)]
         if self.transforms:
             image_i = self.transforms(image_i)
 

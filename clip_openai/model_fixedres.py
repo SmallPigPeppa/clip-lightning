@@ -15,6 +15,35 @@ import random
 from typing import Union, List
 
 
+def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
+    """
+    图→文 R@1
+    image_feats: (N, D)
+    text_feats:  (N*c, D)
+    """
+    sims = image_feats @ text_feats.T                                       # 1. 计算相似度 (N, N*c)
+    top1 = sims.argmax(dim=1)                                               # 2. 每图最匹配 caption 的索引 (N,)
+    pred_img = top1 // caps_per_image                                        # 3. caption idx → 图 idx
+    N = image_feats.size(0)
+    correct = pred_img == torch.arange(N, device=image_feats.device)         # 4. 召回率 = 命中数 / N
+    return correct.float().mean().item() * 100.0
+
+def recall_t2i_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
+    """
+    文→图 R@1
+    image_feats: (N, D)
+    text_feats:  (N*c, D)
+    """
+    sims = text_feats @ image_feats.T                                        # 1. 计算相似度 (N*c, N)
+    top1 = sims.argmax(dim=1)                                                # 2. 每 caption 最匹配 图像 的索引 (N*c,)
+    M = text_feats.size(0)
+    true_img = torch.arange(M, device=text_feats.device) // caps_per_image   # 3. caption idx → 图 idx
+    correct = top1 == true_img                                               # 4. 召回率 = 命中数 / (N*c)
+    return correct.float().mean().item() * 100.0
+
+
+
+
 class CLIPDualEncoderModel(LightningModule):
     def __init__(
             self,
@@ -43,9 +72,14 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
 
     def forward(self, inputs):
-        import pdb;pdb.set_trace()
-        image_features = self.model.encode_image(inputs["image"])
-        text_features = self.model.encode_text(inputs["caption"])
+        images = inputs["image"]
+        captions = inputs["caption"]
+        # multi-caption
+        if isinstance(captions, list):
+            captions = random.choice(captions)
+        image_features = self.model.encode_image(images)
+        text_features = self.model.encode_text(captions)
+
         return image_features, text_features
 
     def configure_optimizers(self):
@@ -146,81 +180,23 @@ class CLIPDualEncoderModel(LightningModule):
         #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_recall_metrics(self, dataloader):
-        val_img_feats = []
-        val_text_feats = []
-
+        img_feats, txt_feats = [], []
         with torch.no_grad():
-            for inputs in tqdm(dataloader, desc="Recall Evaluating", unit="batch"):
-                images = inputs["image"].to(self.device)
-                targets = inputs["caption"].to(self.device)
-                image_features = self.model.encode_image(images)
-                text_features = self.model.encode_text(targets)
-                val_img_feats.append(image_features)
-                val_text_feats.append(text_features)
+            for batch in dataloader:
+                imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
+                caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
+                caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
+                img_feats.append(self.model.encode_image(imgs))  # [B, D]
+                txt_feats.append(self.model.encode_text(caps))  # [B*C, D]
 
-        all_image_features = torch.cat(val_img_feats)
-        all_text_features = torch.cat(val_text_feats)
+        imgs = torch.cat(img_feats, dim=0)  # [N, D]
+        txts = torch.cat(txt_feats, dim=0)  # [N*C, D]
+        C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
 
-        metrics = self.recall_score(
-            image_features=all_image_features,
-            text_features=all_text_features,
-            logit_scale=self.model.logit_scale.exp(),
-        )
-
-        return metrics
-
-    def recall_score_cpu(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        image_features = image_features.to(self.device)
-        text_features = text_features.to(self.device)
-        # normalized features
-        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-        logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        logits_per_text = (logit_scale * text_features @ image_features.t()).detach().cpu()
-        # logits_per_text = logits_per_image.t().detach().cpu()
-
-        logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
-        ground_truth = torch.arange(len(text_features)).view(-1, 1)
-
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
-            preds = preds.detach().cpu().numpy()
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-
-        return metrics
-
-    def recall_score(self, image_features, text_features, logit_scale=1.0):
-        metrics = {}
-        # move to GPU
-        image_features = image_features.to(self.device)
-        text_features = text_features.to(self.device)
-        # normalized features
-        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-        # compute logits on GPU
-        logits_per_image = logit_scale * image_features @ text_features.t()
-        logits_per_text = logit_scale * text_features @ image_features.t()
-        # logits_per_text = logits_per_image.t()
-
-        logits = {
-            "val/image_to_text": logits_per_image,
-            "val/text_to_image": logits_per_text
+        return {
+            "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
+            "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
-        # ground truth on GPU
-        ground_truth = torch.arange(len(text_features), device=self.device).view(-1, 1)
-
-        for name, logit in logits.items():
-            ranking = torch.argsort(logit, descending=True)
-            preds = torch.where(ranking == ground_truth)[1]
-            # move to CPU only for numpy operations
-            preds = preds.detach().cpu().numpy()
-            for k in [1]:
-                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
-
-        return metrics
 
     def get_zero_shot_metrics(self, dataloader):
         self.tokenizer = SimpleTokenizer()
@@ -256,3 +232,4 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
+
