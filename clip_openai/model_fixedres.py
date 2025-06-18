@@ -170,8 +170,14 @@ class CLIPDualEncoderModel(LightningModule):
 
     def recall_score(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
+        image_features = image_features.to(self.device)
+        text_features = text_features.to(self.device)
+        # normalized features
+        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
         logits_per_image = (logit_scale * image_features @ text_features.t()).detach().cpu()
-        logits_per_text = logits_per_image.t().detach().cpu()
+        logits_per_text = (logit_scale * text_features @ image_features.t()).detach().cpu()
+        # logits_per_text = logits_per_image.t().detach().cpu()
 
         logits = {"val/image_to_text": logits_per_image, "val/text_to_image": logits_per_text}
         ground_truth = torch.arange(len(text_features)).view(-1, 1)
