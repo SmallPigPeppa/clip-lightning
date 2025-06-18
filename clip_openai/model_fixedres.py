@@ -187,6 +187,7 @@ class CLIPDualEncoderModel(LightningModule):
                 # caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
                 #
                 # 展平所有 captions, [1,2,3][1,2,3] -> [112233]
+                import pdb; pdb.set_trace()
                 caps_tensor = torch.stack(batch["caption"], dim=0)
                 # swap & flatten to [batch_size*caps_per_image, …]
                 caps = caps_tensor.transpose(0, 1).flatten(0, 1).to(self.device)
