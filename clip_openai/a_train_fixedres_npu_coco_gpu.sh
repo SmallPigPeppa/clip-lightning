@@ -15,7 +15,7 @@ PROJECT=CLIP-MSUN
 MODEL_NAME=RN101
 
 # 数据集列表（只修改这里可灵活增删）
-DATASETS=("flickr30k" "coco2014")
+DATASETS=("coco2014")
 
 # 为每个数据集单独定义视觉分支和文本分支的学习率
 declare -A DATASET_LR_VISUAL_MAP=(
