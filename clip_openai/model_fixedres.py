@@ -168,7 +168,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return metrics
 
-    def recall_score(self, image_features, text_features, logit_scale=1.0):
+    def recall_score_cpu(self, image_features, text_features, logit_scale=1.0):
         metrics = {}
         image_features = image_features.to(self.device)
         text_features = text_features.to(self.device)
@@ -185,6 +185,36 @@ class CLIPDualEncoderModel(LightningModule):
         for name, logit in logits.items():
             ranking = torch.argsort(logit, descending=True)
             preds = torch.where(ranking == ground_truth)[1]
+            preds = preds.detach().cpu().numpy()
+            for k in [1]:
+                metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
+
+        return metrics
+
+    def recall_score(self, image_features, text_features, logit_scale=1.0):
+        metrics = {}
+        # move to GPU
+        image_features = image_features.to(self.device)
+        text_features = text_features.to(self.device)
+        # normalized features
+        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+        # compute logits on GPU
+        logits_per_image = logit_scale * image_features @ text_features.t()
+        logits_per_text = logit_scale * text_features @ image_features.t()
+        # logits_per_text = logits_per_image.t()
+
+        logits = {
+            "val/image_to_text": logits_per_image,
+            "val/text_to_image": logits_per_text
+        }
+        # ground truth on GPU
+        ground_truth = torch.arange(len(text_features), device=self.device).view(-1, 1)
+
+        for name, logit in logits.items():
+            ranking = torch.argsort(logit, descending=True)
+            preds = torch.where(ranking == ground_truth)[1]
+            # move to CPU only for numpy operations
             preds = preds.detach().cpu().numpy()
             for k in [1]:
                 metrics[f"{name}_R@{k}"] = np.mean(preds < k) * 100  # Convert recall to percentage
