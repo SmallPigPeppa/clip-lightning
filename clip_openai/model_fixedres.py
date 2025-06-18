@@ -185,7 +185,13 @@ class CLIPDualEncoderModel(LightningModule):
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
                 # caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
                 # caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
-                caps = random.choice(batch["caption"]).to(self.device)
+                #
+                # 展平所有 captions, [1,2,3][1,2,3] -> [112233]
+                caps_tensor = torch.stack([torch.stack(c) for c in batch["caption"]], dim=0)
+                # swap & flatten to [batch_size*caps_per_image, …]
+                caps = caps_tensor.transpose(0, 1).flatten(0, 1).to(self.device)
+
+                # caps = random.choice(batch["caption"]).to(self.device)
 
                 img_feats.append(self.model.encode_image(imgs))  # [B, D]
                 txt_feats.append(self.model.encode_text(caps))  # [B*C, D]
@@ -198,8 +204,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
         # C = 1
-        txts = txts.repeat_interleave(C, dim=0)
-        a={
+        # txts = txts.repeat_interleave(C, dim=0)
+        a = {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
