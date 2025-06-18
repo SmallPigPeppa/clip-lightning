@@ -21,12 +21,13 @@ def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_p
     image_feats: (N, D)
     text_feats:  (N*c, D)
     """
-    sims = image_feats @ text_feats.T                                       # 1. 计算相似度 (N, N*c)
-    top1 = sims.argmax(dim=1)                                               # 2. 每图最匹配 caption 的索引 (N,)
-    pred_img = top1 // caps_per_image                                        # 3. caption idx → 图 idx
+    sims = image_feats @ text_feats.T  # 1. 计算相似度 (N, N*c)
+    top1 = sims.argmax(dim=1)  # 2. 每图最匹配 caption 的索引 (N,)
+    pred_img = top1 // caps_per_image  # 3. caption idx → 图 idx
     N = image_feats.size(0)
-    correct = pred_img == torch.arange(N, device=image_feats.device)         # 4. 召回率 = 命中数 / N
+    correct = pred_img == torch.arange(N, device=image_feats.device)  # 4. 召回率 = 命中数 / N
     return correct.float().mean().item() * 100.0
+
 
 def recall_t2i_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
     """
@@ -34,14 +35,12 @@ def recall_t2i_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_p
     image_feats: (N, D)
     text_feats:  (N*c, D)
     """
-    sims = text_feats @ image_feats.T                                        # 1. 计算相似度 (N*c, N)
-    top1 = sims.argmax(dim=1)                                                # 2. 每 caption 最匹配 图像 的索引 (N*c,)
+    sims = text_feats @ image_feats.T  # 1. 计算相似度 (N*c, N)
+    top1 = sims.argmax(dim=1)  # 2. 每 caption 最匹配 图像 的索引 (N*c,)
     M = text_feats.size(0)
-    true_img = torch.arange(M, device=text_feats.device) // caps_per_image   # 3. caption idx → 图 idx
-    correct = top1 == true_img                                               # 4. 召回率 = 命中数 / (N*c)
+    true_img = torch.arange(M, device=text_feats.device) // caps_per_image  # 3. caption idx → 图 idx
+    correct = top1 == true_img  # 4. 召回率 = 命中数 / (N*c)
     return correct.float().mean().item() * 100.0
-
-
 
 
 class CLIPDualEncoderModel(LightningModule):
@@ -184,8 +183,10 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for batch in dataloader:
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
-                caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
-                caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
+                # caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
+                # caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
+                caps = random.choice(batch["caption"]).to(self.device)
+
                 img_feats.append(self.model.encode_image(imgs))  # [B, D]
                 txt_feats.append(self.model.encode_text(caps))  # [B*C, D]
 
@@ -194,6 +195,7 @@ class CLIPDualEncoderModel(LightningModule):
         imgs = imgs / imgs.norm(dim=-1, keepdim=True)  # 归一化
         txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
+        C = 1
 
         return {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
@@ -234,4 +236,3 @@ class CLIPDualEncoderModel(LightningModule):
         # Release the zero-shot classifier model to free up GPU memory
         del self.zero_shot_classifier
         return metrics
-
