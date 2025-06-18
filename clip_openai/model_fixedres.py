@@ -199,7 +199,11 @@ class CLIPDualEncoderModel(LightningModule):
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
         # C = 1
         txts = txts.repeat_interleave(C, dim=0)
-
+        a={
+            "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
+            "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
+        }
+        print(a)
         return {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
@@ -242,11 +246,10 @@ class CLIPDualEncoderModel(LightningModule):
 
 
 def test_recall():
-    N, C, D = 2, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
+    N, C, D = 100, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
 
     # 1) 构造可区分的图像特征：eye(N, D)，
-    #    保证第 i 张图的特征只有第 i 个维度为 1，其他为 0
-    image_feats = torch.eye(N, D)
+    image_feats = torch.rand(N, D)
 
     # 2) 为每张图生成 C 个完全相同的 caption 特征
     #    使得 text_feats.shape == (N*C, D)
