@@ -10,6 +10,7 @@ class COCO2014Dataset(ImageRetrievalDataset):
             **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
+        self.caption_num = 5
 
     def fetch_dataset(self, split):
         self.root_dir = os.path.join(self.root_dir, 'coco')

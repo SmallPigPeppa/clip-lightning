@@ -18,10 +18,12 @@ class ImageRetrievalDataset(Dataset):
         self.max_length = max_length
         self.split = split
         self.images, self.captions = self.fetch_dataset(split=split)
+        self.caption_num = 1
 
     @abstractmethod
     def fetch_dataset(self, split):
         pass
+
     def __len__(self):
         return len(self.captions)
 
@@ -41,12 +43,14 @@ class ImageRetrievalDataset(Dataset):
         return result
 
     def __getitem__(self, index):
-        image = Image.open(self.images[index])
-        caption = self.captions[index]
-        if isinstance(caption, list):
-            caption = random.choice(caption)
-        caption = self.tokenize(caption)
+        image_i = Image.open(self.images[index])
+        if self.caption_num > 1:
+            caption_i = self.captions[index][:self.caption_num]
+            caption_i = [self.tokenize(t) for t in caption_i]
+        else:
+            caption_i = self.captions[index]
+            caption_i = self.tokenize(caption_i)
         if self.transforms:
-            image = self.transforms(image)
+            image_i = self.transforms(image_i)
 
-        return {"image": image, "caption": caption}
+        return {"image": image_i, "caption": caption_i}

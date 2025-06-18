@@ -43,6 +43,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_text_feats = []
 
     def forward(self, inputs):
+        import pdb;pdb.set_trace()
         image_features = self.model.encode_image(inputs["image"])
         text_features = self.model.encode_text(inputs["caption"])
         return image_features, text_features
