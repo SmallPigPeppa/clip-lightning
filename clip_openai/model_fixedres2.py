@@ -81,60 +81,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         return image_features, text_features
 
-    def configure_optimizers(self):
-        lr_visual = self.hparams.lr_visual
-        lr_text = self.hparams.lr_text
-        min_lr = min(lr_visual, lr_text)
-
-        parameters = [
-            {
-                "params": self.model.visual.parameters(),
-                "lr": lr_visual
-            },
-            {
-                "params": [p for n, p in self.model.named_parameters() if "visual" not in n],
-                "lr": lr_text,
-                "weight_decay": self.hparams.weight_decay
-            }
-        ]
-
-        optimizer = optim.AdamW(parameters, weight_decay=self.hparams.weight_decay)
-
-        lr_scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer,
-            warmup_epochs=self.hparams.lr_warmup_epochs,
-            max_epochs=self.trainer.max_epochs,
-            warmup_start_lr=0.01 * min_lr,
-            eta_min=0.01 * min_lr
-        )
-
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": lr_scheduler,
-        }
-
-    def _compute_losses(self, image_features, text_features):
-        image_features = image_features.to(self.device)
-        text_features = text_features.to(self.device)
-        # normalized features
-        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-
-        # cosine similarity as logits
-        logit_scale = self.model.logit_scale.exp().to(self.device)
-        logits_per_image = logit_scale * image_features @ text_features.t()
-        logits_per_text = logit_scale * text_features @ image_features.t()
-
-        # shape = [global_batch_size, global_batch_size]
-
-        labels = torch.arange(len(logits_per_image)).to(self.device)
-
-        image_loss = F.cross_entropy(logits_per_image, labels)
-        text_loss = F.cross_entropy(logits_per_text, labels)
-
-        loss = (image_loss + text_loss) / 2
-
-        return loss
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
@@ -159,10 +105,6 @@ class CLIPDualEncoderModel(LightningModule):
         # self.log_dict(recall_metric, sync_dist=True)
         self.log_dict(recall_metric)
 
-        # # Zero-shot metric evaluation before training starts
-        # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        # self.log_dict(zero_shot_metric, sync_dist=True)
 
     def on_validation_epoch_end(self):
         # recall metric
@@ -172,11 +114,6 @@ class CLIPDualEncoderModel(LightningModule):
             # self.log_dict(recall_metric, sync_dist=True)
             self.log_dict(recall_metric)
 
-        # # zero-shot metric
-        # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-        #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        #     self.log_dict(zero_shot_metric, sync_dist=True)
 
     def get_recall_metrics(self, dataloader):
         img_feats, txt_feats = [], []
@@ -185,55 +122,19 @@ class CLIPDualEncoderModel(LightningModule):
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
                 caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
                 caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
-                # caps = random.choice(batch["caption"]).to(self.device)
 
                 img_feats.append(self.model.encode_image(imgs))  # [B, D]
                 txt_feats.append(self.model.encode_text(caps))  # [B*C, D]
 
         imgs = torch.cat(img_feats, dim=0)  # [N, D]
         txts = torch.cat(txt_feats, dim=0)  # [N*C, D]
-        import pdb; pdb.set_trace()
         imgs = imgs / imgs.norm(dim=-1, keepdim=True)  # 归一化
         txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
-        # C = 1
 
         return {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
 
-    def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
-        self.zero_shot_classifier = ZeroShotClassifier(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            classnames=IMAGENET_CLASSNAMES,
-            templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size_zs,
-        ).to(self.device)
 
-        self.zero_shot_classifier.compute_weights()
-
-        top1, top5, n = 0., 0., 0.
-
-        with torch.no_grad():
-            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
-                images = images.to(self.device)
-                targets = targets.to(self.device)
-                logits = self.zero_shot_classifier(images)
-                # Measure accuracy
-                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
-                top1 += acc1.item() * images.size(0)
-                top5 += acc5.item() * images.size(0)
-                n += images.size(0)
-
-        top1 = top1 / n
-        top5 = top5 / n
-        metrics = {
-            "zero_shot/top1_accuracy": top1,
-            "zero_shot/top5_accuracy": top5
-        }
-        # Release the zero-shot classifier model to free up GPU memory
-        del self.zero_shot_classifier
-        return metrics
