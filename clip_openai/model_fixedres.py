@@ -191,6 +191,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         imgs = torch.cat(img_feats, dim=0)  # [N, D]
         txts = torch.cat(txt_feats, dim=0)  # [N*C, D]
+        imgs = imgs / imgs.norm(dim=-1, keepdim=True)  # 归一化
+        txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
 
         return {
