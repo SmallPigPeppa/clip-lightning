@@ -59,7 +59,7 @@ class CLIPDualEncoderModel(LightningModule):
             current_task: int = 0,
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
-            recall_eval_interval: int = 1,
+            recall_eval_interval: int = 5,
             *args,
             **kwargs,
     ) -> None:

@@ -15,17 +15,17 @@ PROJECT=CLIP-MSUN
 MODEL_NAME=RN101
 
 # 数据集列表（只修改这里可灵活增删）
-DATASETS=("coco2014")
+DATASETS=("flickr30k" "coco2014")
 #DATASETS=("flickr30k")
 
 # 为每个数据集单独定义视觉分支和文本分支的学习率
 declare -A DATASET_LR_VISUAL_MAP=(
-  ["flickr30k"]=5e-6
+  ["flickr30k"]=5e-5
   ["coco2014"]=5e-5
 )
 declare -A DATASET_LR_TEXT_MAP=(
-  ["flickr30k"]=1e-5
-  ["coco2014"]=1e-6
+  ["flickr30k"]=5e-5
+  ["coco2014"]=5e-5
 )
 
 # 脚本方法映射
