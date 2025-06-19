@@ -209,7 +209,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
-            drop_last=True,
+            # drop_last=True,
             shuffle=True,
         )
 
