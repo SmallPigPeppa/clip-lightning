@@ -11,6 +11,7 @@ class Flickr30kDataset(ImageRetrievalDataset):
             **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
+        self.caption_num = 5
 
 
     def fetch_dataset(self, split):
@@ -31,7 +32,7 @@ class Flickr30kDataset(ImageRetrievalDataset):
 
         for item in split_data:
             img = os.path.join(self.root_dir, "flickr30k_images", item['filename'])
-            caps = [sentence['raw'] for sentence in item['sentences']]
+            caps = [sentence['raw'] for sentence in item['sentences'][:5]]  # 只取前 5 个 captions
             assert os.path.isfile(img)
             images.append(img)
             captions.append(caps)
