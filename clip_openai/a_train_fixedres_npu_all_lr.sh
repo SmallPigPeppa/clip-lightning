@@ -3,12 +3,12 @@
 # --------------------
 # 环境 & 路径设置
 # --------------------
-export HF_HOME=/mnt/hdfs/byte_content_security/user/liuwenzhuo/hf_cache
+export HF_HOME=/mnt/bn/liuwenzhuo-hl-data/hf_cache
 export WANDB_BASE_URL=https://api.bandw.top
 
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
-MODEL_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/openclip_cache
-CKPT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/ckpt/clip_msun
+MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
+CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/fixedres
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN101
 
@@ -78,10 +78,10 @@ run_training() {
 }
 
 # --------------------
-# 嵌套循环：按数据集 & 学习率运行
+# 嵌套循环：按学习率->数据集 运行
 # --------------------
-for ds in "${DATASETS[@]}"; do
-  for lr in "${LR_LIST[@]}"; do
+for lr in "${LR_LIST[@]}"; do
+  for ds in "${DATASETS[@]}"; do
     echo -e "\n=== Training on ${ds} with lr=${lr} ==="
     run_training "${ds}" "${lr}"
     echo "=== Completed ${ds}, lr=${lr} ==="
