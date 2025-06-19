@@ -183,28 +183,21 @@ class CLIPDualEncoderModel(LightningModule):
         with torch.no_grad():
             for batch in dataloader:
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
-                # caps = [cap for caps in batch["caption"] for cap in caps]  # 展平所有 captions
-                # caps = torch.stack(caps, dim=0).to(self.device)  # [B*C, L] → GPU
-                #
                 # 展平所有 captions, [1,2,3][1,2,3] -> [112233]
-                import pdb; pdb.set_trace()
                 caps_tensor = torch.stack(batch["caption"], dim=0)
                 # swap & flatten to [batch_size*caps_per_image, …]
                 caps = caps_tensor.transpose(0, 1).flatten(0, 1).to(self.device)
-
-                # caps = random.choice(batch["caption"]).to(self.device)
 
                 img_feats.append(self.model.encode_image(imgs))  # [B, D]
                 txt_feats.append(self.model.encode_text(caps))  # [B*C, D]
 
         imgs = torch.cat(img_feats, dim=0)  # [N, D]
         txts = torch.cat(txt_feats, dim=0)  # [N*C, D]
-        # import pdb; pdb.set_trace()
         imgs = imgs / imgs.norm(dim=-1, keepdim=True)  # 归一化
         txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
 
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
-        # C = 1
+        # C = 1 for debug
         # txts = txts.repeat_interleave(C, dim=0)
         a = {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
@@ -252,27 +245,29 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
 
-def test_recall():
-    N, C, D = 100, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
 
-    # 1) 构造可区分的图像特征：eye(N, D)，
-    image_feats = torch.rand(N, D)
-
-    # 2) 为每张图生成 C 个完全相同的 caption 特征
-    #    使得 text_feats.shape == (N*C, D)
-    text_feats = image_feats.repeat_interleave(C, dim=0)
-
-    # 3) 对图像和文本特征同时归一化
-    image_feats = F.normalize(image_feats, dim=-1)
-    text_feats = F.normalize(text_feats, dim=-1)
-
-    # 4) 计算 Recall@1
-    i2t = recall_i2t_torch(image_feats, text_feats, C)
-    t2i = recall_t2i_torch(image_feats, text_feats, C)
-
-    print(f"Image→Text Recall@1: {i2t:.2f}% (Expected: 100.00%)")
-    print(f"Text→Image Recall@1: {t2i:.2f}% (Expected: 100.00%)")
 
 
 if __name__ == "__main__":
+    def test_recall():
+        N, C, D = 100, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
+
+        # 1) 构造可区分的图像特征：eye(N, D)，
+        image_feats = torch.rand(N, D)
+
+        # 2) 为每张图生成 C 个完全相同的 caption 特征
+        #    使得 text_feats.shape == (N*C, D)
+        text_feats = image_feats.repeat_interleave(C, dim=0)
+
+        # 3) 对图像和文本特征同时归一化
+        image_feats = F.normalize(image_feats, dim=-1)
+        text_feats = F.normalize(text_feats, dim=-1)
+
+        # 4) 计算 Recall@1
+        i2t = recall_i2t_torch(image_feats, text_feats, C)
+        t2i = recall_t2i_torch(image_feats, text_feats, C)
+
+        print(f"Image→Text Recall@1: {i2t:.2f}% (Expected: 100.00%)")
+        print(f"Text→Image Recall@1: {t2i:.2f}% (Expected: 100.00%)")
+
     test_recall()
