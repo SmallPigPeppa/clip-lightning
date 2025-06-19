@@ -3,7 +3,7 @@ from torchvision import transforms
 from torch.utils.data import random_split, DataLoader, Subset
 from lightning import LightningDataModule
 from .base import ImageRetrievalDataset
-from .flickr30k_json import Flickr30kDataset
+from .flickr30k import Flickr30kDataset
 from .img_transforms import image_transform_v2
 from model_openai import SimpleTokenizer
 from .cub200 import CUB200Dataset
