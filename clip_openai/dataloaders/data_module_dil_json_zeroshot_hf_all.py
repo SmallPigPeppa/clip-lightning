@@ -11,7 +11,7 @@ import os
 from .base_hf import ImageRetrievalDataset as ImageRetrievalDatasetHF
 from .base_hf import DATASET_MAPPINGS
 from .base import ImageRetrievalDataset
-from .flickr30k_json import Flickr30kDataset
+from .flickr30k import Flickr30kDataset
 from .cub200 import CUB200Dataset
 from .food import UPMCFood101Dataset
 from .coco2014 import COCO2014Dataset
