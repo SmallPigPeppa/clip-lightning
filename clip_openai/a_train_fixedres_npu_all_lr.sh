@@ -74,7 +74,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset}-lr${lr}-bs${TOTAL_BATCH_SIZE}
+    --model_checkpoint.filename ${MODEL_NAME}-{dataset}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }
 
 # --------------------
