@@ -72,26 +72,54 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    def on_validation_epoch_end(self):
-        val_loader = self.trainer.datamodule.val_dataloader()
-        resolutions = list(range(32, 225, 16))
+    def log_recall_table(self, recall_list: list[dict]):
+        """
+        recall_list: [
+            {"resolution": 32, "image2text_recall": 45.0, "text2image_recall": 50.0},
+            {"resolution": 48, "image2text_recall": 47.2, "text2image_recall": 52.1},
+            ...
+        ]
+        """
+        # 列名：第一列叫 "Metric"，后面每列用分辨率标识
+        columns = ["Metric"] + [str(d["resolution"]) for d in recall_list]
+        table = wandb.Table(columns=columns)
+
+        # 要记录的 recall 指标
+        metrics_list = ["image2text_recall", "text2image_recall"]
+
+        # 每个指标做一行
+        for name in metrics_list:
+            row = [name]
+            for d in recall_list:
+                # 默认不存在时填 0
+                row.append(d.get(name, 0.0))
+            table.add_data(*row)
+
+        # Log 到当前 Wandb run
         assert isinstance(self.logger, WandbLogger)
         wb_run = self.logger.experiment
+        wb_run.log({"recall": table})
 
-        # 构造一个 W&B Table
-        table = wandb.Table(columns=["resolution", "i2t_R@1", "t2i_R@1"])
+    def on_validation_epoch_end(self):
+        # 只在间隔时执行
+        if (self.current_epoch + 1) % self.hparams.recall_eval_interval != 0:
+            return
+
+        val_loader = self.trainer.datamodule.val_dataloader()
+        resolutions = list(range(32, 225, 16))
+
+        # 收集各分辨率的 recall
+        recall_list = []
         for s in resolutions:
-            metrics = self.get_recall_metrics_anyres(val_loader, s)
-            table.add_data(
-                s,
-                metrics["val/image_to_text_R@1"],
-                metrics["val/text_to_image_R@1"],
-            )
+            m = self.get_recall_metrics_anyres(val_loader, s)
+            recall_list.append({
+                "resolution": s,
+                "image2text_recall": m["val/image_to_text_R@1"],
+                "text2image_recall": m["val/text_to_image_R@1"],
+            })
 
-        wb_run.log({
-            "recall_per_resolution": table,
-            "epoch": self.current_epoch,
-        })
+        # 调用上面的函数将表格 log 到 W&B
+        self.log_recall_table(recall_list)
 
     def get_recall_metrics_anyres(self, dataloader, s=None):
         img_feats, txt_feats = [], []

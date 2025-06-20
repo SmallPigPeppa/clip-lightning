@@ -232,52 +232,24 @@ class CLIPDualEncoderModel(LightningModule):
         df_pivot.to_excel(self.hparams.result_path, index=True)
         print("Metrics saved to Excel.")
 
-    def log_recall_table(self, recall_list: list[dict]):
-        """
-        recall_list: [
-            {"resolution": 32, "image2text_recall": 45.0, "text2image_recall": 50.0},
-            {"resolution": 48, "image2text_recall": 47.2, "text2image_recall": 52.1},
-            ...
-        ]
-        """
-        # 列名：第一列叫 "Metric"，后面每列用分辨率标识
-        columns = ["Metric"] + [str(d["resolution"]) for d in recall_list]
+    def log_metrics_to_wandb(self, metrics):
+        # 创建表格，列为数据集名，行代表 metric
+        columns = ["Metric"] + [metric.get("dataset") for metric in metrics]
         table = wandb.Table(columns=columns)
 
-        # 要记录的 recall 指标
+        # 动态设置要记录的 metrics 列表
         metrics_list = ["image2text_recall", "text2image_recall"]
+        if self.evaluate_zero_shot:
+            metrics_list += ["zero_shot_top1", "zero_shot_top5"]
 
-        # 每个指标做一行
-        for name in metrics_list:
-            row = [name]
-            for d in recall_list:
-                # 默认不存在时填 0
-                row.append(d.get(name, 0.0))
-            table.add_data(*row)
+        # 将每个 metric 作为行添加，行首为 metric 名称，后面为不同数据集的值
+        for metric_name in metrics_list:
+            row_data = [metric_name]
+            for metric in metrics:
+                row_data.append(metric.get(metric_name, 0))
+            table.add_data(*row_data)
 
-        wb_run = self.logger.experiment
-        wb_run.log({"recall_per_resolution": table, "epoch": self.current_epoch})
-
-    def on_validation_epoch_end(self):
-        # 只在间隔时执行
-        if (self.current_epoch + 1) % self.hparams.recall_eval_interval != 0:
-            return
-
-        val_loader = self.trainer.datamodule.val_dataloader()
-        resolutions = list(range(32, 225, 16))
-
-        # 收集各分辨率的 recall
-        recall_list = []
-        for s in resolutions:
-            m = self.get_recall_metrics_anyres(val_loader, s)
-            recall_list.append({
-                "resolution": s,
-                "image2text_recall": m["val/image_to_text_R@1"],
-                "text2image_recall": m["val/text_to_image_R@1"],
-            })
-
-        # 调用上面的函数将表格 log 到 W&B
-        self.log_recall_table(recall_list)
+        wandb.log({"metrics_table": table})
 
     def get_recall_metrics_5caption(self, dataloader, num_caption=5):
         val_img_feats = []
