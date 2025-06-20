@@ -118,8 +118,7 @@ class CLIPDualEncoderModel(LightningModule):
     def get_recall_metrics_anyres(self, dataloader, s=None):
         img_feats, txt_feats = [], []
         with torch.no_grad():
-            for batch in dataloader:
-
+            for batch in tqdm(dataloader, desc=f"Recall @ {s}px", unit="batch"):
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
                 if s is not None:
                     b, c, h, w = imgs.shape
