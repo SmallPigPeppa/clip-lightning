@@ -95,10 +95,7 @@ class CLIPDualEncoderModel(LightningModule):
                 row.append(d.get(name, 0.0))
             table.add_data(*row)
 
-        # Log 到当前 Wandb run
-        assert isinstance(self.logger, WandbLogger)
-        wb_run = self.logger.experiment
-        wb_run.log({"recall": table})
+        wandb.log({"recall": table})
 
     def on_validation_epoch_end(self):
         val_loader = self.trainer.datamodule.val_dataloader()
