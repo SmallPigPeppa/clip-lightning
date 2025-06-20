@@ -1,13 +1,11 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
+from tqdm import tqdm
 from lightning import LightningModule
 from model_openai import my_load
 from typing import Union, List
 import wandb
-from lightning.pytorch.loggers import WandbLogger
 
 
 def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
