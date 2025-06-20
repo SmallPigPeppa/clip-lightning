@@ -4,17 +4,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from lightning import LightningModule
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from transformers.models.clip.modeling_tf_clip import clip_loss
-
 from model_openai import my_load
-from zero_shot.zero_shot_classifier import ZeroShotClassifier
-from model_openai import SimpleTokenizer
-from zero_shot.zero_shot_metadata_imagenet import IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES
-from timm.utils import accuracy
-from tqdm import tqdm
-import random
 from typing import Union, List
+import wandb
+from lightning.pytorch.loggers import WandbLogger
 
 
 def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
@@ -72,7 +65,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.val_img_feats = []
         self.val_text_feats = []
 
-
     def validation_step(self, batch, *args, **kwargs):
         clip_loss = 0.
         # self.log("val/clip_loss", clip_loss, sync_dist=True)
@@ -81,21 +73,38 @@ class CLIPDualEncoderModel(LightningModule):
         return clip_loss
 
     def on_validation_epoch_end(self):
-        # recall metric
-        if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
-            val_loader = self.trainer.datamodule.val_dataloader()
-            recall_metric = self.get_recall_metrics(val_loader)
-            self.log_dict(recall_metric)
+        val_loader = self.trainer.datamodule.val_dataloader()
+        resolutions = list(range(32, 225, 16))
+        assert isinstance(self.logger, WandbLogger)
+        wb_run = self.logger.experiment
 
+        # 构造一个 W&B Table
+        table = wandb.Table(columns=["resolution", "i2t_R@1", "t2i_R@1"])
+        for s in resolutions:
+            metrics = self.get_recall_metrics_anyres(val_loader, s)
+            table.add_data(
+                s,
+                metrics["val/image_to_text_R@1"],
+                metrics["val/text_to_image_R@1"],
+            )
 
-    def get_recall_metrics(self, dataloader):
+        wb_run.log({
+            "recall_per_resolution": table,
+            "epoch": self.current_epoch,
+        })
+
+    def get_recall_metrics_anyres(self, dataloader, s=None):
         img_feats, txt_feats = [], []
         with torch.no_grad():
             for batch in dataloader:
+
                 imgs = batch["image"].to(self.device)  # [B, C, H, W] → GPU
-                # 展平所有 captions, [1,2,3][1,2,3] -> [112233]
+                if s is not None:
+                    b, c, h, w = imgs.shape
+                    down = F.interpolate(imgs, size=(s, s), mode='bilinear', align_corners=False)
+                    imgs = F.interpolate(down, size=(h, w), mode='bilinear', align_corners=False)
+
                 caps_tensor = torch.stack(batch["caption"], dim=0)
-                # swap & flatten to [batch_size*caps_per_image, …]
                 caps = caps_tensor.transpose(0, 1).flatten(0, 1).to(self.device)
 
                 img_feats.append(self.model.encode_image(imgs))  # [B, D]
@@ -118,5 +127,3 @@ class CLIPDualEncoderModel(LightningModule):
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
-
-
