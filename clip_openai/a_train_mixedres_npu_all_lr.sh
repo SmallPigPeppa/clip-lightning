@@ -42,7 +42,7 @@ run_training() {
   local dataset=$1
   local lr=$2
 
-  python3 cli_fixedres.py fit \
+  python3 cli_mixedres.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
