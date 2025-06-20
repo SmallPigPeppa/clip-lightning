@@ -95,6 +95,7 @@ class CLIPDualEncoderModel(LightningModule):
                 row.append(d.get(name, 0.0))
             table.add_data(*row)
 
+        import pdb;pdb.set_trace()
         wandb.log({"recall": table})
 
     def on_validation_epoch_end(self):
