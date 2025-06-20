@@ -8,7 +8,7 @@ export WANDB_BASE_URL=https://api.bandw.top
 
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
-CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/fixedres
+CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/mixedres
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN101
 
