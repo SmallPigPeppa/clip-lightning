@@ -72,7 +72,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         return clip_loss
 
-    def log_recall_table(self, recall_list: list[dict]):
+    def log_recall_table(self, recall_list):
         """
         recall_list: [
             {"resolution": 32, "image2text_recall": 45.0, "text2image_recall": 50.0},
