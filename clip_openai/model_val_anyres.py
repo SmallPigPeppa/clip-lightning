@@ -101,10 +101,6 @@ class CLIPDualEncoderModel(LightningModule):
         wb_run.log({"recall": table})
 
     def on_validation_epoch_end(self):
-        # 只在间隔时执行
-        if (self.current_epoch + 1) % self.hparams.recall_eval_interval != 0:
-            return
-
         val_loader = self.trainer.datamodule.val_dataloader()
         resolutions = list(range(32, 225, 16))
 
