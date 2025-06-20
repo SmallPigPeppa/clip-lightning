@@ -31,7 +31,7 @@ lr=1e-5
 # 训练函数
 # --------------------
 
-python3 cli_mixedres.py validate \
+python3 cli_val_anyres.py validate \
   --data.num_tasks 1 \
   --data.current_task 0 \
   --data.max_length 77 \
