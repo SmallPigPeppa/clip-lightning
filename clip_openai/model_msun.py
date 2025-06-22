@@ -252,6 +252,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def _compute_losses_sir(self, z1, z2):
         zu = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
+        print(z1.shape, z2.shape)
         loss = self.mse_loss(zu, z2)
         return loss
 
@@ -276,7 +277,6 @@ class CLIPDualEncoderModel(LightningModule):
         self.log("val/clip_loss_i", clip_loss_i)
 
         return clip_loss + clip_loss_i + self.hparams.alpha * sir_loss
-
 
     def on_train_start(self):
         self.model.eval()
@@ -321,4 +321,3 @@ class CLIPDualEncoderModel(LightningModule):
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
-
