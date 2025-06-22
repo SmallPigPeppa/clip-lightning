@@ -35,6 +35,7 @@ lr=1e-5
 # --------------------
 
 python3 cli_val_anyres.py validate \
+  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}.ckpt \
   --data.num_tasks 1 \
   --data.current_task 0 \
   --data.max_length 77 \
@@ -59,7 +60,6 @@ python3 cli_val_anyres.py validate \
   --trainer.logger.log_model False \
   --trainer.logger.offline False \
   --trainer.strategy ddp_find_unused_parameters_true \
-  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}.ckpt \
   --lr_monitor.logging_interval epoch \
   --model_checkpoint.dirpath ${CKPT_DIR} \
   --model_checkpoint.save_weights_only True \
