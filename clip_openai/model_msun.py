@@ -67,6 +67,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
+        self.mse_loss = nn.MSELoss()
         self.setup_msun(list(range(32, 96, 16)), list(range(32, 96, 16)), list(range(32, 96, 16)), 32)
 
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
@@ -99,21 +100,21 @@ class CLIPDualEncoderModel(LightningModule):
         visual.unified_size = unified_size
 
         def encode_image_res1(self, x):
-            z = self.subnet1(x)
+            z = self.visual.subnet1(x)
             z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
-            y = self.unified_net(z_u)
+            y = self.visual.unified_net(z_u)
             return z, y
 
         def encode_image_res2(self, x):
-            z = self.subnet2(x)
+            z = self.visual.subnet2(x)
             z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
-            y = self.unified_net(z_u)
+            y = self.visual.unified_net(z_u)
             return z, y
 
         def encode_image_res3(self, x):
-            z = self.subnet3(x)
+            z = self.visual.subnet3(x)
             z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
-            y = self.unified_net(z_u)
+            y = self.visual.unified_net(z_u)
             return z, y
 
         # bind to visual class
@@ -122,36 +123,60 @@ class CLIPDualEncoderModel(LightningModule):
             ('encode_image_res2', encode_image_res2),
             ('encode_image_res3', encode_image_res3),
         ]:
-            setattr(visual.__class__, name, fn)
-        delattr(visual.__class__, 'encode_image')
-
+            setattr(self.model.__class__, name, fn)
+        delattr(self.model.__class__, 'encode_image')
 
     def forward(self, inputs):
-        images = inputs["image"]
-        captions = inputs["caption"]
-        # multi-caption
-        if isinstance(captions, list):
-            captions = random.choice(captions)
-        image_features = self.model.encode_image(images)
-        text_features = self.model.encode_text(captions)
-
-        return image_features, text_features
-
-    def mixedres_forward(self, inputs):
-        imgs, caps = inputs["image"], inputs["caption"]
+        """
+        Choose encode_image_res* based on input size and forward.
+        """
+        imgs, caps = inputs['image'], inputs['caption']
         if isinstance(caps, list):
             caps = random.choice(caps)
 
-        b, c, h, w = imgs.shape
-        s = random.randint(32, 224)
-        # 下采样到 (s, s)
-        down = F.interpolate(imgs, size=(s, s), mode='bilinear', align_corners=False)
-        # 恢复到原始尺寸 (h, w)
-        up = F.interpolate(down, size=(h, w), mode='bilinear', align_corners=False)
+        _, _, h, w = imgs.shape
+        # select subnet by resolution (lists now on self.model.visual)
+        if h in self.model.visual.res1_list:
+            _, img_feats = self.model.visual.encode_image_res1(imgs)
+        elif h in self.model.visual.res2_list:
+            _, img_feats= self.model.visual.encode_image_res2(imgs)
+        else:
+            _, img_feats = self.model.visual.encode_image_res3(imgs)
 
-        img_feats = self.model.encode_image(up)
         txt_feats = self.model.encode_text(caps)
         return img_feats, txt_feats
+
+    def randres_forward(self, inputs):
+        """
+        Randomly pick one resolution from visual.res*_list,
+        resize image, and forward through corresponding encode_image_res* subnet.
+        """
+        imgs, caps = inputs['image'], inputs['caption']
+        if isinstance(caps, list):
+            caps = random.choice(caps)
+
+        # sample one resolution from visual
+        all_res = (
+                self.model.visual.res1_list +
+                self.model.visual.res2_list +
+                self.model.visual.res3_list
+        )
+        r = random.choice(all_res)
+
+        # down & up sample
+        down = F.interpolate(imgs, size=(r, r), mode='bilinear', align_corners=False)
+
+        # route to correct subnet
+        if r in self.model.visual.res1_list:
+            z_i, img_feats_i = self.model.visual.encode_image_res1(down)
+        elif r in self.model.visual.res2_list:
+            z_i, img_feats_i = self.model.visual.encode_image_res2(down)
+        else:
+            z_i, img_feats_i = self.model.visual.encode_image_res3(down)
+
+        txt_feats = self.model.encode_text(caps)
+        z_3, img_feats = self.model.visual.encode_image_res3(imgs)
+        return z_i, z_3, img_feats_i, img_feats, txt_feats
 
     def configure_optimizers(self):
         lr_visual = self.hparams.lr_visual
@@ -208,10 +233,13 @@ class CLIPDualEncoderModel(LightningModule):
 
         return loss
 
+    def _compute_losses_sir(self, z1, z2):
+        loss = self.mse_loss(z1, z2)
+        return loss
+
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.mixedres_forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        # self.log("train/clip_loss", clip_loss, sync_dist=True)
         self.log("train/clip_loss", clip_loss)
 
         return clip_loss
@@ -219,39 +247,23 @@ class CLIPDualEncoderModel(LightningModule):
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.mixedres_forward(batch)
         clip_loss = self._compute_losses(image_embeddings, text_embeddings)
-        # self.log("val/clip_loss", clip_loss, sync_dist=True)
         self.log("val/clip_loss", clip_loss)
 
         return clip_loss
 
     def on_train_start(self):
-        # recall metric
         self.model.eval()
         val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
-        # self.log_dict(recall_metric, sync_dist=True)
         self.log_dict(recall_metric)
-
-        # # Zero-shot metric evaluation before training starts
-        # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        # self.log_dict(zero_shot_metric, sync_dist=True)
         self.model.train()
 
     def on_validation_epoch_end(self):
-        # recall metric
         self.model.eval()
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
-            # self.log_dict(recall_metric, sync_dist=True)
             self.log_dict(recall_metric)
-
-        # # zero-shot metric
-        # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
-        #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
-        #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
-        #     self.log_dict(zero_shot_metric, sync_dist=True)
         self.model.train()
 
     def get_recall_metrics(self, dataloader):
@@ -318,7 +330,3 @@ class CLIPDualEncoderModel(LightningModule):
         del self.zero_shot_classifier
         return metrics
 
-
-import copy
-import torch.nn.functional as F
-from torch import nn
