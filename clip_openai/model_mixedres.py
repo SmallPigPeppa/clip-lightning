@@ -170,32 +170,36 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_train_start(self):
         # recall metric
-        val_loader = self.trainer.datamodule.val_dataloader()
         self.model.eval()
+        val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
         # self.log_dict(recall_metric, sync_dist=True)
         self.log_dict(recall_metric)
-        self.model.train()
+
 
 
         # # Zero-shot metric evaluation before training starts
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
         # self.log_dict(zero_shot_metric, sync_dist=True)
+        self.model.train()
 
     def on_validation_epoch_end(self):
         # recall metric
+        self.model.eval()
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
             # self.log_dict(recall_metric, sync_dist=True)
             self.log_dict(recall_metric)
 
+
         # # zero-shot metric
         # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
         #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
         #     self.log_dict(zero_shot_metric, sync_dist=True)
+        self.model.train()
 
     def get_recall_metrics(self, dataloader):
         img_feats, txt_feats = [], []

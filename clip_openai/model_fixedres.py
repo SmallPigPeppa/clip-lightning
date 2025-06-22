@@ -154,6 +154,7 @@ class CLIPDualEncoderModel(LightningModule):
 
     def on_train_start(self):
         # recall metric
+        self.model.eval()
         val_loader = self.trainer.datamodule.val_dataloader()
         recall_metric = self.get_recall_metrics(val_loader)
         # self.log_dict(recall_metric, sync_dist=True)
@@ -163,9 +164,11 @@ class CLIPDualEncoderModel(LightningModule):
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
         # self.log_dict(zero_shot_metric, sync_dist=True)
+        self.model.train()
 
     def on_validation_epoch_end(self):
         # recall metric
+        self.model.eval()
         if (self.current_epoch + 1) % self.hparams.recall_eval_interval == 0:
             val_loader = self.trainer.datamodule.val_dataloader()
             recall_metric = self.get_recall_metrics(val_loader)
@@ -177,6 +180,7 @@ class CLIPDualEncoderModel(LightningModule):
         #     zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         #     zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
         #     self.log_dict(zero_shot_metric, sync_dist=True)
+        self.model.train()
 
     def get_recall_metrics(self, dataloader):
         img_feats, txt_feats = [], []
@@ -245,9 +249,6 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
 
-
-
-
 if __name__ == "__main__":
     def test_recall():
         N, C, D = 100, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
@@ -269,5 +270,6 @@ if __name__ == "__main__":
 
         print(f"Image→Text Recall@1: {i2t:.2f}% (Expected: 100.00%)")
         print(f"Text→Image Recall@1: {t2i:.2f}% (Expected: 100.00%)")
+
 
     test_recall()
