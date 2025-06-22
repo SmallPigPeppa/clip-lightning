@@ -10,7 +10,7 @@ ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/mixedres
 PROJECT=CLIP-MSUN
-MODEL_NAME=RN101
+MODEL_NAME=RN50
 
 # --------------------
 # 数据集列表
@@ -29,7 +29,7 @@ LR_LIST=(1e-5)
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=80
-BATCH_SIZE=32
+BATCH_SIZE=64
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 NUM_GPUS=8
