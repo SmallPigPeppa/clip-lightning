@@ -92,6 +92,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # make subnet1/2 conv1 stride =1
         visual.subnet1[0].stride = (1, 1)
+        visual.subnet1[9]=nn.Identity()
         visual.subnet2[0].stride = (1, 1)
 
         # resolution configs
