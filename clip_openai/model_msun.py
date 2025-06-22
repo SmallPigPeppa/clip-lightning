@@ -162,6 +162,8 @@ class CLIPDualEncoderModel(LightningModule):
         if isinstance(caps, list):
             caps = random.choice(caps)
 
+        z_3, img_feats = self.model.encode_image_res3(imgs)
+
         # sample one resolution from visual
         all_res = (
                 self.model.visual.res1_list +
@@ -182,7 +184,7 @@ class CLIPDualEncoderModel(LightningModule):
             z_i, img_feats_i = self.model.encode_image_res3(down)
 
         txt_feats = self.model.encode_text(caps)
-        z_3, img_feats = self.model.encode_image_res3(imgs)
+
         return z_i, z_3, img_feats_i, img_feats, txt_feats
 
     def configure_optimizers(self):
