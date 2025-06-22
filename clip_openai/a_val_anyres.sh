@@ -58,6 +58,7 @@ python3 cli_val_anyres.py validate \
   --trainer.logger.log_model False \
   --trainer.logger.offline False \
   --trainer.strategy ddp_find_unused_parameters_true \
+  --trainer.resume_from_checkpoint ${CKPT_DIR}/${MODEL_NAME}-{dataset}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
   --lr_monitor.logging_interval epoch \
   --model_checkpoint.dirpath ${CKPT_DIR} \
   --model_checkpoint.save_weights_only True \
