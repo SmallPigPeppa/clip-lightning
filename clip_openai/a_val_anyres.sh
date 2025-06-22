@@ -11,7 +11,7 @@ MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
-METHOD=mixedres
+METHOD=fixedres
 
 
 
