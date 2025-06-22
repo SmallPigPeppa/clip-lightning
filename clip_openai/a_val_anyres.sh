@@ -47,7 +47,7 @@ python3 cli_val_anyres.py validate \
   --model.projection_dims 512 \
   --model.download_root ${MODEL_DIR} \
   --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-  --trainer.accelerator gpu \
+  --trainer.accelerator npu \
   --trainer.devices ${NUM_GPUS} \
   --trainer.precision 16 \
   --trainer.max_epochs ${MAX_EPOCHS} \
