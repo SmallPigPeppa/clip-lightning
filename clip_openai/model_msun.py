@@ -72,15 +72,10 @@ class CLIPDualEncoderModel(LightningModule):
         self.setup_msun(list(range(32, 96, 16)), list(range(96, 159, 16)), list(range(160, 225, 16)), 56)
 
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
-        """
-        Embed MSUN into model.visual with:
-          - 1 random‐subnet encoder: encode_image_randres
-          - 3 fixed encoders:       encode_image_res1/2/3
-        No input interpolation—subnets are applied directly.
-        """
+        # grab backbone
         visual = self.model.visual
 
-        # build shared stem & tail
+        # shared stem & tail
         stem = nn.Sequential(
             visual.conv1, visual.bn1, visual.relu1,
             visual.conv2, visual.bn2, visual.relu2,
@@ -89,40 +84,53 @@ class CLIPDualEncoderModel(LightningModule):
         )
         tail = nn.Sequential(visual.layer2, visual.layer3, visual.layer4, visual.attnpool)
 
-        # attach subnets + configs
+        # clone stems into subnets
         visual.subnet1 = copy.deepcopy(stem)
         visual.subnet2 = copy.deepcopy(stem)
         visual.subnet3 = copy.deepcopy(stem)
         visual.unified_net = tail
 
+        # make subnet1/2 conv1 stride =1
+        visual.subnet1[0].stride = (1, 1)
+        visual.subnet2[0].stride = (1, 1)
+
+        # resolution configs
         visual.res1_list = res1_list
         visual.res2_list = res2_list
         visual.res3_list = res3_list
         visual.unified_size = unified_size
 
+        # fixed‐resolution encoders
         def encode_image_res1(self, x):
             z = self.visual.subnet1(x)
-            z_u = F.interpolate(z, size=self.visual.unified_size, mode='bilinear', align_corners=False)
-            y = self.visual.unified_net(z_u)
+            y = self.visual.unified_net(
+                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
 
         def encode_image_res2(self, x):
             z = self.visual.subnet2(x)
-            z_u = F.interpolate(z, size=self.visual.unified_size, mode='bilinear', align_corners=False)
-            y = self.visual.unified_net(z_u)
+            y = self.visual.unified_net(
+                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
 
         def encode_image_res3(self, x):
             z = self.visual.subnet3(x)
-            # import pdb; pdb.set_trace()
-            z_u = F.interpolate(z, size=self.visual.unified_size, mode='bilinear', align_corners=False)
-            y = self.visual.unified_net(z_u)
+            y = self.visual.unified_net(
+                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
 
+        # original‐resolution encoder
         def encode_image(self, x):
-            z = self.visual.subnet3(x)
-            y = self.visual.unified_net(z)
-            return y
+            return self.visual.unified_net(self.visual.subnet3(x))
+
+        # bind methods to visual
+        for name, fn in [
+            ('encode_image_res1', encode_image_res1),
+            ('encode_image_res2', encode_image_res2),
+            ('encode_image_res3', encode_image_res3),
+            ('encode_image', encode_image),
+        ]:
+            setattr(visual.__class__, name, fn)
 
         # bind to visual class
         for name, fn in [
