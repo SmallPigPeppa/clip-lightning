@@ -122,7 +122,7 @@ class CLIPDualEncoderModel(LightningModule):
         def encode_image(self, x):
             z = self.visual.subnet3(x)
             y = self.visual.unified_net(z)
-            return z, y
+            return y
 
         # bind to visual class
         for name, fn in [
@@ -144,11 +144,11 @@ class CLIPDualEncoderModel(LightningModule):
         _, _, h, w = imgs.shape
         # select subnet by resolution (lists now on self.model.visual)
         if h in self.model.visual.res1_list:
-            _, img_feats = self.model.visual.encode_image_res1(imgs)
+            _, img_feats = self.model.encode_image_res1(imgs)
         elif h in self.model.visual.res2_list:
-            _, img_feats = self.model.visual.encode_image_res2(imgs)
+            _, img_feats = self.model.encode_image_res2(imgs)
         else:
-            _, img_feats = self.model.visual.encode_image_res3(imgs)
+            _, img_feats = self.model.encode_image_res3(imgs)
 
         txt_feats = self.model.encode_text(caps)
         return img_feats, txt_feats
@@ -175,14 +175,14 @@ class CLIPDualEncoderModel(LightningModule):
 
         # route to correct subnet
         if r in self.model.visual.res1_list:
-            z_i, img_feats_i = self.model.visual.encode_image_res1(down)
+            z_i, img_feats_i = self.model.encode_image_res1(down)
         elif r in self.model.visual.res2_list:
-            z_i, img_feats_i = self.model.visual.encode_image_res2(down)
+            z_i, img_feats_i = self.model.encode_image_res2(down)
         else:
-            z_i, img_feats_i = self.model.visual.encode_image_res3(down)
+            z_i, img_feats_i = self.model.encode_image_res3(down)
 
         txt_feats = self.model.encode_text(caps)
-        z_3, img_feats = self.model.visual.encode_image_res3(imgs)
+        z_3, img_feats = self.model.encode_image_res3(imgs)
         return z_i, z_3, img_feats_i, img_feats, txt_feats
 
     def configure_optimizers(self):
