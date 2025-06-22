@@ -35,6 +35,7 @@ NUM_WORKERS=8
 NUM_GPUS=8
 TOTAL_BATCH_SIZE=$(( BATCH_SIZE * NUM_GPUS ))
 
+
 # --------------------
 # 训练函数
 # --------------------
