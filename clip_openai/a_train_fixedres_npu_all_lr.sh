@@ -10,7 +10,7 @@ ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/fixedres
 PROJECT=CLIP-MSUN
-MODEL_NAME=RN101
+MODEL_NAME=RN50
 
 # --------------------
 # 数据集列表
@@ -68,7 +68,7 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
+    --trainer.logger.name $fixedres-{dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
