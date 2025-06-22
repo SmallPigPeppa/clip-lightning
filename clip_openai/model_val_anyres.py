@@ -135,8 +135,6 @@ class CLIPDualEncoderModel(LightningModule):
         txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
 
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
-        # C = 1 for debug
-        # txts = txts.repeat_interleave(C, dim=0)
         a = {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图

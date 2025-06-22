@@ -171,9 +171,12 @@ class CLIPDualEncoderModel(LightningModule):
     def on_train_start(self):
         # recall metric
         val_loader = self.trainer.datamodule.val_dataloader()
+        self.model.eval()
         recall_metric = self.get_recall_metrics(val_loader)
         # self.log_dict(recall_metric, sync_dist=True)
         self.log_dict(recall_metric)
+        self.model.train()
+
 
         # # Zero-shot metric evaluation before training starts
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
@@ -213,8 +216,6 @@ class CLIPDualEncoderModel(LightningModule):
         txts = txts / txts.norm(dim=-1, keepdim=True)  # 归一化
 
         C = len(dataloader.dataset[0]["caption"])  # 每图 caption 数
-        # C = 1 for debug
-        # txts = txts.repeat_interleave(C, dim=0)
         a = {
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
