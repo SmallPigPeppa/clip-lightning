@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,6 +12,7 @@ from timm.utils import accuracy
 from tqdm import tqdm
 import random
 from typing import Union, List
+import copy
 
 
 def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
@@ -60,6 +60,7 @@ class CLIPDualEncoderModel(LightningModule):
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
             recall_eval_interval: int = 5,
+            alpha: float = 100.,
             *args,
             **kwargs,
     ) -> None:
@@ -117,14 +118,19 @@ class CLIPDualEncoderModel(LightningModule):
             y = self.visual.unified_net(z_u)
             return z, y
 
+        def encode_image(self, x):
+            z = self.visual.subnet3(x)
+            y = self.visual.unified_net(z)
+            return z, y
+
         # bind to visual class
         for name, fn in [
             ('encode_image_res1', encode_image_res1),
             ('encode_image_res2', encode_image_res2),
             ('encode_image_res3', encode_image_res3),
+            ('encode_image', encode_image),
         ]:
             setattr(self.model.__class__, name, fn)
-        delattr(self.model.__class__, 'encode_image')
 
     def forward(self, inputs):
         """
@@ -139,7 +145,7 @@ class CLIPDualEncoderModel(LightningModule):
         if h in self.model.visual.res1_list:
             _, img_feats = self.model.visual.encode_image_res1(imgs)
         elif h in self.model.visual.res2_list:
-            _, img_feats= self.model.visual.encode_image_res2(imgs)
+            _, img_feats = self.model.visual.encode_image_res2(imgs)
         else:
             _, img_feats = self.model.visual.encode_image_res3(imgs)
 
@@ -238,18 +244,27 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def training_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.mixedres_forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
+        clip_loss = self._compute_losses(img_feats, txt_feats)
+        sir_loss = self._compute_losses_sir(z_i, z_3)
+        clip_loss_i = self._compute_losses(img_feats, txt_feats)
         self.log("train/clip_loss", clip_loss)
+        self.log("train/sir_loss", sir_loss)
+        self.log("train/clip_loss_i", clip_loss_i)
 
-        return clip_loss
+        return clip_loss + clip_loss_i + self.hparams.alpha * sir_loss
 
     def validation_step(self, batch, *args, **kwargs):
-        image_embeddings, text_embeddings = self.mixedres_forward(batch)
-        clip_loss = self._compute_losses(image_embeddings, text_embeddings)
+        z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
+        clip_loss = self._compute_losses(img_feats, txt_feats)
+        sir_loss = self._compute_losses_sir(z_i, z_3)
+        clip_loss_i = self._compute_losses(img_feats, txt_feats)
         self.log("val/clip_loss", clip_loss)
+        self.log("val/sir_loss", sir_loss)
+        self.log("val/clip_loss_i", clip_loss_i)
 
-        return clip_loss
+        return clip_loss + clip_loss_i + self.hparams.alpha * sir_loss
+
 
     def on_train_start(self):
         self.model.eval()
@@ -294,39 +309,4 @@ class CLIPDualEncoderModel(LightningModule):
             "val/image_to_text_R@1": recall_i2t_torch(imgs, txts, C),  # 图→文
             "val/text_to_image_R@1": recall_t2i_torch(imgs, txts, C),  # 文→图
         }
-
-    def get_zero_shot_metrics(self, dataloader):
-        self.tokenizer = SimpleTokenizer()
-        self.zero_shot_classifier = ZeroShotClassifier(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            classnames=IMAGENET_CLASSNAMES,
-            templates=OPENAI_IMAGENET_TEMPLATES,
-            num_classes_per_batch=self.hparams.batch_size_zs,
-        ).to(self.device)
-
-        self.zero_shot_classifier.compute_weights()
-
-        top1, top5, n = 0., 0., 0.
-
-        with torch.no_grad():
-            for images, targets in tqdm(dataloader, desc="Zero-shot Evaluating", unit="batch"):
-                images = images.to(self.device)
-                targets = targets.to(self.device)
-                logits = self.zero_shot_classifier(images)
-                # Measure accuracy
-                acc1, acc5 = accuracy(logits, targets, topk=(1, 5))
-                top1 += acc1.item() * images.size(0)
-                top5 += acc5.item() * images.size(0)
-                n += images.size(0)
-
-        top1 = top1 / n
-        top5 = top5 / n
-        metrics = {
-            "zero_shot/top1_accuracy": top1,
-            "zero_shot/top5_accuracy": top5
-        }
-        # Release the zero-shot classifier model to free up GPU memory
-        del self.zero_shot_classifier
-        return metrics
 

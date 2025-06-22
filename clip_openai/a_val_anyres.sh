@@ -11,7 +11,7 @@ MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
-METHOD=fixedres
+METHOD=mixedres
 
 
 
@@ -28,7 +28,7 @@ NUM_GPUS=1
 TOTAL_BATCH_SIZE=$(( BATCH_SIZE * NUM_GPUS ))
 
 dataset="flickr30k"
-dataset="coco2014"
+#dataset="coco2014"
 lr=1e-5
 
 # --------------------
