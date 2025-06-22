@@ -12,6 +12,7 @@ CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/mixedres
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN101
 
+
 # --------------------
 # 通用训练参数
 # --------------------
