@@ -87,8 +87,8 @@ class CLIPDualEncoderModel(LightningModule):
             caps = random.choice(caps)
 
         b, c, h, w = imgs.shape
-        # s = random.randint(32, 224)
-        s = random.randrange(32, 225, 16)
+        s = random.randint(32, 224)
+        # s = random.randrange(32, 225, 16)
         # 下采样到 (s, s)
         down = F.interpolate(imgs, size=(s, s), mode='bilinear', align_corners=False)
         # 恢复到原始尺寸 (h, w)
