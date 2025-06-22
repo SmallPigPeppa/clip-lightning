@@ -6,6 +6,8 @@ from lightning import LightningModule
 from model_openai import my_load
 from typing import Union, List
 import wandb
+import os
+
 
 
 def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
@@ -48,7 +50,6 @@ class CLIPDualEncoderModel(LightningModule):
             lr_text: float = 5e-4,
             lr_warmup_epochs: int = 5,
             batch_size: int = 64,
-            old_checkpoint_path: Union[str, List[str]] = None,
             current_task: int = 0,
             batch_size_zs: int = 256,
             zero_shot_eval_interval: int = 5,
@@ -60,8 +61,11 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.val_img_feats = []
-        self.val_text_feats = []
+        import pdb; pdb.set_trace()
+        checkpoint_path = os.path.join(self.hparams.ckpt_dir, checkpoint_path)
+        checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+        self.model.load_state_dict(checkpoint['model'], strict=True)
+        print(f"Loaded checkpoint: {checkpoint_path}")
 
     def validation_step(self, batch, *args, **kwargs):
         clip_loss = 0.
