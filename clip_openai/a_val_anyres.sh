@@ -57,11 +57,11 @@ python3 cli_val_anyres.py validate \
   --trainer.log_every_n_steps 1 \
   --trainer.logger WandbLogger \
   --trainer.logger.project ${PROJECT} \
-  --trainer.logger.name val-${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
+  --trainer.logger.name val-${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-s1 \
   --trainer.logger.log_model False \
   --trainer.logger.offline False \
   --trainer.strategy ddp_find_unused_parameters_true \
   --lr_monitor.logging_interval epoch \
   --model_checkpoint.dirpath ${CKPT_DIR} \
   --model_checkpoint.save_weights_only True \
-  --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}
+  --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-s1
