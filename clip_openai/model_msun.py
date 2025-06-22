@@ -69,7 +69,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.mse_loss = nn.MSELoss()
-        self.setup_msun(list(range(32, 96, 16)), list(range(96, 159, 16)), list(range(160, 225, 16)), 32)
+        self.setup_msun(list(range(32, 96, 16)), list(range(96, 159, 16)), list(range(160, 225, 16)), 56)
 
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
         """
