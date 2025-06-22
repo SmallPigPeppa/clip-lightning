@@ -8,7 +8,7 @@ export WANDB_BASE_URL=https://api.bandw.top
 
 ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
-CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/fixedres
+CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
 
@@ -75,7 +75,7 @@ run_training() {
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}
+    --model_checkpoint.filename fixedres-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }
 
 # --------------------
