@@ -21,7 +21,6 @@ DATASETS=(flickr30k coco2014)
 # 学习率列表
 # --------------------
 #LR_LIST=(5e-6 1e-5)
-#LR_LIST=(1.25e-6)
 LR_LIST=(1e-5)
 
 # --------------------
@@ -30,7 +29,7 @@ LR_LIST=(1e-5)
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=80
-BATCH_SIZE=512
+BATCH_SIZE=64
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 NUM_GPUS=8
@@ -70,7 +69,7 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
+    --trainer.logger.name mixedres-{dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
