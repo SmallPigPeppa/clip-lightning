@@ -68,7 +68,7 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name $fixedres-{dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
+    --trainer.logger.name fixedres-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
