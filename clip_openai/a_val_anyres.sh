@@ -28,6 +28,7 @@ NUM_GPUS=1
 TOTAL_BATCH_SIZE=$(( BATCH_SIZE * NUM_GPUS ))
 
 dataset="flickr30k"
+dataset="coco2014"
 lr=1e-5
 
 # --------------------

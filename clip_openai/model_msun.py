@@ -67,59 +67,64 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
-
+        self.setup_msun(list(range(32, 96, 16)), list(range(32, 96, 16)), list(range(32, 96, 16)), 32)
 
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
         """
-        res*_list: list of ints for random resize
-        unified_size: tuple (H, W)
+        Embed MSUN into model.visual with:
+          - 1 random‐subnet encoder: encode_image_randres
+          - 3 fixed encoders:       encode_image_res1/2/3
+        No input interpolation—subnets are applied directly.
         """
-        orig = self.model.visual
+        visual = self.model.visual
 
-        # shared stem and tail
+        # build shared stem & tail
         stem = nn.Sequential(
-            orig.conv1, orig.bn1, orig.relu1,
-            orig.conv2, orig.bn2, orig.relu2,
-            orig.conv3, orig.bn3, orig.relu3,
-            orig.avgpool, orig.layer1
+            visual.conv1, visual.bn1, visual.relu1,
+            visual.conv2, visual.bn2, visual.relu2,
+            visual.conv3, visual.bn3, visual.relu3,
+            visual.avgpool, visual.layer1
         )
-        tail = nn.Sequential(orig.layer2, orig.layer3, orig.layer4, orig.attnpool)
+        tail = nn.Sequential(visual.layer2, visual.layer3, visual.layer4, visual.attnpool)
 
-        # attach MSUN subnets
-        self.model.subnet1 = copy.deepcopy(stem)
-        self.model.subnet2 = copy.deepcopy(stem)
-        self.model.subnet3 = copy.deepcopy(stem)
-        self.model.unified_net = tail
+        # attach subnets + configs
+        visual.subnet1 = copy.deepcopy(stem)
+        visual.subnet2 = copy.deepcopy(stem)
+        visual.subnet3 = copy.deepcopy(stem)
+        visual.unified_net = tail
 
-        # store resolution options
-        self.model.res1_list = res1_list
-        self.model.res2_list = res2_list
-        self.model.res3_list = res3_list
-        self.model.unified_size = unified_size
+        visual.res1_list = res1_list
+        visual.res2_list = res2_list
+        visual.res3_list = res3_list
+        visual.unified_size = unified_size
 
-        # define random-res forward
-        def encode_image_randres(mod, x):
-            # pick one resolution from all lists
-            all_res = mod.res1_list + mod.res2_list + mod.res3_list
-            r = random.choice(all_res)
-
-            # resize input
-            xr = F.interpolate(x, size=(r, r), mode='bilinear', align_corners=False)
-
-            # select subnet
-            if r in mod.res1_list:
-                z = mod.subnet1(xr)
-            elif r in mod.res2_list:
-                z = mod.subnet2(xr)
-            else:
-                z = mod.subnet3(xr)
-
-            # unify and tail
-            z_u = F.interpolate(z, size=mod.unified_size, mode='bilinear', align_corners=False)
-            y = mod.unified_net(z_u)
+        def encode_image_res1(self, x):
+            z = self.subnet1(x)
+            z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
+            y = self.unified_net(z_u)
             return z, y
 
-        setattr(self.model.__class__, 'encode_image_randres', encode_image_randres)
+        def encode_image_res2(self, x):
+            z = self.subnet2(x)
+            z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
+            y = self.unified_net(z_u)
+            return z, y
+
+        def encode_image_res3(self, x):
+            z = self.subnet3(x)
+            z_u = F.interpolate(z, size=self.unified_size, mode='bilinear', align_corners=False)
+            y = self.unified_net(z_u)
+            return z, y
+
+        # bind to visual class
+        for name, fn in [
+            ('encode_image_res1', encode_image_res1),
+            ('encode_image_res2', encode_image_res2),
+            ('encode_image_res3', encode_image_res3),
+        ]:
+            setattr(visual.__class__, name, fn)
+        delattr(visual.__class__, 'encode_image')
+
 
     def forward(self, inputs):
         images = inputs["image"]
@@ -227,8 +232,6 @@ class CLIPDualEncoderModel(LightningModule):
         # self.log_dict(recall_metric, sync_dist=True)
         self.log_dict(recall_metric)
 
-
-
         # # Zero-shot metric evaluation before training starts
         # zero_shot_loader = self.trainer.datamodule.zero_shot_dataloader()
         # zero_shot_metric = self.get_zero_shot_metrics(zero_shot_loader)
@@ -243,7 +246,6 @@ class CLIPDualEncoderModel(LightningModule):
             recall_metric = self.get_recall_metrics(val_loader)
             # self.log_dict(recall_metric, sync_dist=True)
             self.log_dict(recall_metric)
-
 
         # # zero-shot metric
         # if (self.current_epoch + 1) % self.hparams.zero_shot_eval_interval == 0:
@@ -320,9 +322,3 @@ class CLIPDualEncoderModel(LightningModule):
 import copy
 import torch.nn.functional as F
 from torch import nn
-
-
-
-
-
-
