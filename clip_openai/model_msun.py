@@ -67,8 +67,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        self.val_img_feats = []
-        self.val_text_feats = []
+
 
     def forward(self, inputs):
         images = inputs["image"]
@@ -87,8 +86,7 @@ class CLIPDualEncoderModel(LightningModule):
             caps = random.choice(caps)
 
         b, c, h, w = imgs.shape
-        # s = random.randint(32, 224)
-        s = random.randrange(32, 225, 16)
+        s = random.randint(32, 224)
         # 下采样到 (s, s)
         down = F.interpolate(imgs, size=(s, s), mode='bilinear', align_corners=False)
         # 恢复到原始尺寸 (h, w)
@@ -267,29 +265,76 @@ class CLIPDualEncoderModel(LightningModule):
         return metrics
 
 
+import copy
+import torch.nn.functional as F
+from torch import nn
+
+def inject_multiscale_encoder(model,
+                              small_size=(32,32),
+                              mid_size=(128,128),
+                              large_size=(224,224),
+                              unified_size=(56,56)):
+    """
+    将 model.visual_encoder (MResNet) 替换为 Multi-scale + Unified 结构，
+    并在 model 上添加 small_net, mid_net, large_net, unified_net 及 forward_ms 方法。
+    """
+
+    # 原始 MResNet 编码器
+    orig: MResNet = model.visual_encoder
+
+    # 1. 构建“stem + layer1” 子网
+    stem_and_l1 = nn.Sequential(
+        orig.conv1, orig.bn1, orig.relu1,
+        orig.conv2, orig.bn2, orig.relu2,
+        orig.conv3, orig.bn3, orig.relu3,
+        orig.avgpool,
+        orig.layer1
+    )
+    # 2. 构建 Unified Tail
+    tail = nn.Sequential(
+        orig.layer2,
+        orig.layer3,
+        orig.layer4,
+        orig.attnpool
+    )
+
+    # 3. 将子网和 Tail 挂到 model 上
+    model.small_net = copy.deepcopy(stem_and_l1)
+    model.mid_net   = copy.deepcopy(stem_and_l1)
+    model.large_net = copy.deepcopy(stem_and_l1)
+    model.unified_net = tail
+
+    # 4. 保存各个尺度尺寸
+    model.small_size, model.mid_size = small_size, mid_size
+    model.large_size, model.unified_size = large_size, unified_size
+
+    # 5. 动态注入一个多尺度 forward 方法
+    def forward_ms(self, x):
+        # 插值到 small/mid/large
+        x_s = F.interpolate(x, size=self.small_size, mode='bilinear', align_corners=False)
+        x_m = F.interpolate(x, size=self.mid_size,   mode='bilinear', align_corners=False)
+        x_L = F.interpolate(x, size=self.large_size, mode='bilinear', align_corners=False)
+
+        # 过各自子网
+        z1 = self.small_net(x_s)
+        z2 = self.mid_net(x_m)
+        z3 = self.large_net(x_L)
+
+        # 都插值到统一特征尺寸
+        z1u = F.interpolate(z1, size=self.unified_size, mode='bilinear', align_corners=False)
+        z2u = F.interpolate(z2, size=self.unified_size, mode='bilinear', align_corners=False)
+
+        # 过 Tail（Unified Net）
+        y1 = self.unified_net(z1u)
+        y2 = self.unified_net(z2u)
+        y3 = self.unified_net(z3)
+
+        return z1, z2, z3, y1, y2, y3
+
+    # 把方法绑定到 model
+    setattr(model.__class__, 'forward_ms', forward_ms)
+
+    return model
 
 
 
-if __name__ == "__main__":
-    def test_recall():
-        N, C, D = 100, 5, 10  # 2 张图，每图 5 个 caption，特征维度 10
-
-        # 1) 构造可区分的图像特征：eye(N, D)，
-        image_feats = torch.rand(N, D)
-
-        # 2) 为每张图生成 C 个完全相同的 caption 特征
-        #    使得 text_feats.shape == (N*C, D)
-        text_feats = image_feats.repeat_interleave(C, dim=0)
-
-        # 3) 对图像和文本特征同时归一化
-        image_feats = F.normalize(image_feats, dim=-1)
-        text_feats = F.normalize(text_feats, dim=-1)
-
-        # 4) 计算 Recall@1
-        i2t = recall_i2t_torch(image_feats, text_feats, C)
-        t2i = recall_t2i_torch(image_feats, text_feats, C)
-
-        print(f"Image→Text Recall@1: {i2t:.2f}% (Expected: 100.00%)")
-        print(f"Text→Image Recall@1: {t2i:.2f}% (Expected: 100.00%)")
-
-    test_recall()
