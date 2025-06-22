@@ -11,7 +11,7 @@ MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
-METHOD=fixedres
+METHOD=msun
 
 # --------------------
 # 数据集列表
@@ -36,6 +36,7 @@ NUM_WORKERS=8
 NUM_GPUS=8
 TOTAL_BATCH_SIZE=$(( BATCH_SIZE * NUM_GPUS ))
 
+
 # --------------------
 # 训练函数
 # --------------------
@@ -43,7 +44,7 @@ run_training() {
   local dataset=$1
   local lr=$2
 
-  python3 cli_fixedres.py fit \
+  python3 cli_msun.py fit \
     --data.num_tasks 1 \
     --data.current_task 0 \
     --data.max_length 77 \
@@ -53,6 +54,7 @@ run_training() {
     --data.config ${CONFIG_FILE} \
     --data.dataset_name ${dataset} \
     --data.root_dir ${ROOT_DIR} \
+    --model.alpha 10 \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 512 \
     --model.temperature 0.1 \
@@ -78,6 +80,7 @@ run_training() {
     --model_checkpoint.save_weights_only True \
     --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}
 }
+
 
 # --------------------
 # 嵌套循环：按学习率->数据集 运行
