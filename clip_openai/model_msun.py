@@ -243,7 +243,8 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def _compute_losses_sir(self, z1, z2):
-        loss = self.mse_loss(z1, z2)
+        zu = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
+        loss = self.mse_loss(zu, z2)
         return loss
 
     def training_step(self, batch, *args, **kwargs):
