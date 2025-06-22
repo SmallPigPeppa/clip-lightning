@@ -69,6 +69,58 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
 
+    def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
+        """
+        res*_list: list of ints for random resize
+        unified_size: tuple (H, W)
+        """
+        orig = self.model.visual
+
+        # shared stem and tail
+        stem = nn.Sequential(
+            orig.conv1, orig.bn1, orig.relu1,
+            orig.conv2, orig.bn2, orig.relu2,
+            orig.conv3, orig.bn3, orig.relu3,
+            orig.avgpool, orig.layer1
+        )
+        tail = nn.Sequential(orig.layer2, orig.layer3, orig.layer4, orig.attnpool)
+
+        # attach MSUN subnets
+        self.model.subnet1 = copy.deepcopy(stem)
+        self.model.subnet2 = copy.deepcopy(stem)
+        self.model.subnet3 = copy.deepcopy(stem)
+        self.model.unified_net = tail
+
+        # store resolution options
+        self.model.res1_list = res1_list
+        self.model.res2_list = res2_list
+        self.model.res3_list = res3_list
+        self.model.unified_size = unified_size
+
+        # define random-res forward
+        def encode_image_randres(mod, x):
+            # pick one resolution from all lists
+            all_res = mod.res1_list + mod.res2_list + mod.res3_list
+            r = random.choice(all_res)
+
+            # resize input
+            xr = F.interpolate(x, size=(r, r), mode='bilinear', align_corners=False)
+
+            # select subnet
+            if r in mod.res1_list:
+                z = mod.subnet1(xr)
+            elif r in mod.res2_list:
+                z = mod.subnet2(xr)
+            else:
+                z = mod.subnet3(xr)
+
+            # unify and tail
+            z_u = F.interpolate(z, size=mod.unified_size, mode='bilinear', align_corners=False)
+            y = mod.unified_net(z_u)
+            return z, y
+
+        setattr(self.model.__class__, 'encode_image_randres', encode_image_randres)
+
     def forward(self, inputs):
         images = inputs["image"]
         captions = inputs["caption"]
@@ -269,72 +321,8 @@ import copy
 import torch.nn.functional as F
 from torch import nn
 
-def inject_multiscale_encoder(model,
-                              small_size=(32,32),
-                              mid_size=(128,128),
-                              large_size=(224,224),
-                              unified_size=(56,56)):
-    """
-    将 model.visual_encoder (MResNet) 替换为 Multi-scale + Unified 结构，
-    并在 model 上添加 small_net, mid_net, large_net, unified_net 及 forward_ms 方法。
-    """
 
-    # 原始 MResNet 编码器
-    orig: MResNet = model.visual_encoder
 
-    # 1. 构建“stem + layer1” 子网
-    stem_and_l1 = nn.Sequential(
-        orig.conv1, orig.bn1, orig.relu1,
-        orig.conv2, orig.bn2, orig.relu2,
-        orig.conv3, orig.bn3, orig.relu3,
-        orig.avgpool,
-        orig.layer1
-    )
-    # 2. 构建 Unified Tail
-    tail = nn.Sequential(
-        orig.layer2,
-        orig.layer3,
-        orig.layer4,
-        orig.attnpool
-    )
-
-    # 3. 将子网和 Tail 挂到 model 上
-    model.small_net = copy.deepcopy(stem_and_l1)
-    model.mid_net   = copy.deepcopy(stem_and_l1)
-    model.large_net = copy.deepcopy(stem_and_l1)
-    model.unified_net = tail
-
-    # 4. 保存各个尺度尺寸
-    model.small_size, model.mid_size = small_size, mid_size
-    model.large_size, model.unified_size = large_size, unified_size
-
-    # 5. 动态注入一个多尺度 forward 方法
-    def forward_ms(self, x):
-        # 插值到 small/mid/large
-        x_s = F.interpolate(x, size=self.small_size, mode='bilinear', align_corners=False)
-        x_m = F.interpolate(x, size=self.mid_size,   mode='bilinear', align_corners=False)
-        x_L = F.interpolate(x, size=self.large_size, mode='bilinear', align_corners=False)
-
-        # 过各自子网
-        z1 = self.small_net(x_s)
-        z2 = self.mid_net(x_m)
-        z3 = self.large_net(x_L)
-
-        # 都插值到统一特征尺寸
-        z1u = F.interpolate(z1, size=self.unified_size, mode='bilinear', align_corners=False)
-        z2u = F.interpolate(z2, size=self.unified_size, mode='bilinear', align_corners=False)
-
-        # 过 Tail（Unified Net）
-        y1 = self.unified_net(z1u)
-        y2 = self.unified_net(z2u)
-        y3 = self.unified_net(z3)
-
-        return z1, z2, z3, y1, y2, y3
-
-    # 把方法绑定到 model
-    setattr(model.__class__, 'forward_ms', forward_ms)
-
-    return model
 
 
 
