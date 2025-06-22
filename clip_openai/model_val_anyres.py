@@ -61,11 +61,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.save_hyperparameters()
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
-        import pdb; pdb.set_trace()
-        checkpoint_path = os.path.join(self.hparams.ckpt_dir, checkpoint_path)
-        checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
-        self.model.load_state_dict(checkpoint['model'], strict=True)
-        print(f"Loaded checkpoint: {checkpoint_path}")
+
 
     def validation_step(self, batch, *args, **kwargs):
         clip_loss = 0.
