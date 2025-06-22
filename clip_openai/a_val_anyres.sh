@@ -47,14 +47,14 @@ python3 cli_val_anyres.py validate \
   --model.projection_dims 512 \
   --model.download_root ${MODEL_DIR} \
   --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-  --trainer.accelerator npu \
+  --trainer.accelerator gpu \
   --trainer.devices ${NUM_GPUS} \
   --trainer.precision 16 \
   --trainer.max_epochs ${MAX_EPOCHS} \
   --trainer.log_every_n_steps 1 \
   --trainer.logger WandbLogger \
   --trainer.logger.project ${PROJECT} \
-  --trainer.logger.name ${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
+  --trainer.logger.name val-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE} \
   --trainer.logger.log_model False \
   --trainer.logger.offline False \
   --trainer.strategy ddp_find_unused_parameters_true \
