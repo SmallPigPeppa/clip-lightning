@@ -10,7 +10,7 @@ ROOT_DIR=/mnt/hdfs/byte_content_security/user/liuwenzhuo/datasets
 MODEL_DIR=/mnt/bn/liuwenzhuo-hl-data/openclip_cache
 CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun/mixedres
 PROJECT=CLIP-MSUN
-MODEL_NAME=RN101
+MODEL_NAME=RN50
 
 
 
