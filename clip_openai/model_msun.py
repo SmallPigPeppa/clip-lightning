@@ -114,7 +114,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         def encode_image_res3(self, x):
             z = self.visual.subnet3(x)
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             z_u = F.interpolate(z, size=self.visual.unified_size, mode='bilinear', align_corners=False)
             y = self.visual.unified_net(z_u)
             return z, y
