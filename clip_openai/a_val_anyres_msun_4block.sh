@@ -12,6 +12,7 @@ CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
 METHOD=msun
+ALPHA=0
 
 
 
@@ -36,7 +37,7 @@ lr=1e-5
 # --------------------
 
 python3 cli_val_anyres_msun_block4.py validate \
-  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-v3.ckpt \
+  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-alpha${ALPHA}-v3.ckpt \
   --data.num_tasks 1 \
   --data.current_task 0 \
   --data.max_length 77 \
@@ -57,11 +58,11 @@ python3 cli_val_anyres_msun_block4.py validate \
   --trainer.log_every_n_steps 1 \
   --trainer.logger WandbLogger \
   --trainer.logger.project ${PROJECT} \
-  --trainer.logger.name val-${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-block4 \
+  --trainer.logger.name val-${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-alpha${ALPHA}-block4 \
   --trainer.logger.log_model False \
   --trainer.logger.offline False \
   --trainer.strategy ddp_find_unused_parameters_true \
   --lr_monitor.logging_interval epoch \
   --model_checkpoint.dirpath ${CKPT_DIR} \
   --model_checkpoint.save_weights_only True \
-  --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-block4
+  --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-alpha${ALPHA}-block4
