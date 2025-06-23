@@ -115,8 +115,6 @@ class CLIPDualEncoderModel(LightningModule):
 
         def encode_image_res3(self, x):
             z = self.visual.subnet3(x)
-            import pdb;
-            pdb.set_trace()
             y = self.visual.unified_net(
                 F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
@@ -231,7 +229,6 @@ class CLIPDualEncoderModel(LightningModule):
         imgs, caps = inputs['image'], inputs['caption']
         if isinstance(caps, list):
             caps = random.choice(caps)
-        import pdb; pdb.set_trace()
         z_3, img_feats = self.model.encode_image_res3(imgs)
 
         # sample one resolution from visual
