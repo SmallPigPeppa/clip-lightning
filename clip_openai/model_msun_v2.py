@@ -79,6 +79,7 @@ class CLIPDualEncoderModel(LightningModule):
             unified_size=56,
         )
 
+
     def setup_msun(self, res_lists: List[List[int]], unified_size: int):
         visual = self.model.visual
 
