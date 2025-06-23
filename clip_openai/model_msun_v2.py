@@ -235,7 +235,7 @@ class CLIPDualEncoderModel(LightningModule):
         clip_losses = [self._compute_losses(f, txt) for f in feat_list]
 
         # apply thresholds to first three CLIP losses
-        thresholds = [0.5, 0.5, 0.5]
+        thresholds = [1.5, 0.5, 0.3]
         masked_clip = []
         for loss, thr in zip(clip_losses, thresholds):
             # zero out losses below threshold (no gradient)
