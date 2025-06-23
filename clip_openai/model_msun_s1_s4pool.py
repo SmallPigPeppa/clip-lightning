@@ -67,8 +67,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.mse_loss = nn.MSELoss()
         self.setup_msun(list(range(32, 96, 1)), list(range(96, 159, 1)), list(range(160, 225, 1)), 56)
-        self.setup_s4pool()
-
+        # self.setup_s4pool()
+/
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
         # grab backbone
         visual = self.model.visual
