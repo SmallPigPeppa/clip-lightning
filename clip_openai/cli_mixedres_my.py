@@ -1,28 +1,30 @@
-import time
-import random
+#!/usr/bin/env python3
+import argparse, time, random
 from datetime import datetime
-from tqdm import tqdm  # Install via: pip install tqdm
+from tqdm import tqdm
 
-def simulate_training(total_steps=10, interval_hours=2):
-    """
-    Simulates a training process with steps.
-    Every 'step' is separated by a fixed interval (e.g., 2 hours).
-    Randomly generates and prints training loss for each step with a timestamp.
-    """
-    for step in tqdm(range(1, total_steps + 1), desc="Training Progress", unit="step"):
-        # Simulate a random training loss between 0.1 and 1.0
-        train_loss = round(random.uniform(0.1, 1.0), 4)
 
-        # Get current timestamp
+def simulate_training(steps=5, interval=2):
+    """Run dummy training for given steps and hour intervals"""
+    for i in tqdm(range(1, steps + 1), "Training", unit="step"):
+        loss = round(random.uniform(0.1, 1.0), 4)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] Step {i}/{steps} | Loss: {loss}")
+        if i < steps:
+            time.sleep(interval * 3600)
 
-        # Print training info for the current step
-        print(f"[{now}] Step {step} | Training Loss: {train_loss}")
 
-        # Wait before the next step (2 hours by default)
-        if step != total_steps:
-            time.sleep(2 * 60 * 60)  # 2 hours = 7200 seconds
-            # time.sleep(5)  # Debug mode: use 5 seconds for testing
+def main():
+    parser = argparse.ArgumentParser(description="Dummy training script")
+    parser.add_argument("--total_steps", type=int, default=200,
+                        help="Number of steps to simulate")
+    parser.add_argument("--interval_hours", type=float, default=2,
+                        help="Hours between steps")
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        print("Ignoring args:", unknown)
+    simulate_training(steps=args.total_steps, interval=args.interval_hours)
 
-# Run the training simulation
-simulate_training(total_steps=5)
+
+if __name__ == "__main__":
+    main()
