@@ -19,7 +19,7 @@ ALPHA=0
 # 数据集列表
 # --------------------
 DATASETS=(flickr30k coco2014)
-DATASETS=(flickr30k)
+#DATASETS=(flickr30k)
 
 # --------------------
 # 学习率列表

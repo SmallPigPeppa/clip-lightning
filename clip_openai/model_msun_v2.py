@@ -71,9 +71,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.mse_loss = nn.MSELoss()
         self.setup_msun(
             res_lists=[
-                list(range(32, 81, 1)),
-                list(range(96, 145, 1)),
-                list(range(160, 209, 1)),
+                list(range(32, 81, 16)),
+                list(range(96, 145, 16)),
+                list(range(160, 209, 16)),
                 [224],
             ],
             unified_size=56,
