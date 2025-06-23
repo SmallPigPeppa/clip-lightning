@@ -115,6 +115,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         def encode_image_res3(self, x):
             z = self.visual.subnet3(x)
+            import pdb;
+            pdb.set_trace()
             y = self.visual.unified_net(
                 F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
@@ -229,7 +231,7 @@ class CLIPDualEncoderModel(LightningModule):
         imgs, caps = inputs['image'], inputs['caption']
         if isinstance(caps, list):
             caps = random.choice(caps)
-
+        import pdb; pdb.set_trace()
         z_3, img_feats = self.model.encode_image_res3(imgs)
 
         # sample one resolution from visual
@@ -311,9 +313,10 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def _compute_losses_sir(self, z1, z2):
-        zu = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
+        z1_u = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
+        z2_u = F.interpolate(z2, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
         # print(z1.shape, z2.shape)
-        loss = self.mse_loss(zu, z2)
+        loss = self.mse_loss(z1_u, z2_u)
         return loss
 
     def training_step(self, batch, *args, **kwargs):
