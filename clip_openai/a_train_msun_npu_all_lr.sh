@@ -12,6 +12,7 @@ CKPT_DIR=/mnt/bn/liuwenzhuo-hl-data/ckpt/clip_msun
 PROJECT=CLIP-MSUN
 MODEL_NAME=RN50
 METHOD=msun
+ALPHA=0
 
 # --------------------
 # 数据集列表
@@ -35,7 +36,7 @@ BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 NUM_GPUS=8
 TOTAL_BATCH_SIZE=$(( BATCH_SIZE * NUM_GPUS ))
-ALPHA=0
+
 
 
 # --------------------
@@ -55,7 +56,6 @@ run_training() {
     --data.config ${CONFIG_FILE} \
     --data.dataset_name ${dataset} \
     --data.root_dir ${ROOT_DIR} \
-    --model.alpha 10 \
     --model.model_name ${MODEL_NAME} \
     --model.projection_dims 512 \
     --model.temperature 0.1 \
