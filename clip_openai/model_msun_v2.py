@@ -228,30 +228,40 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def training_step(self, batch, *args, **kwargs):
-        # get per-subnet features and texts
+        # forward pass for each resolution
         z_list, feat_list, txt = self.randres_forward(batch)
 
-        # compute clip loss for each subnet
+        # compute CLIP losses for all subnets
         clip_losses = [self._compute_losses(f, txt) for f in feat_list]
-        # compute sir loss against last subnet as reference
+
+        # apply thresholds to first three CLIP losses
+        thresholds = [0.5, 0.5, 0.5]
+        masked_clip = []
+        for loss, thr in zip(clip_losses, thresholds):
+            # zero out losses below threshold (no gradient)
+            masked_clip.append(loss * (loss >= thr).float())
+        # keep any remaining losses unchanged
+        masked_clip.extend(clip_losses[len(thresholds):])
+
+        # compute SIR losses against last subnet
         ref = z_list[-1]
         sir_losses = [self._compute_losses_sir(z, ref) for z in z_list[:-1]]
 
-        # aggregate totals
-        total_clip = sum(clip_losses)
+        # aggregate losses
+        total_clip = sum(masked_clip)
         total_sir = sum(sir_losses)
 
-        # log individual subnet losses
-        for i, l in enumerate(clip_losses, 1):
+        # log individual losses
+        for i, l in enumerate(masked_clip, 1):
             self.log(f"train/clip_loss_subnet{i}", l)
         for i, l in enumerate(sir_losses, 1):
             self.log(f"train/sir_loss_subnet{i}", l)
 
-        # log aggregated losses
+        # log totals
         self.log("train/clip_loss", total_clip)
         self.log("train/sir_loss", total_sir)
 
-        # return weighted sum
+        # return combined loss
         return total_clip + self.hparams.alpha * total_sir
 
     def validation_step(self, batch, *args, **kwargs):
