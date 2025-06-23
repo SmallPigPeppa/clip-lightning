@@ -36,7 +36,7 @@ lr=1e-5
 # --------------------
 
 python3 cli_val_anyres_msun.py validate \
-  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-s1.ckpt \
+  --ckpt_path ${CKPT_DIR}/${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}.ckpt \
   --data.num_tasks 1 \
   --data.current_task 0 \
   --data.max_length 77 \
