@@ -69,9 +69,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.mse_loss = nn.MSELoss()
-        self.setup_msun(list(range(32, 96, 16)), list(range(96, 159, 16)), list(range(160, 224, 16)), [224], 56)
+        self.setup_msun(list(range(32, 96, 16)), list(range(96, 159, 16)), list(range(160, 225, 16)), 56)
 
-    def setup_msun(self, res1_list, res2_list, res3_list, res4_list, unified_size):
+    def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
         # grab backbone
         visual = self.model.visual
 
@@ -88,19 +88,17 @@ class CLIPDualEncoderModel(LightningModule):
         visual.subnet1 = copy.deepcopy(stem)
         visual.subnet2 = copy.deepcopy(stem)
         visual.subnet3 = copy.deepcopy(stem)
-        visual.subnet4 = copy.deepcopy(stem)
         visual.unified_net = tail
 
         # make subnet1/2 conv1 stride =1
         visual.subnet1[0].stride = (1, 1)
-        visual.subnet1[9] = nn.Identity()
+        visual.subnet1[9]=nn.Identity()
         visual.subnet2[0].stride = (1, 1)
 
         # resolution configs
         visual.res1_list = res1_list
         visual.res2_list = res2_list
         visual.res3_list = res3_list
-        visual.res4_list = res4_list
         visual.unified_size = unified_size
 
         # fixed‐resolution encoders
@@ -122,23 +120,15 @@ class CLIPDualEncoderModel(LightningModule):
                 F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
             return z, y
 
-        def encode_image_res4(self, x):
-            z = self.visual.subnet4(x)
-            y = self.visual.unified_net(
-                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
-            return z, y
-
         # original‐resolution encoder
         def encode_image(self, x):
-            return self.visual.unified_net(self.visual.subnet4(x))
+            return self.visual.unified_net(self.visual.subnet3(x))
 
         # bind to visual class
         for name, fn in [
             ('encode_image_res1', encode_image_res1),
             ('encode_image_res2', encode_image_res2),
             ('encode_image_res3', encode_image_res3),
-            ('encode_image_res4', encode_image_res4),
-            ('encode_image', encode_image),
         ]:
             setattr(self.model.__class__, name, fn)
 
@@ -158,8 +148,6 @@ class CLIPDualEncoderModel(LightningModule):
             _, img_feats = self.model.encode_image_res2(imgs)
         elif h in self.model.visual.res3_list:
             _, img_feats = self.model.encode_image_res3(imgs)
-        elif h in self.model.visual.res4_list:
-            _, img_feats = self.model.encode_image_res4(imgs)
 
         txt_feats = self.model.encode_text(caps)
         return img_feats, txt_feats
@@ -173,7 +161,7 @@ class CLIPDualEncoderModel(LightningModule):
         if isinstance(caps, list):
             caps = random.choice(caps)
 
-        z_4, img_feats = self.model.encode_image_res4(imgs)
+        z_3, img_feats = self.model.encode_image_res3(imgs)
 
         # sample one resolution from visual
         all_res = (
@@ -196,7 +184,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         txt_feats = self.model.encode_text(caps)
 
-        return z_i, z_4, img_feats_i, img_feats, txt_feats
+        return z_i, z_3, img_feats_i, img_feats, txt_feats
 
     def configure_optimizers(self):
         lr_visual = self.hparams.lr_visual
@@ -254,16 +242,15 @@ class CLIPDualEncoderModel(LightningModule):
         return loss
 
     def _compute_losses_sir(self, z1, z2):
-        z1_u = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
-        z2_u = F.interpolate(z2, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
+        zu = F.interpolate(z1, size=self.model.visual.unified_size, mode='bilinear', align_corners=False)
         # print(z1.shape, z2.shape)
-        loss = self.mse_loss(z1_u, z2_u)
+        loss = self.mse_loss(zu, z2)
         return loss
 
     def training_step(self, batch, *args, **kwargs):
-        z_i, z_4, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
+        z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
         clip_loss = self._compute_losses(img_feats, txt_feats)
-        sir_loss = self._compute_losses_sir(z_i, z_4)
+        sir_loss = self._compute_losses_sir(z_i, z_3)
         clip_loss_i = self._compute_losses(img_feats_i, txt_feats)
         self.log("train/clip_loss", clip_loss)
         self.log("train/sir_loss", sir_loss)
@@ -272,9 +259,9 @@ class CLIPDualEncoderModel(LightningModule):
         return clip_loss + clip_loss_i + self.hparams.alpha * sir_loss
 
     def validation_step(self, batch, *args, **kwargs):
-        z_i, z_4, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
+        z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
         clip_loss = self._compute_losses(img_feats, txt_feats)
-        sir_loss = self._compute_losses_sir(z_i, z_4)
+        sir_loss = self._compute_losses_sir(z_i, z_3)
         clip_loss_i = self._compute_losses(img_feats_i, txt_feats)
         self.log("val/clip_loss", clip_loss)
         self.log("val/sir_loss", sir_loss)
