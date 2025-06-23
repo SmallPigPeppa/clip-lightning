@@ -72,14 +72,14 @@ run_training() {
     --trainer.log_every_n_steps 1 \
     --trainer.logger WandbLogger \
     --trainer.logger.project ${PROJECT} \
-    --trainer.logger.name ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-${ALPHA}-s1-s4pool \
+    --trainer.logger.name ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-alpha${ALPHA}-s1-s4pool \
     --trainer.logger.log_model False \
     --trainer.logger.offline False \
     --trainer.strategy ddp_find_unused_parameters_true \
     --lr_monitor.logging_interval epoch \
     --model_checkpoint.dirpath ${CKPT_DIR} \
     --model_checkpoint.save_weights_only True \
-    --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-${ALPHA}-s1-s4pool
+    --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-alpha${ALPHA}-s1-s4pool
 }
 
 
