@@ -100,7 +100,7 @@ class CLIPDualEncoderModel(LightningModule):
         for i, res in enumerate(res_lists, 1):
             subnet = copy.deepcopy(stem)
             # inline customization for first three subnets
-            if i in (1, 2,):
+            if i in (1):
                 subnet[0].stride = (1, 1)
             if i in (1,):
                 subnet[9] = nn.Identity()
