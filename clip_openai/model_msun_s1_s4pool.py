@@ -90,7 +90,7 @@ class CLIPDualEncoderModel(LightningModule):
 
         # make subnet1/2 conv1 stride =1
         visual.subnet1[0].stride = (1, 1)
-        visual.subnet1[9]=nn.Identity()
+        visual.subnet1[9] = nn.Identity()
         visual.subnet2[0].stride = (1, 1)
 
         # resolution configs
@@ -122,7 +122,6 @@ class CLIPDualEncoderModel(LightningModule):
         def encode_image(self, x):
             return self.visual.unified_net(self.visual.subnet3(x))
 
-
         # bind to visual class
         for name, fn in [
             ('encode_image_res1', encode_image_res1),
@@ -149,12 +148,14 @@ class CLIPDualEncoderModel(LightningModule):
                 first_side = self.padding[1] - shift2
                 second_side = self.padding[1] + shift2 - 1
                 padded_input = F.pad(padded_input, (first_side, second_side, 0, 0), "constant", 0)
-            fmap = F.conv2d(padded_input,
-                            weight=self.weight.to(self.device),
-                            bias=self.bias,
-                            stride=self.stride,
-                            dilation=self.dilation,
-                            groups=self.groups)
+            fmap = F.conv2d(
+                padded_input,
+                weight=self.weight,
+                bias=self.bias,
+                stride=self.stride,
+                dilation=self.dilation,
+                groups=self.groups
+            )
             return fmap
 
         def s4_maxpool(self, input):
@@ -171,20 +172,22 @@ class CLIPDualEncoderModel(LightningModule):
                 first_side = self.padding - shift2
                 second_side = self.padding + shift2 - 1
                 padded_input = F.pad(padded_input, (first_side, second_side, 0, 0), "constant", float('-inf'))
-            return F.max_pool2d(padded_input, self.kernel_size, self.stride,
-                                0, self.dilation, self.ceil_mode,
-                                self.return_indices)
+            return F.max_pool2d(
+                padded_input, self.kernel_size, self.stride,
+                0, self.dilation, self.ceil_mode,
+                self.return_indices)
 
         def conv_s4pool_1x1(self, input):
             (shift1, shift2) = (np.random.randint(2), np.random.randint(2))
-            fmap = F.conv2d(input[:, :, shift1:, shift2:],
-                            weight=self.weight.to(self.device),
-                            bias=self.bias,
-                            stride=self.stride,
-                            dilation=self.dilation,
-                            groups=self.groups)
+            fmap = F.conv2d(
+                input[:, :, shift1:, shift2:],
+                weight=self.weight,
+                bias=self.bias,
+                stride=self.stride,
+                dilation=self.dilation,
+                groups=self.groups
+            )
             return fmap
-
 
         def modify_conv_module(mod):
             if isinstance(mod, torch.nn.Conv2d) and mod.kernel_size[0] > 1 and mod.stride == (2, 2):
@@ -196,8 +199,6 @@ class CLIPDualEncoderModel(LightningModule):
                 mod.forward = MethodType(s4_maxpool, mod)
 
         self.model.visual.apply(modify_conv_module)
-
-
 
     def forward(self, inputs):
         """
