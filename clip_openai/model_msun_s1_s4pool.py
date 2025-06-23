@@ -9,6 +9,7 @@ import random
 from typing import Union, List
 import copy
 import numpy as np
+from types import MethodType
 
 
 def recall_i2t_torch(image_feats: torch.Tensor, text_feats: torch.Tensor, caps_per_image: int) -> float:
@@ -66,6 +67,7 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.mse_loss = nn.MSELoss()
         self.setup_msun(list(range(32, 96, 1)), list(range(96, 159, 1)), list(range(160, 225, 1)), 56)
+        self.setup_s4pool()
 
     def setup_msun(self, res1_list, res2_list, res3_list, unified_size):
         # grab backbone
@@ -201,7 +203,7 @@ class CLIPDualEncoderModel(LightningModule):
                 print("changed maxpool")
                 mod.forward = MethodType(s4_maxpool, mod)
 
-        self.model.apply(modify_conv_module)
+        self.model.visual.apply(modify_conv_module)
 
 
 
