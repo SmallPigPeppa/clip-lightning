@@ -117,14 +117,6 @@ class CLIPDualEncoderModel(LightningModule):
         def encode_image(self, x):
             return self.visual.unified_net(self.visual.subnet3(x))
 
-        # bind methods to visual
-        for name, fn in [
-            ('encode_image_res1', encode_image_res1),
-            ('encode_image_res2', encode_image_res2),
-            ('encode_image_res3', encode_image_res3),
-            ('encode_image', encode_image),
-        ]:
-            setattr(visual.__class__, name, fn)
 
         # bind to visual class
         for name, fn in [

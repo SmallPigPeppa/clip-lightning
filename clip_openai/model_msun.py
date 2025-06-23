@@ -124,15 +124,6 @@ class CLIPDualEncoderModel(LightningModule):
         def encode_image(self, x):
             return self.visual.unified_net(self.visual.subnet3(x))
 
-        # bind methods to visual
-        for name, fn in [
-            ('encode_image_res1', encode_image_res1),
-            ('encode_image_res2', encode_image_res2),
-            ('encode_image_res3', encode_image_res3),
-            ('encode_image', encode_image),
-        ]:
-            setattr(visual.__class__, name, fn)
-
         # bind to visual class
         for name, fn in [
             ('encode_image_res1', encode_image_res1),
@@ -261,7 +252,7 @@ class CLIPDualEncoderModel(LightningModule):
         z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
         clip_loss = self._compute_losses(img_feats, txt_feats)
         sir_loss = self._compute_losses_sir(z_i, z_3)
-        clip_loss_i = self._compute_losses(img_feats, txt_feats)
+        clip_loss_i = self._compute_losses(img_feats_i, txt_feats)
         self.log("train/clip_loss", clip_loss)
         self.log("train/sir_loss", sir_loss)
         self.log("train/clip_loss_i", clip_loss_i)
@@ -272,7 +263,7 @@ class CLIPDualEncoderModel(LightningModule):
         z_i, z_3, img_feats_i, img_feats, txt_feats = self.randres_forward(batch)
         clip_loss = self._compute_losses(img_feats, txt_feats)
         sir_loss = self._compute_losses_sir(z_i, z_3)
-        clip_loss_i = self._compute_losses(img_feats, txt_feats)
+        clip_loss_i = self._compute_losses(img_feats_i, txt_feats)
         self.log("val/clip_loss", clip_loss)
         self.log("val/sir_loss", sir_loss)
         self.log("val/clip_loss_i", clip_loss_i)
