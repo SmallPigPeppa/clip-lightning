@@ -137,7 +137,7 @@ class CLIPDualEncoderModel(LightningModule):
             _, img_feats = self.model.encode_image_res1(imgs)
         elif h in self.model.visual.res2_list:
             _, img_feats = self.model.encode_image_res2(imgs)
-        else:
+        elif h in self.model.visual.res3_list:
             _, img_feats = self.model.encode_image_res3(imgs)
 
         return img_feats
