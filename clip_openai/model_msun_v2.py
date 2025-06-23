@@ -100,9 +100,9 @@ class CLIPDualEncoderModel(LightningModule):
         for i, res in enumerate(res_lists, 1):
             subnet = copy.deepcopy(stem)
             # inline customization for first three subnets
-            if i in (1, 2, 3):
+            if i in (1, 2, 3, 4):
                 subnet[0].stride = (1, 1)
-            if i == 1:
+            if i in (1,):
                 subnet[9] = nn.Identity()
 
             setattr(visual, f"subnet{i}", subnet)
@@ -124,9 +124,12 @@ class CLIPDualEncoderModel(LightningModule):
 
         # original-resolution encoder via last subnet
         def encode_image(self, x):
-            return self.visual.unified_net(
-                getattr(self.visual, f"subnet{self.num_subnets}")(x)
+            z = getattr(self.visual, f"subnet{self.num_subnets}")(x)
+            y = self.visual.unified_net(
+                F.interpolate(z, self.visual.unified_size,
+                              mode='bilinear', align_corners=False)
             )
+            return y
 
         setattr(self.model.__class__, 'encode_image', encode_image)
 
@@ -331,4 +334,3 @@ class CLIPDualEncoderModel(LightningModule):
             results[f"val/R{r}_t2i_R@1"] = t2i
 
         return results
-
