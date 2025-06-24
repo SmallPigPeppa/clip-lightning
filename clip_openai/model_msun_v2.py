@@ -237,7 +237,8 @@ class CLIPDualEncoderModel(LightningModule):
 
         # apply thresholds to first three CLIP losses
         # thresholds = [1.5, 0.5, 0.3] # for flickr30k
-        thresholds = [1.0, 0.4, 0.2] # for coco
+        # thresholds = [1.0, 0.4, 0.2] # for coco
+        thresholds = [0.5, 0.3, 0.2] # for coco
         masked_clip = []
         for loss, thr in zip(clip_losses, thresholds):
             # zero out losses below threshold (no gradient)
