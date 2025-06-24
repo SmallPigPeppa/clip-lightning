@@ -240,7 +240,8 @@ class CLIPDualEncoderModel(LightningModule):
         # thresholds = [1.0, 0.4, 0.2] # for coco
         # thresholds = [0.5, 0.3, 0.2] # for coco
         # thresholds = [0., 0., 0.]  # for coco
-        thresholds = [0.75, 0.1, 0.1]  # for coco
+        # thresholds = [0.75, 0.1, 0.1]  # for coco
+        thresholds = [0.5, 0.1, 0.1]  # for coco
         masked_clip = []
         for loss, thr in zip(clip_losses, thresholds):
             # zero out losses below threshold (no gradient)
