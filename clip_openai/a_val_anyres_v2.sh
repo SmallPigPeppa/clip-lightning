@@ -65,3 +65,4 @@ python3 cli_val_anyres.py validate \
   --model_checkpoint.dirpath ${CKPT_DIR} \
   --model_checkpoint.save_weights_only True \
   --model_checkpoint.filename ${METHOD}-${dataset}-${MODEL_NAME}-lr${lr}-bs${TOTAL_BATCH_SIZE}-V2
+
