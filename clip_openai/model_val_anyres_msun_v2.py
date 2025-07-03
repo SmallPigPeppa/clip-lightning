@@ -62,18 +62,19 @@ class CLIPDualEncoderModel(LightningModule):
         self.model = my_load(name=model_name, download_root=download_root)
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.setup_msun(
-            list(range(32, 96, 16)),
-            list(range(96, 159, 16)),
-            list(range(160, 224, 16)),
-            [224],
-            56
+            res_lists=[
+                list(range(32, 81, 16)),
+                list(range(96, 145, 16)),
+                list(range(160, 209, 16)),
+                [224],
+            ],
+            unified_size=56,
         )
 
-    def setup_msun(self, res1_list, res2_list, res3_list, res4_list, unified_size):
-        # grab backbone
+    def setup_msun(self, res_lists: List[List[int]], unified_size: int):
         visual = self.model.visual
 
-        # shared stem & tail
+        # split backbone
         stem = nn.Sequential(
             visual.conv1, visual.bn1, visual.relu1,
             visual.conv2, visual.bn2, visual.relu2,
@@ -82,94 +83,59 @@ class CLIPDualEncoderModel(LightningModule):
         )
         tail = nn.Sequential(visual.layer2, visual.layer3, visual.layer4, visual.attnpool)
 
-        # clone stems into subnets
-        visual.subnet1 = copy.deepcopy(stem)
-        visual.subnet2 = copy.deepcopy(stem)
-        visual.subnet3 = copy.deepcopy(stem)
-        visual.subnet4 = copy.deepcopy(stem)
+        # attach unified tail
         visual.unified_net = tail
-
-        # make subnet1/2 conv1 stride =1
-        visual.subnet1[0].stride = (1, 1)
-        visual.subnet1[9] = nn.Identity()
-        visual.subnet2[0].stride = (1, 1)
-        visual.subnet3[0].stride = (1, 1)
-
-        # resolution configs
-        visual.res1_list = res1_list
-        visual.res2_list = res2_list
-        visual.res3_list = res3_list
-        visual.res4_list = res4_list
         visual.unified_size = unified_size
+        self.num_subnets = len(res_lists)
 
-        # fixed‐resolution encoders
-        def encode_image_res1(self, x):
-            z = self.visual.subnet1(x)
-            y = self.visual.unified_net(
-                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
-            return z, y
+        # create subnets and encoders
+        for i, res in enumerate(res_lists, 1):
+            subnet = copy.deepcopy(stem)
+            # inline customization for first three subnets
+            if i in (1, 2):
+                subnet[0].stride = (1, 1)
+            if i in (1,):
+                subnet[9] = nn.Identity()
 
-        def encode_image_res2(self, x):
-            z = self.visual.subnet2(x)
-            y = self.visual.unified_net(
-                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
-            return z, y
+            setattr(visual, f"subnet{i}", subnet)
+            setattr(visual, f"res{i}_list", res)
 
-        def encode_image_res3(self, x):
-            z = self.visual.subnet3(x)
-            y = self.visual.unified_net(
-                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
-            return z, y
+            # bind fixed-res encoder
+            def make_encoder(j):
+                def encode(self, x):
+                    z = getattr(self.visual, f"subnet{j}")(x)
+                    y = self.visual.unified_net(
+                        F.interpolate(z, self.visual.unified_size,
+                                      mode='bilinear', align_corners=False)
+                    )
+                    return z, y
 
-        def encode_image_res4(self, x):
-            z = self.visual.subnet4(x)
-            y = self.visual.unified_net(
-                F.interpolate(z, self.visual.unified_size, mode='bilinear', align_corners=False))
-            return z, y
+                return encode
 
-        # original‐resolution encoder
+            setattr(self.model.__class__, f"encode_image_res{i}", make_encoder(i))
+
+        # original-resolution encoder via last subnet
         def encode_image(self, x):
-            return self.visual.unified_net(self.visual.subnet4(x))
+            z = getattr(self.visual, f"subnet{self.num_subnets}")(x)
+            y = self.visual.unified_net(
+                F.interpolate(z, self.visual.unified_size,
+                              mode='bilinear', align_corners=False)
+            )
+            return y
 
-        # bind to visual class
-        for name, fn in [
-            ('encode_image_res1', encode_image_res1),
-            ('encode_image_res2', encode_image_res2),
-            ('encode_image_res3', encode_image_res3),
-            ('encode_image_res4', encode_image_res4),
-            ('encode_image', encode_image),
-        ]:
-            setattr(self.model.__class__, name, fn)
+        setattr(self.model.__class__, 'encode_image', encode_image)
 
-        # original‐resolution encoder
-        def encode_image(self, x):
-            return self.visual.unified_net(self.visual.subnet3(x))
 
-        # bind to visual class
-        for name, fn in [
-            ('encode_image_res1', encode_image_res1),
-            ('encode_image_res2', encode_image_res2),
-            ('encode_image_res3', encode_image_res3),
-            ('encode_image', encode_image),
-        ]:
-            setattr(self.model.__class__, name, fn)
 
     def forward_imgs(self, imgs):
-        """
-        Choose encode_image_res* based on input size and forward.
-        """
-        _, _, h, w = imgs.shape
-        # select subnet by resolution (lists now on self.model.visual)
-        if h in self.model.visual.res1_list:
-            _, img_feats = self.model.encode_image_res1(imgs)
-        elif h in self.model.visual.res2_list:
-            _, img_feats = self.model.encode_image_res2(imgs)
-        elif h in self.model.visual.res3_list:
-            _, img_feats = self.model.encode_image_res3(imgs)
-        elif h in self.model.visual.res4_list:
-            _, img_feats = self.model.encode_image_res4(imgs)
+        _, _, h, _ = imgs.shape
+        for idx in range(1, self.num_subnets + 1):
+            if h in getattr(self.model.visual, f'res{idx}_list'):
+                _, img_feats = getattr(self.model, f'encode_image_res{idx}')(imgs)
+                break
 
         return img_feats
+
 
     def validation_step(self, batch, *args, **kwargs):
         clip_loss = 0.
