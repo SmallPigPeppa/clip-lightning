@@ -71,8 +71,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.mse_loss = nn.MSELoss()
         self.setup_mixedres(
             res_lists=[
-                list(range(32, 63, 16)),
-                list(range(64, 145, 16)),
+                list(range(32, 81, 16)),
+                list(range(96, 145, 16)),
                 list(range(160, 209, 16)),
                 [224],
             ],
