@@ -1,29 +1,17 @@
-import random
 import torch
 from packaging import version
 from torch.utils.data import Dataset
 from datasets import load_dataset
 import requests
 from PIL import Image
-from io import BytesIO
 import os
 
 # Define dataset mappings as a constant outside the class
 DATASET_MAPPINGS = {
-    'emoji': {
-        'hf_name': 'Norod78/microsoft-fluentui-emoji-512-whitebg',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
-    },
     'wikiart': {
         'hf_name': 'AterMors/wikiart_recaption',
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'newyorker': {
-        'hf_name': 'jmhessel/newyorker_caption_contest',
-        'keys': {'image': 'image', 'text': 'image_description'},
-        'splits': {'train': 'train', 'val': 'validation'}
     },
     'patfig': {
         'hf_name': 'lcolonn/patfig',
@@ -39,11 +27,6 @@ DATASET_MAPPINGS = {
         'hf_name': 'visual-layer/oxford-iiit-pet-vl-enriched',
         'keys': {'image': 'image', 'text': 'caption_enriched'},
         'splits': {'train': 'train', 'val': 'test'}
-    },
-    'nouns': {
-        'hf_name': 'm1guelpf/nouns',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.5, 'val': 0.5}
     },
     'shahnegar': {
         'hf_name': 'sadrasabouri/ShahNegar',
@@ -90,72 +73,6 @@ DATASET_MAPPINGS = {
         'keys': {'image': 'image', 'text': 'text'},
         'splits': {'train': 0.8, 'val': 0.2}
     },
-    'wit': {
-        'hf_name': 'wikimedia/wit_base',
-        'keys': {'image': 'image', 'text': 'caption_attribution_description'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'oldbook': {
-        'hf_name': 'gigant/oldbookillustrations',
-        'keys': {'image': 'rawscan', 'text': 'image_caption'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'polaris': {
-        'hf_name': 'yuwd/Polaris',
-        'keys': {'image': 'img', 'text': 'refs'},
-        'splits': {'train': 'train', 'val': 'test'}
-    },
-    'news': {
-        'hf_name': 'Oztobuzz/Kosmos_news',
-        'keys': {'image': 'img', 'text': 'caption'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-    'cxiu': {
-        'hf_name': 'Shrey-1329/cxiu_hf_dataset',
-        'keys': {'image': 'image', 'text': 'text'},
-        'splits': {'train': 0.8, 'val': 0.2}
-    },
-
-    # 'text2food': {
-    #     'hf_name': 'tum-nlp/text2food-mmc4',
-    #     'keys': {'image': 'Raw URL', 'text': 'Matched Text'},
-    #     'splits': {'train': 0.8, 'val': 0.2}
-    # },
-    # 'plans': {
-    #     'hf_name': 'ShazShoaib/SingleFloorPlans',
-    #     'keys': {'image': 'image', 'text': 'text'},
-    #     'splits': {'train': 0.8, 'val': 0.2}
-    # },
-    # 'tomato': {
-    #     'hf_name': 'wellCh4n/tomato-leaf-disease-image',
-    #     'keys': {'image': 'image', 'text': 'text'},
-    #     'splits': {'train': 0.8, 'val': 0.2}
-    # },
-    # 'peanuts': {
-    #     'hf_name': 'afmck/peanuts-flan-t5-xl',
-    #     'keys': {'image': 'image', 'text': 'caption'},
-    #     'splits': {'train': 0.8, 'val': 0.2}
-    # },
-    # 'vintage': {
-    #     'hf_name': 'SilentAntagonist/vintage-artworks-60k-captioned',
-    #     'keys': {'image': 'image_url', 'text': 'short_caption'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
-    # 'face': {
-    #     'hf_name': 'OpenFace-CQUPT/FaceCaption-15M',
-    #     'keys': {'image': 'url', 'text': 'caption'},
-    #     'splits': {'train': 0.002, 'val': 0.0005}
-    # },
-    # 'pokemon': {
-    #     'hf_name': 'TheFusion21/PokemonCards',
-    #     'keys': {'image': 'image_url', 'text': 'caption'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
-    # 'midjourney': {
-    #     'hf_name': 'CortexLM/midjourney-v6',
-    #     'keys': {'image': 'image_url', 'text': 'prompt'},
-    #     'splits': {'train': 0.5, 'val': 0.5}
-    # },
 
 }
 
@@ -181,15 +98,10 @@ class ImageRetrievalDataset(Dataset):
         if dataset_info is None:
             raise ValueError(f"Dataset {dataset_name} is not supported.")
 
-        # # Handle split mapping
-        # self.split = dataset_info['splits'].get(split, split)  # Default to the provided split if not found
 
-        # 检查是否有预定义的分割
         if isinstance(dataset_info['splits']['train'], (int, float)):
-            # 如果没有预定义分割，我们默认使用 'train'
             self.split = 'train'
         else:
-            # 如果有预定义分割，则尝试获取指定分割，如果不存在，则使用原始分割
             self.split = dataset_info['splits'].get(split, split)
 
         # Load the dataset with the correct split
@@ -218,39 +130,6 @@ class ImageRetrievalDataset(Dataset):
             result[:self.max_length] = torch.tensor(tokens)[:self.max_length]
         return result
 
-    # def __getitem__(self, index):
-    #     sample = self.hf_dataset[index]
-    #
-    #     # Extract image and text using the keys from the dictionary
-    #     image = sample[self.keys['image']]
-    #     text = sample[self.keys['text']]
-
-    # def __getitem__(self, index):
-    #     # image = Image.open(self.images[index])
-    #     # caption = self.captions[index]
-    #     sample = self.hf_dataset[index]
-    #
-    #     # # Extract image and text using the keys from the dictionary
-    #     # image = sample[self.keys['image']]
-    #     # Check if 'url' is in the key for image data to determine if it's a URL
-    #     if 'url' in self.keys['image']:
-    #         # Load image from URL
-    #         print(sample[self.keys['image']])
-    #         response = requests.get(sample[self.keys['image']])
-    #         image = Image.open(BytesIO(response.content))
-    #     else:
-    #         # already a PIL Image object
-    #         image = sample[self.keys['image']]
-    #
-    #
-    #     caption = sample[self.keys['text']]
-    #     if isinstance(caption, list):
-    #         caption = random.choice(caption)
-    #     caption = self.tokenize(caption)
-    #     if self.transforms:
-    #         image = self.transforms(image)
-    #
-    #     return {"image": image, "caption": caption}
 
     def download_image(self, url):
         # Modify the directory structure to include '/cache'
@@ -303,15 +182,9 @@ class ImageRetrievalDataset(Dataset):
         else:
             import warnings
             warnings.warn(f"self.dataset_name is {self.dataset_name}: The text list contains {len(text)} elements.")
-            # 选择最长的元素
             longest_text = max(text, key=len)
-            # print(f"Longest text: {longest_text}")
-            # 输出所有元素
-            # for idx, t in enumerate(text):
-            #     print(f"Element {idx}: {t}")
             text = longest_text
 
-        # text = self.tokenize(text)
 
         if self.transforms:
             image = self.transforms(image)

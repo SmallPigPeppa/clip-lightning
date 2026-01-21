@@ -1,25 +1,18 @@
 #!/bin/bash
 
-# 设置 Hugging Face home 目录
+# Set Hugging Face home directory
 export HF_HOME=/ppio_net0/huggingface
-ROOT_DIR=/ppio_net0/torch_ds
-PROJECT=CLIP-til
 
-# 模型名称
+ROOT_DIR=/ppio_net0/torch_ds
+PROJECT=C-CLIP
+
+# Model name
 MODEL_NAME=ViT-B/16
 
-# 数据集列表
+# Datasets
 DATASETS=("flickr30k" "coco2014" "wikiart" "patfig" "pet" "simpsons" "lexica" "styles" "kream" "sketch")
-DATASETS=("coco2014")
-#DATASETS=("flickr30k")
-#DATASETS=("wikiart")
-#DATASETS=("patfig")
-#DATASETS=("emoji" "fashion" "nouns" "shahnegar" "artbench" "hausavg")
-#DATASETS=("food" "clothes")
-#DATASETS=("lexica")
-#DATASETS=("pet")
 
-# 数据集学习率映射
+# Per-dataset learning rate map
 declare -A DATASET_LR_MAP=(
   ["flickr30k"]=2e-5
   ["coco2014"]=5e-6
@@ -41,17 +34,13 @@ declare -A DATASET_LR_MAP=(
   ["clothes"]=2e-5
 )
 
-
-# 脚本方法映射
+# Method -> script mapping
 declare -A METHOD_MAP=(
   ["vanilla"]="cli_vanilla_zeroshot_hf.py"
-  ["lora"]="cli_vanilla_zeroshot_lora_best.py"
-  ["distill"]="cli_distill_zeroshot.py"
-  ["distill_v2"]="cli_distill_zeroshot_v2.py"
-  ["distill_lora"]="cli_distill_zeroshot_lora_best.py"
-)
+  ["lora"]="cli_vanilla_zeroshot_lora.py"
+  ["ckc"]="cli_ckc_zeroshot.py"
 
-# 其他参数
+# Other parameters
 CONFIG_FILE=config.yaml
 ZERO_SHOT_EVAL_INTERVAL=40
 MAX_EPOCHS=40
@@ -59,7 +48,7 @@ BATCH_SIZE=128
 BATCH_SIZE_ZS=32
 NUM_WORKERS=8
 
-# 函数：运行训练
+# Function: run training
 run_training() {
   local method=$1
   local dataset_name=$2
@@ -83,7 +72,7 @@ run_training() {
     --model.weight_decay 0.1 \
     --model.download_root ./ \
     --model.zero_shot_eval_interval ${ZERO_SHOT_EVAL_INTERVAL} \
-    --model.old_checkpoint_path ckpt/flickr30k-512/distill_lora-lr-2e-5.ckpt  \
+    --model.old_checkpoint_path ckpt/flickr30k-512/ckc_lora-lr-2e-5.ckpt \
     --trainer.accelerator gpu \
     --trainer.precision 16 \
     --trainer.max_epochs ${MAX_EPOCHS} \
@@ -99,19 +88,18 @@ run_training() {
     --model_checkpoint.filename ${dataset_name}-512-new/${method}-lr-${lr}
 }
 
-# 运行所有数据集
+# Run all datasets
 for DATASET_NAME in "${DATASETS[@]}"; do
   LR=${DATASET_LR_MAP[${DATASET_NAME}]}
 
+  if [[ -z "${LR}" ]]; then
+    echo "ERROR: No learning rate found for dataset: ${DATASET_NAME}"
+    exit 1
+  fi
+
   echo "Running training for dataset: ${DATASET_NAME} with lr: ${LR}"
 
-  # 按不同的方法运行（比如 'distill_lora', 'vanilla'）
-#  run_training "vanilla" ${DATASET_NAME} ${LR}
-  run_training "distill" ${DATASET_NAME} ${LR}
-#  run_training "distill_v2" ${DATASET_NAME} ${LR}
-#  run_training "lora" ${DATASET_NAME} ${LR}
-#  run_training "distill_lora" ${DATASET_NAME} ${LR}
-
+  run_training "ckc" ${DATASET_NAME} ${LR}
 
   echo "Completed training for dataset: ${DATASET_NAME}"
 done

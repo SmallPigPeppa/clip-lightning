@@ -25,19 +25,19 @@ import numpy as np
 import json
 
 def get_cache_file_path(dataset_name, train_ratio, val_ratio):
-    # 根据数据集名称和比例生成唯一的文件路径
+    # Generate a unique cache file path based on the dataset name and split ratios
     cache_dir = "/ppio_net0/cache/VL-CL"
-    os.makedirs(cache_dir, exist_ok=True)  # 确保缓存目录存在
+    os.makedirs(cache_dir, exist_ok=True)  # Ensure the cache directory exists
     cache_file_name = f"{dataset_name}_train{train_ratio}_val{val_ratio}_split_indices.txt"
     return os.path.join(cache_dir, cache_file_name)
 
 def save_split_indices(file_path, train_indices, val_indices):
-    # 保存索引到文件
+    # Save split indices to a file
     with open(file_path, 'w') as f:
         json.dump({"train_indices": train_indices, "val_indices": val_indices}, f)
 
 def load_split_indices(file_path):
-    # 从文件加载索引
+    # Load split indices from a file
     with open(file_path, 'r') as f:
         indices = json.load(f)
     return indices["train_indices"], indices["val_indices"]
@@ -91,34 +91,34 @@ class ImageRetrievalDataModule(LightningDataModule):
                 transforms=image_transform_v2(config_path=self.config, is_train=False)
             )
         else:
-            # 主函数部分
+            # Main logic
             # import pdb;pdb.set_trace()
             dataset_config = DATASET_MAPPINGS[dataset_name]
 
-            # 获取数据增强的配置
+            # Get augmentation configs
             train_transforms = image_transform_v2(config_path=self.config, is_train=True)
             val_transforms = image_transform_v2(config_path=self.config, is_train=False)
 
             if isinstance(dataset_config['splits']['train'], (int, float)):
-                # 创建数据集实例（无分割信息）
+                # Create a dataset instance (without predefined split info)
                 full_dataset = ImageRetrievalDatasetHF(
                     dataset_name=dataset_name,
                     root_dir=self.root_dir,
                     tokenizer=self.tokenizer,
                     max_length=self.max_length,
-                    transforms=train_transforms  # 使用训练集变换初始化
+                    transforms=train_transforms  # Initialize with training transforms
                 )
 
-                # 如果划分方式为数字比例
+                # If split configuration is given as numeric ratios
                 train_ratio = dataset_config['splits']['train']
                 val_ratio = dataset_config['splits']['val']
                 total_len = len(full_dataset)
 
-                # 计算划分长度
+                # Compute split lengths
                 train_len = int(total_len * train_ratio)
                 val_len = int(total_len * val_ratio)
 
-                # 检查是否已经存在索引文件
+                # Check whether cached indices already exist
                 cache_file = get_cache_file_path(dataset_name, train_ratio, val_ratio)
                 if os.path.exists(cache_file):
                     # File exists, load the existing indices
@@ -137,14 +137,14 @@ class ImageRetrievalDataModule(LightningDataModule):
                     save_split_indices(cache_file, train_indices, val_indices)
                     print(f"Random split saved to cache file: {cache_file}")
 
-                # 创建子集
+                # Create subsets
                 train_dataset = Subset(full_dataset, train_indices)
                 val_dataset = Subset(full_dataset, val_indices)
 
-                # 为验证集设置正确的变换
+                # Set the correct transforms for the validation set
                 val_dataset.dataset.transforms = val_transforms
             else:
-                # 使用预定义的分割
+                # Use predefined split
                 val_dataset = ImageRetrievalDatasetHF(
                     dataset_name=dataset_name,
                     root_dir=self.root_dir,
@@ -187,10 +187,4 @@ class ImageRetrievalDataModule(LightningDataModule):
             pin_memory=True,
         )
 
-    def zero_shot_dataloader(self):
-        return DataLoader(
-            self.zero_shot_dataset,
-            batch_size=self.batch_size_zs,
-            num_workers=self.num_workers,
-            pin_memory=True
-        )
+    def zer
